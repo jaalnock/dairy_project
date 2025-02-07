@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext.jsx";
 
 export const Login = () => {
   const [role, setRole] = useState("");
@@ -7,7 +8,8 @@ export const Login = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  const navigate = useNavigate(); // React Router navigation
+  const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -34,6 +36,8 @@ export const Login = () => {
     }
 
     console.log("Login successful:", { role, mobile, password });
+
+    login(role);
 
     // Redirect based on role
     if (role === "Admin") {

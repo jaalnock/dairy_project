@@ -19,6 +19,7 @@ import {
 import { SubAdminProductsList } from "./pages/SubAdminProductsList.jsx";
 import TransactionList from "./pages/TransactionList.jsx";
 import { SubAdminReport } from "./pages/SubAdminReport.jsx";
+import { ProtectedRoute } from "./components/ProtectedRoute";
 
 function App() {
   return (
@@ -33,19 +34,26 @@ function App() {
 
         <Route path="products/:id" element={<ProductDetails />} />
 
-        <Route path="/admin" element={<AdminLayout />}>
-          <Route index element={<EditImageSlider />} />
-          <Route path="branch" element={<BranchList />} />
-          <Route path="subadmin" element={<SubAdminList />} />
-          <Route path="reports" element={<AdminReport />} />
+        <Route path="/admin" element={<ProtectedRoute allowedRole="Admin" />}>
+          <Route element={<AdminLayout />}>
+            <Route index element={<EditImageSlider />} />
+            <Route path="branch" element={<BranchList />} />
+            <Route path="subadmin" element={<SubAdminList />} />
+            <Route path="reports" element={<AdminReport />} />
+          </Route>
         </Route>
 
         <Route path="/login" element={<Login />} />
 
-        <Route path="/subadmin" element={<SubAdminLayout />}>
-          <Route index element={<TransactionList />} />
-          <Route path="product" element={<SubAdminProductsList />} />
-          <Route path="report" element={<SubAdminReport />} />
+        <Route
+          path="/subadmin"
+          element={<ProtectedRoute allowedRole="SubAdmin" />}
+        >
+          <Route element={<SubAdminLayout />}>
+            <Route index element={<TransactionList />} />
+            <Route path="products" element={<SubAdminProductsList />} />
+            <Route path="report" element={<SubAdminReport />} />
+          </Route>
         </Route>
 
         <Route path="*" element={<NotFoundPage />} />

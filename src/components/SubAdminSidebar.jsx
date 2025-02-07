@@ -35,8 +35,8 @@ export const SubAdminSidebar = ({ isOpen, setSidebarOpen }) => {
 
           <ul className="text-left">
             {[
-              { name: "Transection", path: "/subadmin" },
-              { name: "Add Product", path: "/subadmin/product" },
+              { name: "Transactions", path: "/subadmin" },
+              { name: "Products", path: "/subadmin/products" },
               { name: "Report", path: "/subadmin/report" },
             ].map((item) => (
               <li key={item.name} className="mb-4">
