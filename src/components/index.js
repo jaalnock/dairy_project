@@ -14,7 +14,7 @@ import { SubAdminCard } from "./SubAdminCard.jsx";
 import { SubAdminForm } from "./SubAdminForm.jsx";
 import { SubAdminLayout } from "./SubAdminLayout.jsx";
 import { AddProductCard } from "./AddProductCard.jsx";
-import { AddProductForm } from "./AddProductForm.jsx";
+import {AddProductForm} from "./AddProductForm.jsx";
 import { SubAdminSidebar } from "./SubAdminSidebar.jsx";
 import { TransactionCard } from "./TransactionCard.jsx";
 import { TransactionForm } from "./TransactionForm.jsx";

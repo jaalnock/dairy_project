@@ -9,6 +9,7 @@ export const SubAdminSidebar = ({ isOpen, setSidebarOpen }) => {
   const [showReports, setShowReports] = useState(false); // Toggle dropdown
 
   useEffect(() => {
+  
     if (!location.pathname.includes("/reports")) {
       setShowReports(false);
     }
@@ -34,25 +35,24 @@ export const SubAdminSidebar = ({ isOpen, setSidebarOpen }) => {
           </div>
 
           <ul className="text-left">
-            {[
-              { name: "Transactions", path: "/subadmin" },
-              { name: "Products", path: "/subadmin/products" },
-              { name: "Report", path: "/subadmin/report" },
-            ].map((item) => (
-              <li key={item.name} className="mb-4">
-                <Link
-                  to={item.path}
-                  className={`block px-3 py-2 rounded-lg transition duration-200 ${
-                    location.pathname === item.path
-                      ? "bg-blue-500 text-white shadow-md"
-                      : "text-black hover:bg-gray-300"
-                  }`}
-                  onClick={() => setShowReports(false)}
-                >
-                  {item.name}
-                </Link>
-              </li>
-            ))}
+            {[{name: "Transection", path: "/subadmin"},{name: "Add Product", path: "/subadmin/products"},{name: "Report", path: "/subadmin/report"},{name: "Add Milk", path: "/subadmin/add_milk"},{name: "Loan", path: "/subadmin/loan"},{name: "Farmer", path: "/subadmin/farmer"}].map(
+              (item) => (
+                <li key={item.name} className="mb-4">
+                  <Link
+                    to={item.path}
+                    className={`block px-3 py-2 rounded-lg transition duration-200 ${
+                      location.pathname === item.path
+                        ? "bg-blue-500 text-white shadow-md"
+                        : "text-black hover:bg-gray-300"
+                    }`}
+                    onClick={() => setShowReports(false)} // Close dropdown when any link is clicked
+                  >
+                    {item.name}
+                  </Link>
+                </li>
+              )
+            )}
+
           </ul>
         </div>
 
@@ -65,7 +65,7 @@ export const SubAdminSidebar = ({ isOpen, setSidebarOpen }) => {
           />
           <div className="ml-5">
             <h3 className="text-base font-semibold text-gray-900">John Doe</h3>
-            <p className="text-sm text-gray-700">Admin</p>
+            <p className="text-sm text-gray-700">Sub-Admin</p>
           </div>
         </div>
 
@@ -80,3 +80,4 @@ export const SubAdminSidebar = ({ isOpen, setSidebarOpen }) => {
     </>
   );
 };
+

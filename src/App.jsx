@@ -20,6 +20,9 @@ import { SubAdminProductsList } from "./pages/SubAdminProductsList.jsx";
 import TransactionList from "./pages/TransactionList.jsx";
 import { SubAdminReport } from "./pages/SubAdminReport.jsx";
 import { ProtectedRoute } from "./components/ProtectedRoute";
+import MilkList from "./pages/MilkList.jsx";
+import LoanList from "./pages/LoanList.jsx";
+import FarmerList from "./pages/FarmerList.jsx";
 
 function App() {
   return (
@@ -53,6 +56,9 @@ function App() {
             <Route index element={<TransactionList />} />
             <Route path="products" element={<SubAdminProductsList />} />
             <Route path="report" element={<SubAdminReport />} />
+            <Route path="add_milk" element={<MilkList/>} />
+            <Route path="loan" element={<LoanList/>} />
+            <Route path="farmer" element={<FarmerList/>} />
           </Route>
         </Route>
 

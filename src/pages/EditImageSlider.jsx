@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { ImageSlider } from "../../../customer-frontend/src/components/ImageSlider";
+// import { ImageSlider } from "../../../customer-frontend/src/components/ImageSlider";
+import {ImageSlider} from "../components/ImageSlider"
 import {SlideForm} from "../components/SlideForm";
 
 export const EditImageSlider = () => {

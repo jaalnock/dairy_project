@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 
 export const AddProductForm = ({
   isEditing,
@@ -7,10 +7,28 @@ export const AddProductForm = ({
   handleSaveProduct,
   setIsFormOpen,
 }) => {
-  const { name = "", price = "", quantity = "", imageUrl = "", snf = "", fat = "" } = formData;
+  const { name = "", price = "", quantity = "", snf = "", fat = "" } = formData;
+  const [image, setImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+
+  // Handle image selection
+  const handleImageChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      setImage(file);
+      setImagePreview(URL.createObjectURL(file));
+    }
+  };
 
   // Disable Save button if form is not valid
-  const isFormValid = name && price && quantity && !isNaN(price) && price > 0 && !isNaN(quantity) && quantity > 0;
+  const isFormValid =
+    name &&
+    price &&
+    quantity &&
+    !isNaN(price) &&
+    price > 0 &&
+    !isNaN(quantity) &&
+    quantity > 0;
 
   return (
     <div className="fixed inset-0 bg-black/50 flex justify-center items-center px-4">
@@ -56,17 +74,6 @@ export const AddProductForm = ({
             </div>
 
             <div className="mb-4">
-              <label className="block text-sm font-semibold text-gray-700">Image URL</label>
-              <input
-                type="text"
-                name="imageUrl"
-                value={imageUrl}
-                onChange={handleInputChange}
-                className="w-full px-4 py-2 border rounded-lg mt-2"
-              />
-            </div>
-
-            <div className="mb-4">
               <label className="block text-sm font-semibold text-gray-700">SNF</label>
               <input
                 type="number"
@@ -86,6 +93,23 @@ export const AddProductForm = ({
                 onChange={handleInputChange}
                 className="w-full px-4 py-2 border rounded-lg mt-2"
               />
+            </div>
+
+            <div className="mb-4">
+              <label className="block text-sm font-semibold text-gray-700">Product Image</label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                className="w-full px-4 py-2 border rounded-lg mt-2"
+              />
+              {imagePreview && (
+                <img
+                  src={imagePreview}
+                  alt="Preview"
+                  className="mt-2 max-h-40 rounded-lg shadow"
+                />
+              )}
             </div>
           </form>
         </div>
@@ -112,3 +136,4 @@ export const AddProductForm = ({
     </div>
   );
 };
+
