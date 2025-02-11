@@ -5,6 +5,9 @@ import { motion } from "framer-motion";
 import { fadout } from "./variants2";
 import logoImage from "../assets/Borgave_Logo_BG_Removed.png";
 
+// 1) Import the i18n hook
+import { useTranslation } from "react-i18next";
+
 // NavLink component for navigation links
 const NavLink = ({ to, children, className }) => (
   <Link
@@ -18,6 +21,13 @@ const NavLink = ({ to, children, className }) => (
 // Main Navbar component
 export const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+
+  // 2) Setup translation and toggle handler
+  const { i18n } = useTranslation();
+  const handleToggleLanguage = () => {
+    const newLang = i18n.language === "en" ? "mr" : "en";
+    i18n.changeLanguage(newLang);
+  };
 
   return (
     <nav className="bg-white shadow-lg relative w-full top-0 z-50 mb-0">
@@ -40,6 +50,13 @@ export const Navbar = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center ml-auto space-x-6">
+            {/* 3) Language Toggle Button (desktop) */}
+            <button
+              onClick={handleToggleLanguage}
+              className="px-4 py-2 text-gray-700 hover:text-blue-600 transition-colors duration-200"
+            >
+              {i18n.language === "en" ? "मराठी" : "English"}
+            </button>
             <NavLink to="/">Home</NavLink>
             <NavLink to="/products">Products</NavLink>
             <NavLink to="/about-us">About Us</NavLink>
@@ -55,7 +72,15 @@ export const Navbar = () => {
           </div>
 
           {/* Mobile menu button */}
-          <div className="md:hidden ml-auto">
+          {/* 4) Wrap in flex to place toggle left of hamburger */}
+          <div className="md:hidden ml-auto flex items-center space-x-2">
+            {/* Language Toggle Button (mobile) */}
+            <button
+              onClick={handleToggleLanguage}
+              className="px-2 py-1 text-gray-700 hover:text-blue-600 transition-colors duration-200"
+            >
+              {i18n.language === "en" ? "मराठी" : "English"}
+            </button>
             <button
               onClick={() => setIsOpen(!isOpen)}
               className="inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-blue-600 focus:outline-none"
