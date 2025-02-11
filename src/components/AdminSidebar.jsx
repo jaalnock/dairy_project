@@ -6,11 +6,9 @@ import userProfile from "../assets/user_profile.png";
 export const AdminSidebar = ({ isOpen, setSidebarOpen }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [showReports, setShowReports] = useState(false); // Toggle dropdown
+  const [showReports, setShowReports] = useState(false);
 
-  // Close the dropdown if the user navigates to any other page
   useEffect(() => {
-    // Close the dropdown if the current path isn't related to reports
     if (!location.pathname.includes("/reports")) {
       setShowReports(false);
     }
@@ -18,7 +16,11 @@ export const AdminSidebar = ({ isOpen, setSidebarOpen }) => {
 
   const handleReportSelection = (reportType) => {
     navigate(`/reports?type=${reportType}`);
-    setShowReports(false); // Close dropdown after selecting a report
+    setShowReports(false);
+  };
+
+  const handleLogout = () => {
+    navigate("/login");
   };
 
   return (
@@ -29,7 +31,6 @@ export const AdminSidebar = ({ isOpen, setSidebarOpen }) => {
         } w-50 lg:w-74 flex flex-col justify-between`}
       >
         <div>
-          {/* Company Logo & Name */}
           <div className="mb-6 flex items-center space-x-3">
             <img src={logoImage} alt="logo" className="w-10 h-10" />
             <h1 className="text-lg font-bold text-black">Borgave Dugdhalay</h1>
@@ -46,7 +47,7 @@ export const AdminSidebar = ({ isOpen, setSidebarOpen }) => {
                         ? "bg-blue-500 text-white shadow-md"
                         : "text-black hover:bg-gray-300"
                     }`}
-                    onClick={() => setShowReports(false)} // Close dropdown when any link is clicked
+                    onClick={() => setShowReports(false)}
                   >
                     {item.name}
                   </Link>
@@ -54,11 +55,10 @@ export const AdminSidebar = ({ isOpen, setSidebarOpen }) => {
               )
             )}
 
-            {/* Reports Dropdown */}
             <li className="mb-4 relative">
               <button
                 className="text-left px-3 w-full py-2 rounded-lg bg-[#8095b5] text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-                onClick={() => setShowReports(!showReports)} // Toggle the dropdown
+                onClick={() => setShowReports(!showReports)}
               >
                 Reports   ▼
               </button>
@@ -88,20 +88,27 @@ export const AdminSidebar = ({ isOpen, setSidebarOpen }) => {
           </ul>
         </div>
 
-        {/* Profile Section */}
-        <div className="absolute bottom-4 left-4 flex items-center space-x-4 bg-gradient-to-br from-[#d6e4fc] to-[#b3c7f7] p-4 rounded-xl shadow-lg w-[85%]">
-          <img
-            src={userProfile}
-            alt="User"
-            className="w-12 h-12 rounded-full border-2 border-white shadow-md"
-          />
-          <div className="ml-5">
-            <h3 className="text-base font-semibold text-gray-900">John Doe</h3>
-            <p className="text-sm text-gray-700">Admin</p>
+        <div className="absolute bottom-4 left-4 flex flex-col items-center space-y-4 bg-gradient-to-br from-[#d6e4fc] to-[#b3c7f7] p-4 rounded-xl shadow-lg w-[85%]">
+          <div className="flex items-center space-x-4">
+            <img
+              src={userProfile}
+              alt="User"
+              className="w-12 h-12 rounded-full border-2 border-white shadow-md"
+            />
+            <div className="ml-5">
+              <h3 className="text-base font-semibold text-gray-900">John Doe</h3>
+              <p className="text-sm text-gray-700">Admin</p>
+            </div>
           </div>
+
+          <button
+            onClick={handleLogout}
+            className="w-full px-4 py-2 mt-2 bg-red-600 text-white font-semibold rounded-lg shadow-md hover:bg-red-700 transition duration-200"
+          >
+            Logout
+          </button>
         </div>
 
-        {/* Close Button for Mobile */}
         <button
           className="lg:hidden mt-4 p-2 bg-gray-600 rounded text-white"
           onClick={() => setSidebarOpen(false)}
@@ -112,5 +119,3 @@ export const AdminSidebar = ({ isOpen, setSidebarOpen }) => {
     </>
   );
 };
-
-

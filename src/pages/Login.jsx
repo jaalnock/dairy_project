@@ -27,13 +27,13 @@ export const Login = () => {
     }
 
     // Password Validation: Min 8 characters, at least one special character
-    const passwordRegex = /^(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-    if (!passwordRegex.test(password)) {
-      setError(
-        "Password must be at least 8 characters long and include at least one special character."
-      );
-      return;
-    }
+    // const passwordRegex = /^(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    // if (!passwordRegex.test(password)) {
+    //   setError(
+    //     "Password must be at least 8 characters long and include at least one special character."
+    //   );
+    //   return;
+    // }
 
     console.log("Login successful:", { role, mobile, password });
 

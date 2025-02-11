@@ -6,18 +6,17 @@ import userProfile from "../assets/user_profile.png";
 export const SubAdminSidebar = ({ isOpen, setSidebarOpen }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [showReports, setShowReports] = useState(false); // Toggle dropdown
+  const [showReports, setShowReports] = useState(false);
 
   useEffect(() => {
-  
     if (!location.pathname.includes("/reports")) {
       setShowReports(false);
     }
   }, [location]);
 
-  const handleReportSelection = (reportType) => {
-    navigate(`/reports?type=${reportType}`);
-    setShowReports(false); // Close dropdown after selecting a report
+  const handleLogout = () => {
+    // Perform logout logic here (e.g., clearing tokens, redirecting to login page)
+    navigate("/login");
   };
 
   return (
@@ -35,38 +34,52 @@ export const SubAdminSidebar = ({ isOpen, setSidebarOpen }) => {
           </div>
 
           <ul className="text-left">
-            {[{name: "Transactions", path: "/subadmin"},{name: "Add Milk", path: "/subadmin/add_milk"},{name: "Add Product", path: "/subadmin/products"},{name: "Loan", path: "/subadmin/loan"},{name: "Farmer", path: "/subadmin/farmer"},{name: "Report", path: "/subadmin/report"}].map(
-              (item) => (
-                <li key={item.name} className="mb-4">
-                  <Link
-                    to={item.path}
-                    className={`block px-3 py-2 rounded-lg transition duration-200 ${
-                      location.pathname === item.path
-                        ? "bg-blue-500 text-white shadow-md"
-                        : "text-black hover:bg-gray-300"
-                    }`}
-                    onClick={() => setShowReports(false)} // Close dropdown when any link is clicked
-                  >
-                    {item.name}
-                  </Link>
-                </li>
-              )
-            )}
-
+            {[
+              { name: "Transactions", path: "/subadmin" },
+              { name: "Add Milk", path: "/subadmin/add_milk" },
+              { name: "Add Product", path: "/subadmin/products" },
+              { name: "Loan", path: "/subadmin/loan" },
+              { name: "Farmer", path: "/subadmin/farmer" },
+              { name: "Report", path: "/subadmin/report" },
+            ].map((item) => (
+              <li key={item.name} className="mb-4">
+                <Link
+                  to={item.path}
+                  className={`block px-3 py-2 rounded-lg transition duration-200 ${
+                    location.pathname === item.path
+                      ? "bg-blue-500 text-white shadow-md"
+                      : "text-black hover:bg-gray-300"
+                  }`}
+                  onClick={() => setShowReports(false)}
+                >
+                  {item.name}
+                </Link>
+              </li>
+            ))}
           </ul>
         </div>
 
         {/* Profile Section */}
-        <div className="absolute bottom-4 left-4 flex items-center space-x-4 bg-gradient-to-br from-[#d6e4fc] to-[#b3c7f7] p-4 rounded-xl shadow-lg w-[85%]">
-          <img
-            src={userProfile}
-            alt="User"
-            className="w-12 h-12 rounded-full border-2 border-white shadow-md"
-          />
-          <div className="ml-5">
-            <h3 className="text-base font-semibold text-gray-900">John Doe</h3>
-            <p className="text-sm text-gray-700">Sub-Admin</p>
+        <div className="absolute bottom-4 left-4 flex flex-col items-center space-y-4 bg-gradient-to-br from-[#d6e4fc] to-[#b3c7f7] p-4 rounded-xl shadow-lg w-[85%]">
+          <div className="flex items-center space-x-4">
+            <img
+              src={userProfile}
+              alt="User"
+              className="w-12 h-12 rounded-full border-2 border-white shadow-md"
+            />
+            <div className="ml-5">
+              <h3 className="text-base font-semibold text-gray-900">John Doe</h3>
+              <p className="text-sm text-gray-700">Sub-Admin</p>
+            </div>
           </div>
+
+          {/* Logout Button */}
+          <button
+            onClick={handleLogout}
+            className="w-full px-4 py-2 mt-2 bg-red-600 text-white font-semibold rounded-lg shadow-md hover:bg-red-700 transition duration-200"
+          >
+            Logout
+          </button>
         </div>
 
         {/* Close Button for Mobile */}
@@ -80,4 +93,3 @@ export const SubAdminSidebar = ({ isOpen, setSidebarOpen }) => {
     </>
   );
 };
-
