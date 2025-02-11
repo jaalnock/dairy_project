@@ -35,7 +35,7 @@ export const SubAdminSidebar = ({ isOpen, setSidebarOpen }) => {
           </div>
 
           <ul className="text-left">
-            {[{name: "Transactions", path: "/subadmin"},{name: "Add Product", path: "/subadmin/products"},{name: "Report", path: "/subadmin/report"},{name: "Add Milk", path: "/subadmin/add_milk"},{name: "Loan", path: "/subadmin/loan"},{name: "Farmer", path: "/subadmin/farmer"}].map(
+            {[{name: "Transactions", path: "/subadmin"},{name: "Add Milk", path: "/subadmin/add_milk"},{name: "Add Product", path: "/subadmin/products"},{name: "Loan", path: "/subadmin/loan"},{name: "Farmer", path: "/subadmin/farmer"},{name: "Report", path: "/subadmin/report"}].map(
               (item) => (
                 <li key={item.name} className="mb-4">
                   <Link
