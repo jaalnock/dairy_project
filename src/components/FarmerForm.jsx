@@ -96,10 +96,20 @@ const FarmerForm = ({ isEditing, handleSaveFarmer, setIsFormOpen, editingFarmer 
           onChange={handleChange}
           className="w-full border p-2 rounded mb-4"
         />
-
-        <button onClick={handleSubmit} className="bg-green-500 text-white px-4 py-2 rounded w-full">
-          {isEditing ? "Update" : "Save"} Farmer
-        </button>
+         <div className="mt-4 flex justify-between space-x-4">
+          <button
+            onClick={() => setIsFormOpen(false)}
+            className="flex-1 bg-gray-400 text-white px-4 py-2 rounded-lg hover:bg-gray-500 transition"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSubmit}
+            className="flex-1 bg-[#2c447f] text-white px-4 py-2 rounded-lg hover:bg-[#1b2d5b] transition"
+            >
+            {isEditing ? "Update" : "Save"} Loan
+          </button>
+        </div>
       </div>
     </div>
   );

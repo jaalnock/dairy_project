@@ -74,9 +74,19 @@ const MilkForm = ({ isEditing, handleSaveMilkEntry, setIsFormOpen, editingEntry 
         <label className="block mt-2">Price (₹)</label>
         <input type="number" name="price" value={formData.price} onChange={handleChange} className="w-full border p-2 rounded" required />
 
-        <div className="mt-4 flex justify-between">
-          <button onClick={() => setIsFormOpen(false)} className="bg-gray-500 text-white px-4 py-2 rounded">Cancel</button>
-          <button onClick={handleSubmit} className="bg-green-500 text-white px-4 py-2 rounded">{isEditing ? "Update" : "Save"} Entry</button>
+        <div className="mt-4 flex justify-between space-x-4">
+          <button
+            onClick={() => setIsFormOpen(false)}
+            className="flex-1 bg-gray-400 text-white px-4 py-2 rounded-lg hover:bg-gray-500 transition"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSubmit}
+            className="flex-1 bg-[#2c447f] text-white px-4 py-2 rounded-lg hover:bg-[#1b2d5b] transition"
+            >
+            {isEditing ? "Update" : "Save"} Loan
+          </button>
         </div>
       </div>
     </div>
