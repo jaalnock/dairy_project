@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { fadout } from "./variants2";
 import logoImage from "../assets/Borgave_Logo_BG_Removed.png";
 import { useTranslation } from "react-i18next";
+import { LanguageToggler } from "./LanguageToggler";
 
 // NavLink component for navigation links
 const NavLink = ({ to, children, className }) => (
@@ -19,12 +20,7 @@ const NavLink = ({ to, children, className }) => (
 // Main Navbar component
 export const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const { t, i18n } = useTranslation();
-
-  const handleToggleLanguage = () => {
-    const newLang = i18n.language === "en" ? "mr" : "en";
-    i18n.changeLanguage(newLang);
-  };
+  const { t } = useTranslation();
 
   return (
     <nav className="bg-white shadow-lg relative w-full top-0 z-50 mb-0">
@@ -47,57 +43,8 @@ export const Navbar = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center ml-auto space-x-6">
-            {/* Enhanced Language Toggle for Desktop */}
-            <div className="relative inline-block">
-              <div className="bg-gray-100/80 backdrop-blur-sm p-1 rounded-full shadow-inner">
-                <div className="relative flex items-center w-[140px] h-8">
-                  {/* Sliding Background */}
-                  <div
-                    className={`
-                      absolute w-[66px] h-7 
-                      bg-gradient-to-r from-blue-500 to-blue-600
-                      rounded-full shadow-md transition-all duration-300 ease-in-out
-                      ${i18n.language === "en" ? "left-0.5" : "left-[72px]"}
-                    `}
-                  />
-
-                  {/* Language Buttons */}
-                  <button
-                    onClick={handleToggleLanguage}
-                    className={`
-                      relative z-10 flex items-center justify-center
-                      w-[66px] h-7 rounded-full font-medium text-sm
-                      transition-colors duration-300
-                      ${
-                        i18n.language === "en"
-                          ? "text-white"
-                          : "text-gray-600 hover:text-gray-900"
-                      }
-                    `}
-                  >
-                    <span className="tracking-wide">
-                      {t("navbar.language.english")}
-                    </span>
-                  </button>
-
-                  <button
-                    onClick={handleToggleLanguage}
-                    className={`
-                      relative z-10 flex items-center justify-center
-                      w-[66px] h-7 rounded-full font-medium text-sm
-                      transition-colors duration-300
-                      ${
-                        i18n.language === "mr"
-                          ? "text-white"
-                          : "text-gray-600 hover:text-gray-900"
-                      }
-                    `}
-                  >
-                    <span>{t("navbar.language.marathi")}</span>
-                  </button>
-                </div>
-              </div>
-            </div>
+            {/* Language Toggler for Desktop */}
+            <LanguageToggler isMobile={false} />
 
             <NavLink to="/">{t("navbar.links.home")}</NavLink>
             <NavLink to="/products">{t("navbar.links.products")}</NavLink>
@@ -115,51 +62,8 @@ export const Navbar = () => {
 
           {/* Mobile menu button */}
           <div className="md:hidden ml-auto flex items-center space-x-2">
-            {/* Enhanced Language Toggle for Mobile */}
-            <div className="relative inline-block">
-              <div className="bg-gray-100/80 p-0.5 rounded-full shadow-inner">
-                <div className="relative flex items-center w-[100px] h-7">
-                  <div
-                    className={`
-                      absolute w-[47px] h-6 
-                      bg-gradient-to-r from-blue-500 to-blue-600
-                      rounded-full shadow-md transition-all duration-300 ease-in-out
-                      ${i18n.language === "en" ? "left-0.5" : "left-[51px]"}
-                    `}
-                  />
-                  <button
-                    onClick={handleToggleLanguage}
-                    className={`
-                      relative z-10 flex items-center justify-center
-                      w-[47px] h-6 rounded-full font-medium text-xs
-                      transition-colors duration-300
-                      ${
-                        i18n.language === "en"
-                          ? "text-white"
-                          : "text-gray-600 hover:text-gray-900"
-                      }
-                    `}
-                  >
-                    {t("navbar.language.english")}
-                  </button>
-                  <button
-                    onClick={handleToggleLanguage}
-                    className={`
-                      relative z-10 flex items-center justify-center
-                      w-[47px] h-6 rounded-full font-medium text-xs
-                      transition-colors duration-300
-                      ${
-                        i18n.language === "mr"
-                          ? "text-white"
-                          : "text-gray-600 hover:text-gray-900"
-                      }
-                    `}
-                  >
-                    {t("navbar.language.marathi")}
-                  </button>
-                </div>
-              </div>
-            </div>
+            {/* Language Toggler for Mobile */}
+            <LanguageToggler isMobile={true} />
 
             <button
               onClick={() => setIsOpen(!isOpen)}
@@ -204,3 +108,5 @@ export const Navbar = () => {
     </nav>
   );
 };
+
+export default Navbar;
