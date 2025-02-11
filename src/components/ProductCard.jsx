@@ -1,58 +1,58 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 export const ProductCard = ({ product }) => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const handleClick = () => {
     navigate(`/products/${product.id}`);
   };
 
   return (
-    <div className="flex flex-col h-full max-w-xs mx-auto rounded-lg overflow-hidden shadow-lg border border-gray-200 bg-white transition duration-300 hover:shadow-xl hover:border-blue-400 group">
+    <div className="max-w-sm rounded overflow-hidden shadow-lg bg-white">
       {/* Product Image */}
-      <img
-        className="w-full h-48 sm:h-56 object-cover transform transition-transform duration-300 group-hover:scale-110"
-        src={product.imageUrl}
-        alt={product.name}
-      />
-      <div className="flex flex-col flex-grow p-4 sm:p-6">
-        <div className="flex-grow">
-          {/* Product Name */}
-          <h3 className="text-lg sm:text-xl font-semibold text-gray-800 group-hover:text-blue-600 transition-colors duration-200">
-            {product.name}
-          </h3>
+      <div className="relative h-48">
+        <img
+          src={product?.imageUrl}
+          alt={product?.name}
+          className="w-full h-full object-cover"
+        />
+      </div>
 
-          {/* Price and Stock Status */}
-          <div className="mt-2 sm:mt-3 mb-2 sm:mb-3">
-            <div className="flex items-center justify-between">
-              <span className="text-lg sm:text-xl font-bold text-green-600">
-                ${product.price}
-              </span>
+      <div className="px-6 py-4">
+        {/* Product Name */}
+        <h3 className="font-bold text-xl mb-2">{product.name}</h3>
 
-              {product.inStock ? (
-                <span className="bg-green-100 text-green-800 text-xs font-semibold py-1 px-2 rounded-full">
-                  In Stock
-                </span>
-              ) : (
-                <span className="bg-red-100 text-red-800 text-xs font-semibold py-1 px-2 rounded-full">
-                  Out of Stock
-                </span>
-              )}
-            </div>
-          </div>
+        {/* Price and Stock Status */}
+        <div className="flex justify-between items-center mb-4">
+          <span className="text-gray-700">
+            {t("products.productCard.price")} ${product.price}
+          </span>
+          <span
+            className={`px-2 py-1 rounded text-sm ${
+              product.inStock
+                ? "bg-green-100 text-green-800"
+                : "bg-red-100 text-red-800"
+            }`}
+          >
+            {product.inStock
+              ? t("products.productCard.inStock")
+              : t("products.productCard.outOfStock")}
+          </span>
         </div>
 
         {/* View Details Button */}
-        <div className="mt-2">
-          <button
-            className="w-full bg-blue-500 text-white text-sm sm:text-base px-3 py-2 rounded-lg border border-blue-500 hover:bg-blue-600 hover:border-blue-600 transition duration-300"
-            onClick={handleClick}
-          >
-            View Details
-          </button>
-        </div>
+        <button
+          onClick={handleClick}
+          className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+        >
+          {t("products.productCard.viewDetails")}
+        </button>
       </div>
     </div>
   );
 };
+
+export default ProductCard;

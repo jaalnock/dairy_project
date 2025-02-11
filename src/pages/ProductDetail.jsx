@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { products } from "../config";
 
 export const ProductDetails = () => {
+  const { t } = useTranslation();
   const { id } = useParams();
   const [product, setProduct] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Fetch product by ID from the products array
     const fetchedProduct = products.find(
       (product) => product.id === parseInt(id)
     );
@@ -23,7 +24,7 @@ export const ProductDetails = () => {
     navigate("/contact-us");
   };
 
-  if (!product) return <div>Loading...</div>;
+  if (!product) return <div>{t("products.productDetails.loading")}</div>;
 
   return (
     <div className="p-6 bg-white rounded-lg shadow-lg max-w-4xl mx-auto my-12">
@@ -31,6 +32,7 @@ export const ProductDetails = () => {
       <button
         onClick={handleBackClick}
         className="absolute top-6 left-6 bg-blue-600 hover:bg-blue-500 text-white transition duration-300 w-12 h-12 rounded-full flex items-center justify-center"
+        aria-label={t("products.productDetails.backToProducts")}
       >
         <span className="text-xl">&larr;</span>
       </button>
@@ -53,15 +55,17 @@ export const ProductDetails = () => {
 
           {/* Status Badge */}
           <div className="mt-2 mb-4">
-            {product.inStock ? (
-              <span className="bg-green-100 text-green-800 text-xs font-semibold py-1 px-4 rounded-full shadow-md">
-                In Stock
-              </span>
-            ) : (
-              <span className="bg-red-100 text-red-800 text-xs font-semibold py-1 px-4 rounded-full shadow-md">
-                Out of Stock
-              </span>
-            )}
+            <span
+              className={`text-xs font-semibold py-1 px-4 rounded-full shadow-md ${
+                product.inStock
+                  ? "bg-green-100 text-green-800"
+                  : "bg-red-100 text-red-800"
+              }`}
+            >
+              {product.inStock
+                ? t("products.productDetails.inStock")
+                : t("products.productDetails.outOfStock")}
+            </span>
           </div>
 
           <p className="text-lg text-gray-700 mt-3">{product.description}</p>
@@ -69,17 +73,21 @@ export const ProductDetails = () => {
           {/* Specifications */}
           <div className="mt-6">
             <h3 className="text-2xl font-semibold text-gray-800 mb-4">
-              Specifications
+              {t("products.productDetails.specifications")}
             </h3>
             <ul className="list-disc list-inside text-gray-700">
               <li>
-                <strong>SNF:</strong> {product.snf || "N/A"}
+                <strong>{t("products.productDetails.snf")}:</strong>{" "}
+                {product.snf || t("products.productDetails.notAvailable")}
               </li>
               <li>
-                <strong>Fat Content:</strong> {product.fatContent || "N/A"}
+                <strong>{t("products.productDetails.fatContent")}:</strong>{" "}
+                {product.fatContent ||
+                  t("products.productDetails.notAvailable")}
               </li>
               <li>
-                <strong>Quantity:</strong> {product.quantity || "N/A"}
+                <strong>{t("products.productDetails.quantity")}:</strong>{" "}
+                {product.quantity || t("products.productDetails.notAvailable")}
               </li>
             </ul>
           </div>
@@ -91,7 +99,10 @@ export const ProductDetails = () => {
 
           {/* Status Message */}
           <p className="text-sm text-gray-500 mt-1">
-            Availability: {product.inStock ? "In Stock" : "Out of Stock"}
+            {t("products.productDetails.availability")}:{" "}
+            {product.inStock
+              ? t("products.productDetails.inStock")
+              : t("products.productDetails.outOfStock")}
           </p>
 
           {/* Inquire Us Button */}
@@ -105,7 +116,7 @@ export const ProductDetails = () => {
                   : "bg-gray-400 cursor-not-allowed opacity-50"
               } text-white px-6 py-3 rounded-full font-semibold transition-all duration-300`}
             >
-              Inquire Us
+              {t("products.productDetails.inquireUs")}
             </button>
           </div>
         </div>
@@ -114,4 +125,4 @@ export const ProductDetails = () => {
   );
 };
 
-
+export default ProductDetails;

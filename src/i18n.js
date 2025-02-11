@@ -5,6 +5,38 @@ import { initReactI18next } from "react-i18next";
 const resources = {
   en: {
     translation: {
+      navbar: {
+        links: {
+          home: "Home",
+          products: "Products",
+          aboutUs: "About Us",
+          contactUs: "Contact Us",
+          login: "Login",
+        },
+        language: {
+          english: "EN",
+          marathi: "मराठी",
+        },
+      },
+      footer: {
+        companyName: "Borgave Dugdhalay",
+        tagline:
+          "Bringing the best dairy products straight from the farm to your home.",
+        copyright: "© 2025 Dairy Fresh Store. All rights reserved.",
+        quickLinks: {
+          title: "Quick Links",
+          home: "Home",
+          products: "Products",
+          aboutUs: "About Us",
+          contactUs: "Contact Us",
+        },
+        social: {
+          title: "Follow Us",
+          facebook: "Facebook",
+          twitter: "Twitter",
+          instagram: "Instagram",
+        },
+      },
       home: {
         heroSlides: [
           {
@@ -51,17 +83,36 @@ const resources = {
         learnMore: "Learn More",
         contactUs: "Contact Us",
       },
-      about: {
-        title: "About Us",
-        subtitle:
-          "We are dedicated to bringing you the freshest and most organic dairy products straight from the farm to your table!",
-        journeyTitle: "Our Journey",
-        paragraph1:
-          "Founded on the principles of sustainability and quality, we have been providing premium dairy products to families for over 20 years. Our farms use eco-friendly methods and ethical practices to ensure that the milk and other dairy products we produce are fresh, nutritious, and free of harmful additives.",
-        paragraph2:
-          "Our farm is located in the heart of the countryside, where our cows roam freely and enjoy a natural, healthy lifestyle. We take pride in using traditional farming methods while embracing innovative practices to ensure the highest quality in every product we make.",
-        learnMore: "Learn More",
-        contactUs: "Contact Us",
+      products: {
+        title: "Dairy Products",
+        categories: {
+          all: "All",
+          milk: "Milk",
+          cheese: "Cheese",
+          yogurt: "Yogurt",
+          sweets: "Sweets",
+          cooking: "Cooking",
+        },
+        noProducts: "No products available in this category.",
+        productCard: {
+          inStock: "In Stock",
+          outOfStock: "Out of Stock",
+          viewDetails: "View Details",
+          price: "Price:",
+        },
+        productDetails: {
+          loading: "Loading...",
+          backToProducts: "Back",
+          specifications: "Specifications",
+          snf: "SNF",
+          fatContent: "Fat Content",
+          quantity: "Quantity",
+          availability: "Availability",
+          inStock: "In Stock",
+          outOfStock: "Out of Stock",
+          inquireUs: "Inquire Us",
+          notAvailable: "N/A",
+        },
       },
       aboutUs: {
         hero: {
@@ -127,10 +178,97 @@ const resources = {
           },
         },
       },
+      contactUs: {
+        title: "Contact Us",
+        imageAlt: "Contact Us",
+        alert: {
+          invalidMobile: "Please enter a valid 10-digit mobile number.",
+          invalidOtp: "Invalid OTP. Please try again.",
+        },
+        confirmation:
+          "Thank you for reaching out! Your inquiry has been received successfully, and our team will get in touch with you shortly. Rest assured, we value your trust and are here to assist you every step of the way.",
+        form: {
+          name: "Name",
+          namePlaceholder: "Enter your name",
+          address: "Address",
+          addressPlaceholder: "Enter your address",
+          mobile: "Mobile No.",
+          mobilePlaceholder: "Enter your mobile number",
+          sendOtp: "Send OTP",
+          enterOtp: "Enter OTP",
+          otpPlaceholder: "Enter the OTP",
+          verifyOtp: "Verify OTP",
+        },
+        info: {
+          title: "Our Contact Information",
+          mainBranchLabel: "Main Branch:",
+          mainBranch: "123 Main Street, City Center, Country",
+          secondBranchLabel: "Second Branch:",
+          secondBranch: "456 Second Avenue, Suburban Area, Country",
+          thirdBranchLabel: "Third Branch:",
+          thirdBranch: "789 Third Boulevard, Downtown, Country",
+          contactNoLabel: "Contact No.:",
+          contactNo: "+1234567890",
+          shopLocationsTitle: "Our Shop Locations",
+          mapTitle: "Shop Locations",
+        },
+      },
+      login: {
+        title: "Login",
+        errors: {
+          fillAllFields: "Please fill in all required fields",
+          invalidMobile: "Please enter a valid 10-digit mobile number",
+          invalidPassword:
+            "Password must be at least 8 characters with one special character",
+        },
+        form: {
+          roleLabel: "Select Role",
+          selectRole: "Choose your role",
+          admin: "Admin",
+          subAdmin: "Sub Admin",
+          mobileLabel: "Mobile Number",
+          mobilePlaceholder: "Enter your mobile number",
+          passwordLabel: "Password",
+          passwordPlaceholder: "Enter your password",
+          submitButton: "Login",
+        },
+      },
     },
   },
   mr: {
     translation: {
+      navbar: {
+        links: {
+          home: "मुख्यपृष्ठ",
+          products: "उत्पादने",
+          aboutUs: "आमच्याबद्दल",
+          contactUs: "संपर्क करा",
+          login: "लॉगिन",
+        },
+        language: {
+          english: "EN",
+          marathi: "मराठी",
+        },
+      },
+      footer: {
+        companyName: "बोरगावे दुग्धालय",
+        tagline:
+          "शेतातून थेट तुमच्या घरापर्यंत सर्वोत्तम दुग्धजन्य पदार्थ आणत आहोत.",
+        copyright: "© 2025 डेअरी फ्रेश स्टोअर. सर्व हक्क राखीव.",
+        quickLinks: {
+          title: "द्रुत दुवे",
+          home: "मुख्यपृष्ठ",
+          products: "उत्पादने",
+          aboutUs: "आमच्याबद्दल",
+          contactUs: "संपर्क करा",
+        },
+        social: {
+          title: "आम्हाला फॉलो करा",
+          facebook: "फेसबुक",
+          twitter: "ट्विटर",
+          instagram: "इन्स्टाग्राम",
+        },
+      },
       home: {
         heroSlides: [
           {
@@ -175,7 +313,38 @@ const resources = {
         paragraph2:
           "आमचे शेत ग्रामीण भागाच्या हृदयात आहे, जिथे आमच्या गायी मोकळेपणाने फिरतात आणि नैसर्गिक, आरोग्यदायी जीवनशैली उपभोगतात. आम्ही पारंपरिक शेती पद्धती वापरत असतानाच नावीन्यपूर्ण पद्धतींचे स्वागत करतो, जेणेकरून आम्ही तयार करतो प्रत्येक उत्पादन उच्च दर्जाचे असेल.",
         learnMore: "आधिक जाणून घ्या",
-        contactUs: "आमच्याशी संपर्क करा",
+        contactUs: "संपर्क करा",
+      },
+      products: {
+        title: "दुग्धजन्य पदार्थ",
+        categories: {
+          all: "सर्व",
+          milk: "दूध",
+          cheese: "चीज",
+          yogurt: "दही",
+          sweets: "मिठाई",
+          cooking: "स्वयंपाक",
+        },
+        noProducts: "या श्रेणीमध्ये कोणतेही उत्पादने उपलब्ध नाहीत.",
+        productCard: {
+          inStock: "स्टॉक मध्ये",
+          outOfStock: "स्टॉक मध्ये नाही",
+          viewDetails: "तपशील पहा",
+          price: "किंमत:",
+        },
+        productDetails: {
+          loading: "लोड करत आहे...",
+          backToProducts: "मागे",
+          specifications: "वैशिष्ट्ये",
+          snf: "एसएनएफ",
+          fatContent: "फॅट कंटेंट",
+          quantity: "प्रमाण",
+          availability: "उपलब्धता",
+          inStock: "स्टॉक मध्ये",
+          outOfStock: "स्टॉक मध्ये नाही",
+          inquireUs: "चौकशी करा",
+          notAvailable: "उपलब्ध नाही",
+        },
       },
       aboutUs: {
         hero: {
@@ -237,6 +406,61 @@ const resources = {
             maria: "गुणवत्ता नियंत्रण संचालक",
             robert: "उत्पादन व्यवस्थापक",
           },
+        },
+      },
+      contactUs: {
+        title: "संपर्क करा",
+        imageAlt: "संपर्क करा",
+        alert: {
+          invalidMobile: "कृपया वैध 10-अंकी मोबाइल क्रमांक प्रविष्ट करा.",
+          invalidOtp: "अवैध OTP. कृपया पुन्हा प्रयत्न करा.",
+        },
+        confirmation:
+          "आपल्या चौकशीबद्दल धन्यवाद! आपली चौकशी यशस्वीपणे प्राप्त झाली आहे आणि आमचा टीम लवकरच आपल्याशी संपर्क साधेल. आमचा विश्वास आपल्यावर आहे आणि आम्ही प्रत्येक पावलावर आपली मदत करण्यास तयार आहोत.",
+        form: {
+          name: "नाव",
+          namePlaceholder: "तुमचे नाव प्रविष्ट करा",
+          address: "पत्ता",
+          addressPlaceholder: "तुमचा पत्ता प्रविष्ट करा",
+          mobile: "मोबाईल क्रमांक",
+          mobilePlaceholder: "तुमचा मोबाईल क्रमांक प्रविष्ट करा",
+          sendOtp: "OTP पाठवा",
+          enterOtp: "OTP प्रविष्ट करा",
+          otpPlaceholder: "OTP प्रविष्ट करा",
+          verifyOtp: "OTP सत्यापित करा",
+        },
+        info: {
+          title: "आमची संपर्क माहिती",
+          mainBranchLabel: "मुख्य शाखा:",
+          mainBranch: "123 मुख्य रस्ता, सिटी सेंटर, देश",
+          secondBranchLabel: "दुसरी शाखा:",
+          secondBranch: "456 सेकंड एवेन्यू, उपनगरीय भाग, देश",
+          thirdBranchLabel: "तिसरी शाखा:",
+          thirdBranch: "789 तिसरा ब्लवार्ड, डाउनटाउन, देश",
+          contactNoLabel: "संपर्क क्रमांक:",
+          contactNo: "+1234567890",
+          shopLocationsTitle: "आमचे दुकान स्थान",
+          mapTitle: "दुकान स्थान",
+        },
+      },
+      login: {
+        title: "लॉगिन",
+        errors: {
+          fillAllFields: "कृपया सर्व आवश्यक फील्ड भरा",
+          invalidMobile: "कृपया वैध 10-अंकी मोबाइल नंबर प्रविष्ट करा",
+          invalidPassword:
+            "पासवर्ड किमान 8 अक्षरे आणि एक विशेष अक्षर असणे आवश्यक आहे",
+        },
+        form: {
+          roleLabel: "भूमिका निवडा",
+          selectRole: "तुमची भूमिका निवडा",
+          admin: "प्रशासक",
+          subAdmin: "उप प्रशासक",
+          mobileLabel: "मोबाईल नंबर",
+          mobilePlaceholder: "तुमचा मोबाईल नंबर प्रविष्ट करा",
+          passwordLabel: "पासवर्ड",
+          passwordPlaceholder: "तुमचा पासवर्ड प्रविष्ट करा",
+          submitButton: "लॉगिन करा",
         },
       },
     },

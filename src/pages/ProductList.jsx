@@ -1,27 +1,25 @@
-// src/ProductList.jsx
-
 import React, { useState } from "react";
 import { ProductCard } from "../components/index.js";
 import { products } from "../config";
+import { useTranslation } from "react-i18next";
 
 // Categorized Products
 const categories = [
-  { category: "All", productIds: [] }, // 'All' shows all products
-  { category: "Milk", productIds: [1, 2, 3, 8] },
-  { category: "Cheese", productIds: [4, 12, 14] },
-  { category: "Yogurt", productIds: [5, 6, 7, 11] },
-  { category: "Sweets", productIds: [9, 15] },
-  { category: "Cooking", productIds: [10, 13] },
+  { category: "all", productIds: [] }, // 'All' shows all products
+  { category: "milk", productIds: [1, 2, 3, 8] },
+  { category: "cheese", productIds: [4, 12, 14] },
+  { category: "yogurt", productIds: [5, 6, 7, 11] },
+  { category: "sweets", productIds: [9, 15] },
+  { category: "cooking", productIds: [10, 13] },
 ];
 
-// Products Array
-
 export const ProductList = () => {
-  const [selectedCategory, setSelectedCategory] = useState("All");
+  const { t } = useTranslation();
+  const [selectedCategory, setSelectedCategory] = useState("all");
 
   // Get products based on selected category
   const filteredProducts =
-    selectedCategory === "All"
+    selectedCategory === "all"
       ? products // Show all products for "All"
       : products.filter((product) =>
           categories
@@ -33,7 +31,7 @@ export const ProductList = () => {
     <div className="py-6 px-4 sm:px-10">
       {/* Heading for Dairy Products */}
       <h2 className="text-2xl sm:text-3xl font-semibold text-gray-800 mb-6 text-center">
-        Dairy Products
+        {t("products.title")}
       </h2>
 
       {/* Category Buttons */}
@@ -48,7 +46,7 @@ export const ProductList = () => {
                 : "bg-gray-200 text-gray-700"
             } hover:bg-blue-500 hover:text-white transition`}
           >
-            {category.category}
+            {t(`products.categories.${category.category}`)}
           </button>
         ))}
       </div>
@@ -62,11 +60,10 @@ export const ProductList = () => {
           ))
         ) : (
           <p className="text-center col-span-full text-gray-500">
-            No products available in this category.
+            {t("products.noProducts")}
           </p>
         )}
       </div>
     </div>
   );
 };
-
