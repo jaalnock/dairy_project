@@ -1,8 +1,12 @@
 import React, { useEffect } from "react";
 import { ImageSlider, ProductImageSlider, About } from "../components/index.js";
 import { motion } from "framer-motion";
+// Added for translation support
+import { useTranslation } from "react-i18next";
 
 export function Home() {
+  const { t } = useTranslation(); // Added translation hook
+
   //Fetch these slides through API
   const slides = [
     {
@@ -48,6 +52,25 @@ export function Home() {
     },
   ];
 
+  // Added: Map original slides to translated slides using t() with default values
+  const translatedSlides = slides.map((slide, index) => ({
+    ...slide,
+    title: t(`home.heroSlides.${index}.title`, { defaultValue: slide.title }),
+    description: t(`home.heroSlides.${index}.description`, {
+      defaultValue: slide.description,
+    }),
+  }));
+
+  const translatedSli = sli.map((slide, index) => ({
+    ...slide,
+    title: t(`home.productSlides.${index}.title`, {
+      defaultValue: slide.title,
+    }),
+    description: t(`home.productSlides.${index}.description`, {
+      defaultValue: slide.description,
+    }),
+  }));
+
   const preloadImages = (imageUrls) => {
     imageUrls.forEach((url) => {
       const img = new Image();
@@ -64,7 +87,7 @@ export function Home() {
     <motion.div className="min-h-screen space-y-0">
       {/* ImageSlider for the Hero Section */}
       <ImageSlider
-        slides={slides}
+        slides={translatedSlides} // Now using translated slides
         className="h-[600px]"
         autoPlayInterval={5000}
       />
@@ -74,12 +97,10 @@ export function Home() {
 
       {/* Product Image Slider for showing product images */}
       <ProductImageSlider
-        slides={sli}
+        slides={translatedSli} // Now using translated product slides
         autoPlayInterval={5000}
         className="h-[600px]" // Adjust as needed
       />
     </motion.div>
   );
 }
-
-

@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
-// import { ImageSlider } from "../../../customer-frontend/src/components/ImageSlider";
-import {ImageSlider} from "../components/ImageSlider"
-import {SlideForm} from "../components/SlideForm";
+import { ImageSlider } from "../components/ImageSlider";
+import { SlideForm } from "../components/SlideForm";
+import { useTranslation } from "react-i18next";
 
 export const EditImageSlider = () => {
-  // Load slides from localStorage or use default slides
+  const { t } = useTranslation();
+
   const [slides, setSlides] = useState(() => {
     const savedSlides = JSON.parse(localStorage.getItem("slides"));
     return (
@@ -13,34 +14,31 @@ export const EditImageSlider = () => {
           id: 1,
           image:
             "https://images.pexels.com/photos/773253/pexels-photo-773253.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-          title: "Premium Dairy Solutions",
-          description:
-            "Streamline your dairy operations with our advanced management system",
+          title: t("premium_dairy_solutions"),
+          description: t("streamline_dairy_operations"),
         },
         {
           id: 2,
           image:
             "https://images.pexels.com/photos/254178/pexels-photo-254178.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-          title: "Smart Herd Management",
-          description: "Track and optimize your herd's health and productivity",
+          title: t("smart_herd_management"),
+          description: t("track_optimize_herd"),
         },
         {
           id: 3,
           image:
             "https://images.pexels.com/photos/2064359/pexels-photo-2064359.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-          title: "Quality Assurance",
-          description: "Maintain the highest standards in dairy production",
+          title: t("quality_assurance"),
+          description: t("maintain_highest_standards"),
         },
       ]
     );
   });
 
-  // Save slides to localStorage whenever they change
   useEffect(() => {
     localStorage.setItem("slides", JSON.stringify(slides));
   }, [slides]);
 
-  // Form state
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [formData, setFormData] = useState({
     id: null,
@@ -48,11 +46,8 @@ export const EditImageSlider = () => {
     title: "",
     description: "",
   });
-
-  // State to track hover for advanced effects
   const [hoveredSlide, setHoveredSlide] = useState(null);
 
-  // Disable background scrolling when modal is open
   useEffect(() => {
     if (isFormOpen) {
       document.body.classList.add("overflow-hidden");
@@ -61,7 +56,6 @@ export const EditImageSlider = () => {
     }
   }, [isFormOpen]);
 
-  // Handle input change
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
@@ -72,61 +66,48 @@ export const EditImageSlider = () => {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setFormData((prevData) => ({
-          ...prevData,
-          image: reader.result,
-        }));
+        setFormData((prevData) => ({ ...prevData, image: reader.result }));
       };
       reader.readAsDataURL(file);
     }
   };
 
-  // Handle add/update slide
   const handleSaveSlide = () => {
     if (!formData.image || !formData.title || !formData.description) {
-      alert("Please fill in all fields!");
+      alert(t("fill_all_fields"));
       return;
     }
 
     if (formData.id) {
-      // Update existing slide
-      const updatedSlides = slides.map((slide) =>
-        slide.id === formData.id ? { ...formData } : slide
+      setSlides(
+        slides.map((slide) =>
+          slide.id === formData.id ? { ...formData } : slide
+        )
       );
-      setSlides(updatedSlides);
     } else {
-      // Add new slide
-      const newSlide = { ...formData, id: slides.length + 1 };
-      setSlides([...slides, newSlide]);
+      setSlides([...slides, { ...formData, id: slides.length + 1 }]);
     }
 
     setIsFormOpen(false);
     setFormData({ id: null, image: "", title: "", description: "" });
   };
 
-  // Handle delete slide
   const handleDelete = (id) => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this slide?"
-    );
-    if (confirmDelete) {
-      const updatedSlides = slides.filter((slide) => slide.id !== id);
-      setSlides(updatedSlides);
+    if (window.confirm(t("confirm_delete"))) {
+      setSlides(slides.filter((slide) => slide.id !== id));
     }
   };
 
   const handleAddSlide = () => {
-    // Clear form data when adding a new slide
     setFormData({ id: null, image: "", title: "", description: "" });
     setIsFormOpen(true);
   };
 
   return (
     <div className="min-h-screen flex flex-col items-center p-6 relative">
-      {/* Slide List */}
       <div className="w-full max-w-5xl mb-8">
         <h2 className="text-4xl font-bold mb-10 text-center text-[#2c447f]">
-          Slide List
+          {t("slide_list")}
         </h2>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {slides.map((slide) => (
@@ -148,8 +129,6 @@ export const EditImageSlider = () => {
               />
               <h3 className="text-lg font-semibold mt-3">{slide.title}</h3>
               <p className="text-sm text-gray-600">{slide.description}</p>
-
-              {/* Buttons: Edit & Delete */}
               <div className="flex justify-between mt-4 space-x-2">
                 <button
                   className="flex-1 bg-[#4c76ba] text-white text-base px-3 py-2 rounded-md shadow-md hover:bg-[#3b5c94] transition"
@@ -158,13 +137,13 @@ export const EditImageSlider = () => {
                     setIsFormOpen(true);
                   }}
                 >
-                  Edit
+                  {t("edit")}
                 </button>
                 <button
                   className="flex-1 bg-[#d9534f] text-white text-base px-3 py-2 rounded-md shadow-md hover:bg-[#b52b27] transition"
                   onClick={() => handleDelete(slide.id)}
                 >
-                  Delete
+                  {t("delete")}
                 </button>
               </div>
             </div>
@@ -172,10 +151,7 @@ export const EditImageSlider = () => {
         </div>
       </div>
 
-      {/* ImageSlider Component */}
       <div className="relative w-full max-w-5xl z-0">
-        {" "}
-        {/* Ensure ImageSlider stays behind the form */}
         <ImageSlider
           slides={slides}
           className="h-[600px] w-full relative z-0"
@@ -183,15 +159,13 @@ export const EditImageSlider = () => {
         />
       </div>
 
-      {/* Add Slide Button */}
       <button
         onClick={handleAddSlide}
         className="mt-6 px-6 py-3 bg-[#1b2d5b] text-white font-semibold rounded-lg shadow-md hover:bg-[#0f1e3e] transition"
       >
-        Add Slide
+        {t("add_slide")}
       </button>
 
-      {/* Slide Form Modal */}
       {isFormOpen && (
         <div className="absolute top-0 left-0 right-0 bottom-0 z-10 bg-opacity-50 flex items-center justify-center">
           <SlideForm
@@ -207,4 +181,3 @@ export const EditImageSlider = () => {
     </div>
   );
 };
-

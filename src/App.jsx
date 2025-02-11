@@ -27,6 +27,7 @@ import FarmerList from "./pages/FarmerList.jsx";
 function App() {
   return (
     <>
+      {/* <-- Global language toggle switcher */}
       <Routes>
         <Route path="/" element={<CustomerLayout />}>
           <Route index element={<Home />} />
@@ -56,9 +57,9 @@ function App() {
             <Route index element={<TransactionList />} />
             <Route path="products" element={<SubAdminProductsList />} />
             <Route path="report" element={<SubAdminReport />} />
-            <Route path="add_milk" element={<MilkList/>} />
-            <Route path="loan" element={<LoanList/>} />
-            <Route path="farmer" element={<FarmerList/>} />
+            <Route path="add_milk" element={<MilkList />} />
+            <Route path="loan" element={<LoanList />} />
+            <Route path="farmer" element={<FarmerList />} />
           </Route>
         </Route>
 
