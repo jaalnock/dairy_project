@@ -233,6 +233,165 @@ const resources = {
           submitButton: "Login",
         },
       },
+      imageSlider: {
+        slideList: "Slide List",
+        slides: {
+          dairy: {
+            title: "Premium Dairy Solutions",
+            description:
+              "Streamline your dairy operations with our advanced management system",
+          },
+          herd: {
+            title: "Smart Herd Management",
+            description:
+              "Track and optimize your herd's health and productivity",
+          },
+          quality: {
+            title: "Quality Assurance",
+            description: "Maintain the highest standards in dairy production",
+          },
+        },
+        buttons: {
+          edit: "Edit",
+          delete: "Delete",
+          addSlide: "Add Slide",
+          save: "Save",
+          cancel: "Cancel",
+        },
+        alerts: {
+          fillAllFields: "Please fill all fields",
+          confirmDelete: "Are you sure you want to delete this slide?",
+        },
+        form: {
+          title: "Title",
+          titlePlaceholder: "Enter slide title",
+          description: "Description",
+          descriptionPlaceholder: "Enter slide description",
+          image: "Image",
+          imagePlaceholder: "Choose an image",
+        },
+      },
+      subAdmin: {
+        title: "SubAdmins",
+        form: {
+          addTitle: "Add New SubAdmin",
+          editTitle: "Edit SubAdmin",
+          name: "Name",
+          namePlaceholder: "Enter SubAdmin name",
+          mobile: "Mobile Number",
+          mobilePlaceholder: "Enter mobile number",
+          password: "Password",
+          passwordPlaceholder: "Enter password",
+          address: "Address",
+          addressPlaceholder: "Enter address",
+          branchId: "Branch ID",
+          branchIdPlaceholder: "Enter branch ID",
+          image: "Image",
+          imagePlaceholder: "Choose an image",
+          cancel: "Cancel",
+          save: "Save",
+        },
+        card: {
+          imageAlt: "Profile image of {{name}}",
+          mobile: "Mob. no",
+          password: "Password",
+          togglePassword: "Toggle password visibility",
+          address: "Address",
+          branchId: "Branch ID",
+          villageCity: "Village/City",
+        },
+        alerts: {
+          fillAllFields: "Please fill in all required fields",
+          confirmDelete: "Are you sure you want to delete this SubAdmin?",
+          confirmDeleteTitle: "Confirm Deletion",
+          no: "No",
+          yes: "Yes",
+        },
+        buttons: {
+          addSubAdmin: "+ Add SubAdmin",
+          edit: "Edit",
+          delete: "Delete",
+        },
+      },
+      branch: {
+        title: "Branches",
+        card: {
+          branchIdLabel: "Branch ID",
+          addressLabel: "Address",
+          villageCityLabel: "Village/City",
+        },
+        form: {
+          addTitle: "Add New Branch",
+          editTitle: "Edit Branch",
+          branchId: "Branch ID",
+          branchIdPlaceholder: "Enter branch ID",
+          address: "Address",
+          addressPlaceholder: "Enter address",
+          villageCity: "Village/City",
+          villageCityPlaceholder: "Enter village or city name",
+          save: "Save",
+          cancel: "Cancel",
+        },
+        buttons: {
+          addBranch: "+ Add Branch",
+          edit: "Edit",
+          delete: "Delete",
+        },
+        alerts: {
+          confirmDelete: "Are you sure you want to delete this branch?",
+          confirmDeleteTitle: "Confirm Deletion",
+          fillAllFields: "Please fill in all required fields",
+          no: "No",
+          yes: "Yes",
+        },
+      },
+      adminSidebar: {
+        title: "Borgave Dugdhalay",
+        menu: {
+          home: "Home",
+          subAdmin: "SubAdmin",
+          branch: "Branch",
+        },
+        reports: {
+          title: "Reports",
+          daily: "Daily Report",
+          weekly: "Weekly Report",
+          monthly: "Monthly Report",
+        },
+        language: {
+          select: "Select Language",
+        },
+        profile: {
+          userImageAlt: "User Profile",
+          name: "John Doe",
+          role: "Admin",
+        },
+        buttons: {
+          logout: "Logout",
+          close: "Close",
+        },
+      },
+      report: {
+        title: "{{type}} Report",
+        types: {
+          daily: "Daily",
+          weekly: "Weekly",
+          monthly: "Monthly",
+        },
+        profit: "Profit: ₹{{amount}}",
+        loss: "Loss: ₹{{amount}}",
+        summary: {
+          title: "Your Total Earnings/Expenditure",
+          description:
+            "Here's the overall summary based on the data collected for the selected report type.",
+          totalLabel: "Total Amount",
+          amount: "₹{{amount}}",
+          profitMessage: "Great job! You're in profit.",
+          lossMessage:
+            "It seems there's a loss overall. Take necessary actions.",
+        },
+        noData: "No report data available.",
+      },
     },
   },
   mr: {
@@ -462,6 +621,166 @@ const resources = {
           passwordPlaceholder: "तुमचा पासवर्ड प्रविष्ट करा",
           submitButton: "लॉगिन करा",
         },
+      },
+      imageSlider: {
+        slideList: "स्लाइड यादी",
+        slides: {
+          dairy: {
+            title: "प्रीमियम डेअरी सोल्यूशन्स",
+            description:
+              "आमच्या प्रगत व्यवस्थापन प्रणालीसह तुमचे डेअरी ऑपरेशन्स सुलभ करा",
+          },
+          herd: {
+            title: "स्मार्ट कळप व्यवस्थापन",
+            description:
+              "तुमच्या कळपाचे आरोग्य आणि उत्पादकता ट्रॅक करा आणि ऑप्टिमाइझ करा",
+          },
+          quality: {
+            title: "गुणवत्ता हमी",
+            description: "डेअरी उत्पादनात सर्वोच्च मानके राखा",
+          },
+        },
+        buttons: {
+          edit: "संपादित करा",
+          delete: "हटवा",
+          addSlide: "स्लाइड जोडा",
+          save: "जतन करा",
+          cancel: "रद्द करा",
+        },
+        alerts: {
+          fillAllFields: "कृपया सर्व फील्ड भरा",
+          confirmDelete:
+            "तुम्हाला खात्री आहे की तुम्ही ही स्लाइड हटवू इच्छिता?",
+        },
+        form: {
+          title: "शीर्षक",
+          titlePlaceholder: "स्लाइड शीर्षक प्रविष्ट करा",
+          description: "वर्णन",
+          descriptionPlaceholder: "स्लाइड वर्णन प्रविष्ट करा",
+          image: "प्रतिमा",
+          imagePlaceholder: "प्रतिमा निवडा",
+        },
+      },
+      subAdmin: {
+        title: "उप प्रशासक",
+        form: {
+          addTitle: "नवीन उप प्रशासक जोडा",
+          editTitle: "उप प्रशासक संपादित करा",
+          name: "नाव",
+          namePlaceholder: "उप प्रशासकाचे नाव प्रविष्ट करा",
+          mobile: "मोबाईल क्रमांक",
+          mobilePlaceholder: "मोबाईल क्रमांक प्रविष्ट करा",
+          password: "पासवर्ड",
+          passwordPlaceholder: "पासवर्ड प्रविष्ट करा",
+          address: "पत्ता",
+          addressPlaceholder: "पत्ता प्रविष्ट करा",
+          branchId: "शाखा आयडी",
+          branchIdPlaceholder: "शाखा आयडी प्रविष्ट करा",
+          image: "प्रतिमा",
+          imagePlaceholder: "प्रतिमा निवडा",
+          cancel: "रद्द करा",
+          save: "जतन करा",
+        },
+        card: {
+          imageAlt: "{{name}} ची प्रोफाइल प्रतिमा",
+          mobile: "मोबाईल क्र",
+          password: "पासवर्ड",
+          togglePassword: "पासवर्ड दृश्यता टॉगल करा",
+          address: "पत्ता",
+          branchId: "शाखा आयडी",
+          villageCity: "गाव/शहर",
+        },
+        alerts: {
+          fillAllFields: "कृपया सर्व आवश्यक फील्ड भरा",
+          confirmDelete:
+            "तुम्हाला खात्री आहे की तुम्ही हा उप प्रशासक हटवू इच्छिता?",
+          confirmDeleteTitle: "हटविण्याची पुष्टी करा",
+          no: "नाही",
+          yes: "होय",
+        },
+        buttons: {
+          addSubAdmin: "+ उप प्रशासक जोडा",
+          edit: "संपादित करा",
+          delete: "हटवा",
+        },
+      },
+      branch: {
+        title: "शाखा",
+        card: {
+          branchIdLabel: "शाखा आयडी",
+          addressLabel: "पत्ता",
+          villageCityLabel: "गाव/शहर",
+        },
+        form: {
+          addTitle: "नवीन शाखा जोडा",
+          editTitle: "शाखा संपादित करा",
+          branchId: "शाखा आयडी",
+          branchIdPlaceholder: "शाखा आयडी प्रविष्ट करा",
+          address: "पत्ता",
+          addressPlaceholder: "पत्ता प्रविष्ट करा",
+          villageCity: "गाव/शहर",
+          villageCityPlaceholder: "गाव किंवा शहराचे नाव प्रविष्ट करा",
+          save: "जतन करा",
+          cancel: "रद्द करा",
+        },
+        buttons: {
+          addBranch: "+ शाखा जोडा",
+          edit: "संपादित करा",
+          delete: "हटवा",
+        },
+        alerts: {
+          confirmDelete: "तुम्हाला खात्री आहे की तुम्ही ही शाखा हटवू इच्छिता?",
+          confirmDeleteTitle: "हटविण्याची पुष्टी करा",
+          fillAllFields: "कृपया सर्व आवश्यक फील्ड भरा",
+          no: "नाही",
+          yes: "होय",
+        },
+      },
+      adminSidebar: {
+        title: "बोरगावे दुग्धालय",
+        menu: {
+          home: "मुख्यपृष्ठ",
+          subAdmin: "उप-प्रशासक",
+          branch: "शाखा",
+        },
+        reports: {
+          title: "अहवाल",
+          daily: "दैनिक अहवाल",
+          weekly: "साप्ताहिक अहवाल",
+          monthly: "मासिक अहवाल",
+        },
+        language: {
+          select: "भाषा निवडा",
+        },
+        profile: {
+          userImageAlt: "वापरकर्ता प्रोफाइल",
+          name: "जॉन डो",
+          role: "प्रशासक",
+        },
+        buttons: {
+          logout: "बाहेर पडा",
+          close: "बंद करा",
+        },
+      },
+      report: {
+        title: "{{type}} अहवाल",
+        types: {
+          daily: "दैनिक",
+          weekly: "साप्ताहिक",
+          monthly: "मासिक",
+        },
+        profit: "नफा: ₹{{amount}}",
+        loss: "तोटा: ₹{{amount}}",
+        summary: {
+          title: "तुमची एकूण कमाई/खर्च",
+          description:
+            "निवडलेल्या अहवाल प्रकारासाठी संकलित केलेल्या डेटावर आधारित एकूण सारांश येथे आहे.",
+          totalLabel: "एकूण रक्कम",
+          amount: "₹{{amount}}",
+          profitMessage: "छान काम! तुम्ही नफ्यात आहात.",
+          lossMessage: "असे दिसते की एकूण तोटा आहे. आवश्यक कारवाई करा.",
+        },
+        noData: "कोणताही अहवाल डेटा उपलब्ध नाही.",
       },
     },
   },

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { XCircle } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export const SubAdminForm = ({
   isEditing,
@@ -9,6 +10,7 @@ export const SubAdminForm = ({
   handleSaveSubAdmin,
   setIsFormOpen,
 }) => {
+  const { t } = useTranslation();
   const [imagePreview, setImagePreview] = useState(null);
 
   useEffect(() => {
@@ -35,15 +37,19 @@ export const SubAdminForm = ({
     <div className="absolute top-0 left-0 w-full h-full bg-gray-500/60 flex justify-center items-center z-50">
       <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md sm:max-w-2xl z-30 relative">
         <h3 className="text-xl font-semibold mb-4 text-center">
-          {isEditing ? "Edit SubAdmin" : "Add New SubAdmin"}
+          {isEditing
+            ? t("subAdmin.form.editTitle")
+            : t("subAdmin.form.addTitle")}
         </h3>
         <form className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-gray-700 font-semibold">Name</label>
+            <label className="block text-gray-700 font-semibold">
+              {t("subAdmin.form.name")}
+            </label>
             <input
               type="text"
               name="name"
-              placeholder="Name"
+              placeholder={t("subAdmin.form.namePlaceholder")}
               value={formData.name}
               onChange={handleInputChange}
               className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2c447f]"
@@ -51,19 +57,18 @@ export const SubAdminForm = ({
           </div>
           <div className="flex flex-col items-center">
             <label className="block text-gray-700 font-semibold">
-              Profile Picture
+              {t("subAdmin.form.image")}
             </label>
             <label
               htmlFor="image"
               className="cursor-pointer bg-[#2c447f] text-white px-4 py-2 rounded-lg shadow-md hover:bg-[#1f3260] transition duration-200"
             >
-              Upload Image
+              {t("subAdmin.form.imagePlaceholder")}
             </label>
             <input
               type="file"
               id="image"
               name="image"
-              placeholder="Image URL"
               accept="image/*"
               onChange={handleFileUpload}
               className="hidden"
@@ -73,7 +78,7 @@ export const SubAdminForm = ({
               <div className="relative mt-4 w-48 h-48 border border-gray-300 rounded-md overflow-hidden">
                 <img
                   src={imagePreview}
-                  alt="Uploaded Image"
+                  alt={t("subAdmin.form.imagePlaceholder")}
                   className="w-full h-full object-cover"
                 />
                 <button
@@ -88,12 +93,12 @@ export const SubAdminForm = ({
           </div>
           <div>
             <label className="block text-gray-700 font-semibold">
-              Mobile No.
+              {t("subAdmin.form.mobile")}
             </label>
             <input
               type="text"
               name="mobile"
-              placeholder="Mobile No."
+              placeholder={t("subAdmin.form.mobilePlaceholder")}
               value={formData.mobile}
               onChange={handleInputChange}
               className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2c447f]"
@@ -101,23 +106,25 @@ export const SubAdminForm = ({
           </div>
           <div>
             <label className="block text-gray-700 font-semibold">
-              Password
+              {t("subAdmin.form.password")}
             </label>
             <input
               type="password"
               name="password"
-              placeholder="Password"
+              placeholder={t("subAdmin.form.passwordPlaceholder")}
               value={formData.password}
               onChange={handleInputChange}
               className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2c447f]"
             />
           </div>
           <div>
-            <label className="block text-gray-700 font-semibold">Address</label>
+            <label className="block text-gray-700 font-semibold">
+              {t("subAdmin.form.address")}
+            </label>
             <input
               type="text"
               name="address"
-              placeholder="Address"
+              placeholder={t("subAdmin.form.addressPlaceholder")}
               value={formData.address}
               onChange={handleInputChange}
               className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2c447f]"
@@ -125,12 +132,12 @@ export const SubAdminForm = ({
           </div>
           <div>
             <label className="block text-gray-700 font-semibold">
-              Branch ID
+              {t("subAdmin.form.branchId")}
             </label>
             <input
               type="text"
               name="branchId"
-              placeholder="Branch ID"
+              placeholder={t("subAdmin.form.branchIdPlaceholder")}
               value={formData.branchId}
               onChange={handleInputChange}
               className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2c447f]"
@@ -143,18 +150,16 @@ export const SubAdminForm = ({
             onClick={() => setIsFormOpen(false)}
             className="flex-1 bg-gray-400 text-white px-4 py-2 rounded-lg hover:bg-gray-500 transition"
           >
-            Cancel
+            {t("subAdmin.form.cancel")}
           </button>
           <button
             onClick={handleSaveSubAdmin}
             className="flex-1 bg-[#2c447f] text-white px-4 py-2 rounded-lg hover:bg-[#1b2d5b] transition"
           >
-            {isEditing ? "Update" : "Save"}
+            {isEditing ? t("subAdmin.form.save") : t("subAdmin.form.save")}
           </button>
         </div>
       </div>
     </div>
   );
 };
-
-

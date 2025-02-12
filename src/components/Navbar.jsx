@@ -1,3 +1,4 @@
+// Navbar.jsx
 import React, { useState } from "react";
 import { Menu, X } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -7,7 +8,6 @@ import logoImage from "../assets/Borgave_Logo_BG_Removed.png";
 import { useTranslation } from "react-i18next";
 import { LanguageToggler } from "./LanguageToggler";
 
-// NavLink component for navigation links
 const NavLink = ({ to, children, className }) => (
   <Link
     to={to}
@@ -17,13 +17,12 @@ const NavLink = ({ to, children, className }) => (
   </Link>
 );
 
-// Main Navbar component
 export const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { t } = useTranslation();
 
   return (
-    <nav className="bg-white shadow-lg relative w-full top-0 z-50 mb-0">
+    <nav className="bg-white shadow-lg fixed w-full top-0 z-50">
       <motion.div className="mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           variants={fadout("up", 0.2)}
@@ -43,15 +42,16 @@ export const Navbar = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center ml-auto space-x-6">
-            {/* Language Toggler for Desktop */}
-            <LanguageToggler isMobile={false} />
+            {/* Language Toggler positioning for desktop */}
+            <div className="px-2">
+              <LanguageToggler isMobile={false} />
+            </div>
 
             <NavLink to="/">{t("navbar.links.home")}</NavLink>
             <NavLink to="/products">{t("navbar.links.products")}</NavLink>
             <NavLink to="/about-us">{t("navbar.links.aboutUs")}</NavLink>
             <NavLink to="/contact-us">{t("navbar.links.contactUs")}</NavLink>
 
-            {/* Login Button */}
             <NavLink
               to="/login"
               className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
@@ -60,10 +60,12 @@ export const Navbar = () => {
             </NavLink>
           </div>
 
-          {/* Mobile menu button */}
-          <div className="md:hidden ml-auto flex items-center space-x-2">
-            {/* Language Toggler for Mobile */}
-            <LanguageToggler isMobile={true} />
+          {/* Mobile menu button and language toggler */}
+          <div className="md:hidden ml-auto flex items-center">
+            {/* Language Toggler positioning for mobile */}
+            <div className="mr-4">
+              <LanguageToggler isMobile={true} />
+            </div>
 
             <button
               onClick={() => setIsOpen(!isOpen)}
@@ -98,7 +100,7 @@ export const Navbar = () => {
 
             <NavLink
               to="/login"
-              className="bg-[#4c76ba] text-white text-center py-2 rounded-md hover:bg-blue-700 transition col-span-2"
+              className="bg-blue-600 text-white text-center py-2 rounded-md hover:bg-blue-700 transition col-span-2"
             >
               {t("navbar.links.login")}
             </NavLink>
@@ -108,5 +110,3 @@ export const Navbar = () => {
     </nav>
   );
 };
-
-export default Navbar;

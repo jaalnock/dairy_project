@@ -14,22 +14,22 @@ export const EditImageSlider = () => {
           id: 1,
           image:
             "https://images.pexels.com/photos/773253/pexels-photo-773253.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-          title: t("premium_dairy_solutions"),
-          description: t("streamline_dairy_operations"),
+          title: t("imageSlider.slides.dairy.title"),
+          description: t("imageSlider.slides.dairy.description"),
         },
         {
           id: 2,
           image:
             "https://images.pexels.com/photos/254178/pexels-photo-254178.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-          title: t("smart_herd_management"),
-          description: t("track_optimize_herd"),
+          title: t("imageSlider.slides.herd.title"),
+          description: t("imageSlider.slides.herd.description"),
         },
         {
           id: 3,
           image:
             "https://images.pexels.com/photos/2064359/pexels-photo-2064359.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-          title: t("quality_assurance"),
-          description: t("maintain_highest_standards"),
+          title: t("imageSlider.slides.quality.title"),
+          description: t("imageSlider.slides.quality.description"),
         },
       ]
     );
@@ -74,7 +74,7 @@ export const EditImageSlider = () => {
 
   const handleSaveSlide = () => {
     if (!formData.image || !formData.title || !formData.description) {
-      alert(t("fill_all_fields"));
+      alert(t("imageSlider.alerts.fillAllFields"));
       return;
     }
 
@@ -93,7 +93,7 @@ export const EditImageSlider = () => {
   };
 
   const handleDelete = (id) => {
-    if (window.confirm(t("confirm_delete"))) {
+    if (window.confirm(t("imageSlider.alerts.confirmDelete"))) {
       setSlides(slides.filter((slide) => slide.id !== id));
     }
   };
@@ -107,7 +107,7 @@ export const EditImageSlider = () => {
     <div className="min-h-screen flex flex-col items-center p-6 relative">
       <div className="w-full max-w-5xl mb-8">
         <h2 className="text-4xl font-bold mb-10 text-center text-[#2c447f]">
-          {t("slide_list")}
+          {t("imageSlider.slideList")}
         </h2>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {slides.map((slide) => (
@@ -137,13 +137,13 @@ export const EditImageSlider = () => {
                     setIsFormOpen(true);
                   }}
                 >
-                  {t("edit")}
+                  {t("imageSlider.buttons.edit")}
                 </button>
                 <button
                   className="flex-1 bg-[#d9534f] text-white text-base px-3 py-2 rounded-md shadow-md hover:bg-[#b52b27] transition"
                   onClick={() => handleDelete(slide.id)}
                 >
-                  {t("delete")}
+                  {t("imageSlider.buttons.delete")}
                 </button>
               </div>
             </div>
@@ -163,19 +163,71 @@ export const EditImageSlider = () => {
         onClick={handleAddSlide}
         className="mt-6 px-6 py-3 bg-[#1b2d5b] text-white font-semibold rounded-lg shadow-md hover:bg-[#0f1e3e] transition"
       >
-        {t("add_slide")}
+        {t("imageSlider.buttons.addSlide")}
       </button>
 
       {isFormOpen && (
-        <div className="absolute top-0 left-0 right-0 bottom-0 z-10 bg-opacity-50 flex items-center justify-center">
-          <SlideForm
-            isEditing={formData.id != null}
-            formData={formData}
-            handleInputChange={handleInputChange}
-            handleFileChange={handleFileChange}
-            handleSaveSlide={handleSaveSlide}
-            setIsFormOpen={setIsFormOpen}
-          />
+        <div className="fixed inset-0 bg-opacity-30 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <h3 className="text-xl font-semibold mb-4">
+              {formData.id
+                ? t("imageSlider.form.editTitle")
+                : t("imageSlider.form.title")}
+            </h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  {t("imageSlider.form.title")}
+                </label>
+                <input
+                  type="text"
+                  name="title"
+                  value={formData.title}
+                  onChange={handleInputChange}
+                  placeholder={t("imageSlider.form.titlePlaceholder")}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  {t("imageSlider.form.description")}
+                </label>
+                <textarea
+                  name="description"
+                  value={formData.description}
+                  onChange={handleInputChange}
+                  placeholder={t("imageSlider.form.descriptionPlaceholder")}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  rows="3"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  {t("imageSlider.form.image")}
+                </label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                />
+              </div>
+              <div className="flex justify-end space-x-3 mt-6">
+                <button
+                  onClick={() => setIsFormOpen(false)}
+                  className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition"
+                >
+                  {t("imageSlider.buttons.cancel")}
+                </button>
+                <button
+                  onClick={handleSaveSlide}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+                >
+                  {t("imageSlider.buttons.save")}
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>

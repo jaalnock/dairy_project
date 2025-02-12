@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
-import {SubAdminCard} from "../components/SubAdminCard";
-import {SubAdminForm }from "../components/SubAdminForm";
+import { SubAdminCard } from "../components/SubAdminCard";
+import { SubAdminForm } from "../components/SubAdminForm";
+import { useTranslation } from "react-i18next";
 
 export const SubAdminList = () => {
+  const { t } = useTranslation();
   const [subAdmins, setSubAdmins] = useState([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -56,7 +58,7 @@ export const SubAdminList = () => {
   };
 
   const handleFileChange = (event) => {
-    const { name, value } = event.target;
+    const { name } = event.target;
     if (name === "image") {
       setFormData({
         ...formData,
@@ -65,7 +67,7 @@ export const SubAdminList = () => {
           : "",
       });
     } else {
-      setFormData({ ...formData, [name]: value });
+      setFormData({ ...formData, [name]: event.target.value });
     }
   };
 
@@ -77,7 +79,7 @@ export const SubAdminList = () => {
       !formData.password ||
       !formData.branchId
     ) {
-      alert("Please fill in all required fields!");
+      alert(t("subAdmin.alerts.fillAllFields"));
       return;
     }
 
@@ -107,7 +109,7 @@ export const SubAdminList = () => {
   return (
     <div className="p-6 relative min-h-screen">
       <h2 className="text-4xl font-bold mb-10 text-center text-[#2c447f]">
-        SubAdmins
+        {t("subAdmin.title")}
       </h2>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -136,7 +138,7 @@ export const SubAdminList = () => {
         }}
         className="fixed bottom-6 right-6 bg-[#2c447f] text-white px-6 py-3 rounded-full shadow-lg hover:bg-[#1b2d5b] transition"
       >
-        + Add SubAdmin
+        {t("subAdmin.buttons.addSubAdmin")}
       </button>
 
       {isFormOpen && (
@@ -154,23 +156,23 @@ export const SubAdminList = () => {
         <div className="fixed inset-0 bg-black/50 flex justify-center items-center px-4">
           <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
             <h3 className="text-xl font-semibold mb-4 text-center">
-              Confirm Deletion
+              {t("subAdmin.alerts.confirmDeleteTitle")}
             </h3>
             <p className="text-center mb-4">
-              Are you sure you want to delete this SubAdmin?
+              {t("subAdmin.alerts.confirmDelete")}
             </p>
             <div className="flex justify-between mt-6 space-x-4">
               <button
                 onClick={() => setShowConfirm(false)}
                 className="flex-1 bg-[#4c76ba] text-white px-4 py-2 rounded-lg hover:bg-gray-500 transition"
               >
-                No
+                {t("subAdmin.alerts.no")}
               </button>
               <button
                 onClick={handleDelete}
                 className="flex-1 bg-[#d9534f] text-white px-4 py-2 rounded-lg hover:bg-red-700 transition"
               >
-                Yes
+                {t("subAdmin.alerts.yes")}
               </button>
             </div>
           </div>
@@ -179,5 +181,3 @@ export const SubAdminList = () => {
     </div>
   );
 };
-
-
