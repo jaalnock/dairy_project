@@ -392,6 +392,32 @@ const resources = {
         },
         noData: "No report data available.",
       },
+      subAdminSidebar: {
+        title: "Borgave Dugdhalay",
+        logo: {
+          alt: "Borgave Dugdhalay Logo",
+        },
+        menu: {
+          transactions: "Transactions",
+          addMilk: "Add Milk",
+          addProduct: "Add Product",
+          loan: "Loan",
+          farmer: "Farmer",
+          report: "Report",
+        },
+        language: {
+          select: "Select Language",
+        },
+        profile: {
+          userImageAlt: "User Profile",
+          name: "John Doe",
+          role: "Sub-Admin",
+        },
+        buttons: {
+          logout: "Logout",
+          close: "Close",
+        },
+      },
     },
   },
   mr: {
@@ -781,6 +807,32 @@ const resources = {
           lossMessage: "असे दिसते की एकूण तोटा आहे. आवश्यक कारवाई करा.",
         },
         noData: "कोणताही अहवाल डेटा उपलब्ध नाही.",
+      },
+      subAdminSidebar: {
+        title: "बोरगावे दुग्धालय",
+        logo: {
+          alt: "बोरगावे दुग्धालय लोगो",
+        },
+        menu: {
+          transactions: "व्यवहार",
+          addMilk: "दूध जोडा",
+          addProduct: "उत्पादन जोडा",
+          loan: "कर्ज",
+          farmer: "शेतकरी",
+          report: "अहवाल",
+        },
+        language: {
+          select: "भाषा निवडा",
+        },
+        profile: {
+          userImageAlt: "वापरकर्ता प्रोफाइल",
+          name: "जॉन डो",
+          role: "उप-प्रशासक",
+        },
+        buttons: {
+          logout: "बाहेर पडा",
+          close: "बंद करा",
+        },
       },
     },
   },

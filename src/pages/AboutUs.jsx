@@ -60,7 +60,7 @@ export function AboutUs() {
       {/* Hero Section */}
       <div className="relative h-[60vh] flex items-center justify-center overflow-hidden">
         <img
-          src="https://images.pexels.com/photos/30394404/pexels-photo-30394404/free-photo-of-scenic-farm-landscape-with-mountain-views.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
+          src="../assests/AboutUs.jpg"
           alt={t("aboutUs.hero.imageAlt", {
             defaultValue: "Green dairy farm landscape",
           })}

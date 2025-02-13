@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
 import { useTranslation } from "react-i18next";
+import axios from "axios";
 
 export const Login = () => {
   const { t } = useTranslation();
@@ -11,21 +12,55 @@ export const Login = () => {
   const [error, setError] = useState("");
 
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { role: savedRole, login } = useAuth();
 
-  const handleSubmit = (event) => {
+  useEffect(() => {
+    if (savedRole === "Admin") {
+      navigate("/admin");
+    } else if (savedRole === "SubAdmin") {
+      navigate("/subadmin");
+    }
+  }, [savedRole, navigate]);
+
+  const handleSubmit = async (event) => {
     event.preventDefault();
+    setError("");
 
     if (!role || !mobile || !password) {
       setError(t("login.errors.fillAllFields"));
       return;
     }
 
-    // Mobile Number Validation (10-digit number only)
     const mobileRegex = /^[0-9]{10}$/;
     if (!mobileRegex.test(mobile)) {
       setError(t("login.errors.invalidMobile"));
       return;
+    }
+
+    try {
+      const response = await axios.post(
+        "http://localhost:8000/api/v1/admin/login",
+        { adminMobileNumber: mobile, adminPassword: password },
+        { withCredentials: true }
+      );
+
+      console.log("Login successful:", response);
+
+      login(role);
+
+      // Redirect based on role
+      if (role === "Admin") {
+        navigate("/admin");
+      } else if (role === "SubAdmin") {
+        navigate("/subadmin");
+      }
+    } catch (err) {
+      if (err?.response?.status == 404) {
+        setError("Invalid Credentials");
+      }
+      if (err?.response?.status == 500) {
+        setError("Internal Server Error");
+      }
     }
 
     // Password Validation: Min 8 characters, at least one special character
@@ -34,17 +69,6 @@ export const Login = () => {
     //   setError(t("login.errors.invalidPassword"));
     //   return;
     // }
-
-    console.log("Login successful:", { role, mobile, password });
-
-    login(role);
-
-    // Redirect based on role
-    if (role === "Admin") {
-      navigate("/admin");
-    } else if (role === "SubAdmin") {
-      navigate("/subadmin");
-    }
 
     // Clear form fields
     setRole("");
@@ -68,7 +92,6 @@ export const Login = () => {
           </p>
         )}
 
-        {/* Role Selection */}
         <div className="mb-6">
           <label
             htmlFor="role"
@@ -89,7 +112,6 @@ export const Login = () => {
           </select>
         </div>
 
-        {/* Mobile Number Input */}
         <div className="mb-6">
           <label
             htmlFor="mobile"
@@ -108,7 +130,6 @@ export const Login = () => {
           />
         </div>
 
-        {/* Password Input */}
         <div className="mb-6">
           <label
             htmlFor="password"
@@ -127,7 +148,6 @@ export const Login = () => {
           />
         </div>
 
-        {/* Submit Button */}
         <button
           type="submit"
           className="w-full bg-[#4c76ba] text-white py-3 rounded-lg shadow-md hover:bg-[#1b2d5b] transition duration-300"
