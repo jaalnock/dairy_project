@@ -4,12 +4,17 @@ import { useTranslation } from "react-i18next";
 import logoImage from "../assets/Borgave_Logo_BG_Removed.png";
 import userProfile from "../assets/user_profile.png";
 import { LanguageToggler } from "./LanguageToggler";
+<<<<<<< HEAD
 import { useAuth } from "../context/AuthContext";
 import axios from "axios";
+=======
+import { useAuth } from "../context/AuthContext.jsx"; 
+>>>>>>> dd0774bde45adaf6ea5e5f4e6130934376cc5805
 
 export const AdminSidebar = ({ isOpen, setSidebarOpen }) => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { logout } = useAuth();
   const [showReports, setShowReports] = useState(false);
   const { t } = useTranslation();
   const { logout } = useAuth();
@@ -141,7 +146,7 @@ export const AdminSidebar = ({ isOpen, setSidebarOpen }) => {
           </div>
 
           <button
-            onClick={handleLogout}
+            onClick={logout}
             className="w-full px-4 py-2 mt-2 bg-red-600 text-white font-semibold rounded-lg shadow-md hover:bg-red-700 transition duration-200"
           >
             {t("adminSidebar.buttons.logout")}
