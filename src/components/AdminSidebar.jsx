@@ -97,7 +97,7 @@ export const AdminSidebar = ({ isOpen, setSidebarOpen }) => {
           </ul>
         </div>
 
-        <div className="absolute bottom-44 left-4 w-[85%] bg-gradient-to-br from-[#d6e4fc] to-[#b3c7f7] p-4 rounded-xl shadow-lg">
+        <div className="absolute md:bottom-38 bottom-42 left-4 w-[85%] bg-gradient-to-br from-[#d6e4fc] to-[#b3c7f7] p-4 rounded-xl shadow-lg">
           <div className="flex flex-col items-center">
             <h3 className="text-base font-semibold text-gray-900 mb-3">
               {t("adminSidebar.language.select")}
@@ -106,7 +106,7 @@ export const AdminSidebar = ({ isOpen, setSidebarOpen }) => {
           </div>
         </div>
 
-        <div className="absolute bottom-4 left-4 flex flex-col items-center space-y-4 bg-gradient-to-br from-[#d6e4fc] to-[#b3c7f7] p-4 rounded-xl shadow-lg w-[85%]">
+        <div className="absolute bottom-4 left-4 flex flex-col items-center space-y-0 bg-gradient-to-br from-[#d6e4fc] to-[#b3c7f7] p-3 rounded-xl shadow-lg w-[85%]">
           <div className="flex items-center space-x-4">
             <img
               src={userProfile}

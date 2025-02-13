@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
 import { useTranslation } from "react-i18next";
@@ -12,7 +12,15 @@ export const Login = () => {
   const [error, setError] = useState("");
 
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { role: savedRole, login } = useAuth();
+
+  useEffect(() => {
+    if (savedRole === "Admin") {
+      navigate("/admin");
+    } else if (savedRole === "SubAdmin") {
+      navigate("/subadmin");
+    }
+  }, [savedRole, navigate]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -23,7 +31,6 @@ export const Login = () => {
       return;
     }
 
-    // Mobile Number Validation (10-digit number only)
     const mobileRegex = /^[0-9]{10}$/;
     if (!mobileRegex.test(mobile)) {
       setError(t("login.errors.invalidMobile"));
@@ -80,7 +87,6 @@ export const Login = () => {
           </p>
         )}
 
-        {/* Role Selection */}
         <div className="mb-6">
           <label
             htmlFor="role"
@@ -101,7 +107,6 @@ export const Login = () => {
           </select>
         </div>
 
-        {/* Mobile Number Input */}
         <div className="mb-6">
           <label
             htmlFor="mobile"
@@ -120,7 +125,6 @@ export const Login = () => {
           />
         </div>
 
-        {/* Password Input */}
         <div className="mb-6">
           <label
             htmlFor="password"
@@ -139,7 +143,6 @@ export const Login = () => {
           />
         </div>
 
-        {/* Submit Button */}
         <button
           type="submit"
           className="w-full bg-[#4c76ba] text-white py-3 rounded-lg shadow-md hover:bg-[#1b2d5b] transition duration-300"
