@@ -44,7 +44,7 @@ export const Login = () => {
         { withCredentials: true }
       );
 
-      console.log("Login successful:", { role, mobile, password });
+      console.log("Login successful:", response);
 
       login(role);
 
@@ -55,7 +55,12 @@ export const Login = () => {
         navigate("/subadmin");
       }
     } catch (err) {
-      setError(err.response?.data?.message);
+      if (err?.response?.status == 404) {
+        setError("Invalid Credentials");
+      }
+      if (err?.response?.status == 500) {
+        setError("Internal Server Error");
+      }
     }
 
     // Password Validation: Min 8 characters, at least one special character

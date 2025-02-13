@@ -4,13 +4,15 @@ import { useTranslation } from "react-i18next";
 import logoImage from "../assets/Borgave_Logo_BG_Removed.png";
 import userProfile from "../assets/user_profile.png";
 import { LanguageToggler } from "./LanguageToggler";
+import { useAuth } from "../context/AuthContext";
+import axios from "axios";
 
 export const AdminSidebar = ({ isOpen, setSidebarOpen }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const [showReports, setShowReports] = useState(false);
   const { t } = useTranslation();
-
+  const { logout } = useAuth();
   useEffect(() => {
     if (!location.pathname.includes("/admin/reports")) {
       setShowReports(false);
@@ -22,8 +24,23 @@ export const AdminSidebar = ({ isOpen, setSidebarOpen }) => {
     setShowReports(false);
   };
 
-  const handleLogout = () => {
-    navigate("/login");
+  const handleLogout = async () => {
+    // localStorage.removeItem("role");
+    logout();
+    try {
+      const response = await axios.post(
+        "http://localhost:8000/api/v1/admin/logout",
+        {},
+        {
+          withCredentials: true,
+        }
+      );
+      console.log(response);
+      console.log("Logout successful");
+      navigate("/login");
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   return (
