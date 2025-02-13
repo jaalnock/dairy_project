@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
 import { useTranslation } from "react-i18next";
+import axios from "axios";
 
 export const Login = () => {
   const { t } = useTranslation();
@@ -13,8 +14,9 @@ export const Login = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
+    setError("");
 
     if (!role || !mobile || !password) {
       setError(t("login.errors.fillAllFields"));
@@ -28,23 +30,33 @@ export const Login = () => {
       return;
     }
 
+    try {
+      const response = await axios.post(
+        "http://localhost:8000/api/v1/admin/login",
+        { adminMobileNumber: mobile, adminPassword: password },
+        { withCredentials: true }
+      );
+
+      console.log("Login successful:", { role, mobile, password });
+
+      login(role);
+
+      // Redirect based on role
+      if (role === "Admin") {
+        navigate("/admin");
+      } else if (role === "SubAdmin") {
+        navigate("/subadmin");
+      }
+    } catch (err) {
+      setError(err.response?.data?.message);
+    }
+
     // Password Validation: Min 8 characters, at least one special character
     // const passwordRegex = /^(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
     // if (!passwordRegex.test(password)) {
     //   setError(t("login.errors.invalidPassword"));
     //   return;
     // }
-
-    console.log("Login successful:", { role, mobile, password });
-
-    login(role);
-
-    // Redirect based on role
-    if (role === "Admin") {
-      navigate("/admin");
-    } else if (role === "SubAdmin") {
-      navigate("/subadmin");
-    }
 
     // Clear form fields
     setRole("");
