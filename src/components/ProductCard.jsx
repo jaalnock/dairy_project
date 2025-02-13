@@ -1,13 +1,21 @@
-import React from "react";
+import React, { useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { CartContext } from "../context/CartContext";
 
 export const ProductCard = ({ product }) => {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const { addToCart } = useContext(CartContext);
 
   const handleClick = () => {
     navigate(`/products/${product.id}`);
+  };
+
+  const handleAddToCart = (e) => {
+    // Prevent the event from bubbling up if needed
+    e.stopPropagation();
+    addToCart(product);
   };
 
   return (
@@ -43,13 +51,24 @@ export const ProductCard = ({ product }) => {
           </span>
         </div>
 
-        {/* View Details Button */}
-        <button
-          onClick={handleClick}
-          className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-        >
-          {t("products.productCard.viewDetails")}
-        </button>
+        {/* Buttons */}
+        <div className="flex space-x-2">
+          {/* View Details Button */}
+          <button
+            onClick={handleClick}
+            className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+          >
+            {t("products.productCard.viewDetails")}
+          </button>
+
+          {/* Add to Cart Button */}
+          <button
+            onClick={handleAddToCart}
+            className="w-full bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+          >
+            Add to cart
+          </button>
+        </div>
       </div>
     </div>
   );

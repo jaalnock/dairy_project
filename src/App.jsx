@@ -1,3 +1,4 @@
+// App.jsx
 import { Routes, Route } from "react-router-dom";
 import "./App.css";
 import { NotFoundPage } from "./pages/NotFoundPage";
@@ -19,21 +20,24 @@ import {
 import { SubAdminProductsList } from "./pages/SubAdminProductsList.jsx";
 import TransactionList from "./pages/TransactionList.jsx";
 import { SubAdminReport } from "./pages/SubAdminReport.jsx";
-import { ProtectedRoute } from "./components/ProtectedRoute";
 import MilkList from "./pages/MilkList.jsx";
 import LoanList from "./pages/LoanList.jsx";
 import FarmerList from "./pages/FarmerList.jsx";
+import Cart from "./pages/Cart.jsx"; // import the new Cart page
+import { CartProvider } from "./context/CartContext"; // import CartProvider
+import { ProtectedRoute } from "./components/ProtectedRoute"; // make sure this is imported
 
 function App() {
   return (
-    <>
-      {/* <-- Global language toggle switcher */}
+    <CartProvider>
       <Routes>
+        {/* Customer routes */}
         <Route path="/" element={<CustomerLayout />}>
           <Route index element={<Home />} />
           <Route path="products" element={<ProductList />} />
           <Route path="about-us" element={<AboutUs />} />
           <Route path="contact-us" element={<ContactUs />} />
+          <Route path="cart" element={<Cart />} />
         </Route>
 
         <Route path="products/:id" element={<ProductDetails />} />
@@ -65,7 +69,7 @@ function App() {
 
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
-    </>
+    </CartProvider>
   );
 }
 
