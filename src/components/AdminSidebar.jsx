@@ -4,12 +4,8 @@ import { useTranslation } from "react-i18next";
 import logoImage from "../assets/Borgave_Logo_BG_Removed.png";
 import userProfile from "../assets/user_profile.png";
 import { LanguageToggler } from "./LanguageToggler";
-<<<<<<< HEAD
 import { useAuth } from "../context/AuthContext";
 import axios from "axios";
-=======
-import { useAuth } from "../context/AuthContext.jsx"; 
->>>>>>> dd0774bde45adaf6ea5e5f4e6130934376cc5805
 
 export const AdminSidebar = ({ isOpen, setSidebarOpen }) => {
   const location = useLocation();
@@ -17,7 +13,6 @@ export const AdminSidebar = ({ isOpen, setSidebarOpen }) => {
   const { logout } = useAuth();
   const [showReports, setShowReports] = useState(false);
   const { t } = useTranslation();
-  const { logout } = useAuth();
   useEffect(() => {
     if (!location.pathname.includes("/admin/reports")) {
       setShowReports(false);
