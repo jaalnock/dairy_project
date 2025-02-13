@@ -1,12 +1,13 @@
 // Navbar.jsx
-import React, { useState } from "react";
-import { Menu, X } from "lucide-react";
+import React, { useState, useContext } from "react";
+import { Menu, X, ShoppingCart } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { fadout } from "./variants2";
 import logoImage from "../assets/Borgave_Logo_BG_Removed.png";
 import { useTranslation } from "react-i18next";
 import { LanguageToggler } from "./LanguageToggler";
+import { CartContext } from "../context/CartContext"; // import CartContext
 
 const NavLink = ({ to, children, className }) => (
   <Link
@@ -20,6 +21,8 @@ const NavLink = ({ to, children, className }) => (
 export const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { t } = useTranslation();
+  const { cartItems } = useContext(CartContext);
+  const totalItems = cartItems.reduce((acc, item) => acc + item.quantity, 0);
 
   return (
     <nav className="bg-white shadow-lg fixed w-full top-0 z-50">
@@ -51,7 +54,14 @@ export const Navbar = () => {
             <NavLink to="/products">{t("navbar.links.products")}</NavLink>
             <NavLink to="/about-us">{t("navbar.links.aboutUs")}</NavLink>
             <NavLink to="/contact-us">{t("navbar.links.contactUs")}</NavLink>
-
+            <NavLink to="/cart" className="relative">
+              <ShoppingCart className="inline-block h-6 w-6" />
+              {totalItems > 0 && (
+                <span className="absolute -top-2 -right-2 bg-red-500 rounded-full text-white w-5 h-5 flex items-center justify-center text-xs">
+                  {totalItems}
+                </span>
+              )}
+            </NavLink>
             <NavLink
               to="/login"
               className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
@@ -97,7 +107,14 @@ export const Navbar = () => {
             <NavLink to="/contact-us" className="text-center">
               {t("navbar.links.contactUs")}
             </NavLink>
-
+            <NavLink to="/cart" className="text-center relative">
+              <ShoppingCart className="inline-block h-6 w-6" />
+              {totalItems > 0 && (
+                <span className="absolute -top-2 -right-2 bg-red-500 rounded-full text-white w-5 h-5 flex items-center justify-center text-xs">
+                  {totalItems}
+                </span>
+              )}
+            </NavLink>
             <NavLink
               to="/login"
               className="bg-blue-600 text-white text-center py-2 rounded-md hover:bg-blue-700 transition col-span-2"

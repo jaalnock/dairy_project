@@ -1,13 +1,15 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { products } from "../config";
+import { CartContext } from "../context/CartContext";
 
 export const ProductDetails = () => {
   const { t } = useTranslation();
   const { id } = useParams();
   const [product, setProduct] = useState(null);
   const navigate = useNavigate();
+  const { addToCart } = useContext(CartContext);
 
   useEffect(() => {
     const fetchedProduct = products.find(
@@ -20,14 +22,15 @@ export const ProductDetails = () => {
     navigate("/products");
   };
 
-  const handleInquireClick = () => {
-    navigate("/contact-us");
+  const handleAddToCart = () => {
+    addToCart(product);
+    navigate("/cart");
   };
 
   if (!product) return <div>{t("products.productDetails.loading")}</div>;
 
   return (
-    <div className="p-6 bg-white rounded-lg shadow-lg max-w-4xl mx-auto my-12">
+    <div className="p-6 bg-white rounded-lg shadow-lg max-w-4xl mx-auto my-12 relative">
       {/* Back Button */}
       <button
         onClick={handleBackClick}
@@ -105,18 +108,18 @@ export const ProductDetails = () => {
               : t("products.productDetails.outOfStock")}
           </p>
 
-          {/* Inquire Us Button */}
+          {/* Add to Cart Button */}
           <div className="mt-6">
             <button
-              onClick={handleInquireClick}
+              onClick={handleAddToCart}
               disabled={!product.inStock}
               className={`${
                 product.inStock
-                  ? "bg-blue-600 hover:bg-blue-700"
+                  ? "bg-green-600 hover:bg-green-700"
                   : "bg-gray-400 cursor-not-allowed opacity-50"
               } text-white px-6 py-3 rounded-full font-semibold transition-all duration-300`}
             >
-              {t("products.productDetails.inquireUs")}
+              AddToCart
             </button>
           </div>
         </div>
