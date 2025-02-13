@@ -35,15 +35,12 @@ export const Login = () => {
       return;
     }
 
-    console.log("Login successful:", { role, mobile, password });
+    // console.log("Login successful:", { role, mobile, password });
 
-    login(role);
+    login(role); // Update role in context
 
-    if (role === "Admin") {
-      navigate("/admin");
-    } else if (role === "SubAdmin") {
-      navigate("/subadmin");
-    }
+    // Wait for state update before navigation
+    navigate(role === "Admin" ? "/admin" : "/subadmin");
 
     setRole("");
     setMobile("");

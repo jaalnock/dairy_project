@@ -4,10 +4,12 @@ import logoImage from "../assets/Borgave_Logo_BG_Removed.png";
 import userProfile from "../assets/user_profile.png";
 import { useTranslation } from "react-i18next";
 import { LanguageToggler } from "./LanguageToggler";
+import { useAuth } from "../context/AuthContext.jsx"; // Import useAuth
 
 export const SubAdminSidebar = ({ isOpen, setSidebarOpen }) => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { logout } = useAuth(); // Get logout function from AuthContext
   const [showReports, setShowReports] = useState(false);
   const { t } = useTranslation();
 
@@ -16,10 +18,6 @@ export const SubAdminSidebar = ({ isOpen, setSidebarOpen }) => {
       setShowReports(false);
     }
   }, [location]);
-
-  const handleLogout = () => {
-    navigate("/login");
-  };
 
   const menuItems = [
     { name: t("subAdminSidebar.menu.transactions"), path: "/subadmin" },
@@ -95,7 +93,7 @@ export const SubAdminSidebar = ({ isOpen, setSidebarOpen }) => {
           </div>
 
           <button
-            onClick={handleLogout}
+            onClick={logout}
             className="w-full px-4 py-2 mt-2 bg-red-600 text-white font-semibold rounded-lg shadow-md hover:bg-red-700 transition duration-200"
           >
             {t("subAdminSidebar.buttons.logout")}
