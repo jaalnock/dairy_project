@@ -2,22 +2,15 @@ import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { BranchCard } from "../components/BranchCard";
 import { BranchForm } from "../components/BranchForm";
+import axios from "axios";
 
 export const BranchList = () => {
   const { t } = useTranslation();
+
+  // State for branches, modal visibility, and deletion/editing helpers
   const [branches, setBranches] = useState([]);
   const [showConfirm, setShowConfirm] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
-
-  useEffect(() => {
-    const storedBranches = JSON.parse(localStorage.getItem("branches")) || [];
-    setBranches(storedBranches);
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem("branches", JSON.stringify(branches));
-  }, [branches]);
-
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editId, setEditId] = useState(null);
@@ -27,53 +20,128 @@ export const BranchList = () => {
     villageCity: "",
   });
 
-  const handleEdit = (id) => {
-    const branchToEdit = branches.find((branch) => branch.branchId === id);
-    setFormData(branchToEdit);
-    setIsEditing(true);
-    setEditId(id);
-    setIsFormOpen(true);
+  // Fetch branches from the backend on component mount
+  useEffect(() => {
+    const fetchBranches = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:8000/api/v1/branch/get-branches",
+          { withCredentials: true }
+        );
+        // Assume your API returns branches under response.data.data
+        setBranches(response.data.data);
+      } catch (error) {
+        console.error("Error fetching branches:", error);
+      }
+    };
+    fetchBranches();
+  }, []);
+
+  // Handle input changes for the branch form
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  // Open the form in edit mode for a given branch id
+  const handleEdit = (id) => {
+    const branchToEdit = branches.find((branch) => branch.branchId === id);
+    if (branchToEdit) {
+      // Map your backend fields accordingly (e.g., branchAddress vs. address)
+      setFormData({
+        branchId: branchToEdit.branchId,
+        address: branchToEdit.branchAddress || branchToEdit.address,
+        villageCity: branchToEdit.location || branchToEdit.villageCity,
+      });
+      setIsEditing(true);
+      setEditId(id);
+      setIsFormOpen(true);
+    }
+  };
+
+  // Confirm delete action for a branch
   const confirmDelete = (id) => {
     setDeleteId(id);
     setShowConfirm(true);
   };
 
-  const handleDelete = () => {
-    const updatedBranches = branches.filter(
-      (branch) => branch.branchId !== deleteId
-    );
-    setBranches(updatedBranches);
-    setShowConfirm(false);
-    setDeleteId(null);
+  // Handle deletion of a branch and update state immediately
+  const handleDelete = async () => {
+    try {
+      await axios.delete(
+        `http://localhost:8000/api/v1/branch/delete-branch/${deleteId}`,
+        { withCredentials: true }
+      );
+      setBranches((prevBranches) =>
+        prevBranches.filter((branch) => branch.branchId !== deleteId)
+      );
+    } catch (error) {
+      console.error("Error deleting branch:", error);
+    } finally {
+      setShowConfirm(false);
+      setDeleteId(null);
+    }
   };
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-  };
-
-  const handleSaveBranch = () => {
+  // Handle saving a branch (both create and update)
+  const handleSaveBranch = async () => {
+    // Validate fields
     if (!formData.branchId || !formData.address || !formData.villageCity) {
       alert(t("branch.alerts.fillAllFields"));
       return;
     }
 
-    if (isEditing) {
-      const updatedBranches = branches.map((branch) =>
-        branch.branchId === editId ? { ...branch, ...formData } : branch
-      );
-      setBranches(updatedBranches);
-    } else {
-      const newBranch = { ...formData };
-      setBranches([...branches, newBranch]);
+    try {
+      if (isEditing) {
+        // Update existing branch using PATCH (or PUT if you prefer)
+        const response = await axios.patch(
+          `http://localhost:8000/api/v1/branch/update-branch/${editId}`,
+          {
+            branchId: formData.branchId,
+            branchAddress: formData.address,
+            location: formData.villageCity,
+          },
+          { withCredentials: true }
+        );
+        if (response.status === 200) {
+          // Update the branch in state
+          setBranches((prevBranches) =>
+            prevBranches.map((branch) =>
+              branch.branchId === editId
+                ? {
+                    ...branch,
+                    branchId: formData.branchId,
+                    branchAddress: formData.address,
+                    location: formData.villageCity,
+                  }
+                : branch
+            )
+          );
+        }
+      } else {
+        // Create new branch
+        const response = await axios.post(
+          "http://localhost:8000/api/v1/branch/create-branch",
+          {
+            branchId: formData.branchId,
+            branchAddress: formData.address,
+            location: formData.villageCity,
+          },
+          { withCredentials: true }
+        );
+        // Check for success status (200 or 201) and update state
+        if (response.status === 200 || response.status === 201) {
+          setBranches((prevBranches) => [...prevBranches, response.data.data]);
+        }
+      }
+      // Reset form state after saving
+      setIsFormOpen(false);
+      setIsEditing(false);
+      setEditId(null);
+      setFormData({ branchId: "", address: "", villageCity: "" });
+    } catch (error) {
+      console.error("Error saving branch:", error);
     }
-
-    setIsFormOpen(false);
-    setIsEditing(false);
-    setEditId(null);
-    setFormData({ branchId: "", address: "", villageCity: "" });
   };
 
   return (
@@ -87,7 +155,7 @@ export const BranchList = () => {
           <BranchCard
             key={branch.branchId}
             branch={branch}
-            onEdit={handleEdit}
+            onEdit={() => handleEdit(branch.branchId)}
             onDelete={() => confirmDelete(branch.branchId)}
           />
         ))}
@@ -105,7 +173,7 @@ export const BranchList = () => {
         {t("branch.buttons.addBranch")}
       </button>
 
-      {/* Call BranchForm when needed */}
+      {/* Branch Form Modal */}
       {isFormOpen && (
         <BranchForm
           isEditing={isEditing}
@@ -116,7 +184,7 @@ export const BranchList = () => {
         />
       )}
 
-      {/* Confirmation Modal */}
+      {/* Delete Confirmation Modal */}
       {showConfirm && (
         <div className="fixed inset-0 bg-black/50 flex justify-center items-center px-4">
           <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">

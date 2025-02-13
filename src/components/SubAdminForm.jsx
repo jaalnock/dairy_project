@@ -13,24 +13,42 @@ export const SubAdminForm = ({
   const { t } = useTranslation();
   const [imagePreview, setImagePreview] = useState(null);
 
+  // Update preview whenever formData.image changes.
   useEffect(() => {
     if (formData.image) {
-      setImagePreview(formData.image);
+      // If the image is a File object, create an object URL for preview.
+      if (typeof formData.image === "object") {
+        const previewUrl = URL.createObjectURL(formData.image);
+        setImagePreview(previewUrl);
+
+        // Revoke object URL on cleanup to avoid memory leaks.
+        return () => URL.revokeObjectURL(previewUrl);
+      } else if (typeof formData.image === "string") {
+        // If it's already a URL (from backend, for example), use it.
+        setImagePreview(formData.image);
+      }
+    } else {
+      setImagePreview(null);
     }
   }, [formData.image]);
 
+  // Handle file input changes. Generate a preview and pass the file to parent.
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
     if (file) {
-      const imageUrl = URL.createObjectURL(file);
-      setImagePreview(imageUrl);
+      // Generate preview URL.
+      const previewUrl = URL.createObjectURL(file);
+      setImagePreview(previewUrl);
+      // Let the parent update the formData with the file.
       handleFileChange(event);
     }
   };
 
+  // Remove the selected image.
   const handleRemoveImage = () => {
     setImagePreview(null);
-    handleFileChange({ target: { name: "image", value: "" } });
+    // Trigger parent's file change handler to set the image field to null.
+    handleFileChange({ target: { name: "image", files: [] } });
   };
 
   return (
@@ -156,7 +174,7 @@ export const SubAdminForm = ({
             onClick={handleSaveSubAdmin}
             className="flex-1 bg-[#2c447f] text-white px-4 py-2 rounded-lg hover:bg-[#1b2d5b] transition"
           >
-            {isEditing ? t("subAdmin.form.save") : t("subAdmin.form.save")}
+            {t("subAdmin.form.save")}
           </button>
         </div>
       </div>

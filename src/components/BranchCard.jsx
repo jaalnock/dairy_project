@@ -11,11 +11,12 @@ export const BranchCard = ({ branch, onEdit, onDelete }) => {
           {t("branch.card.branchIdLabel")}: {branch.branchId}
         </h2>
         <p className="text-gray-700 text-lg">
-          <strong>{t("branch.card.addressLabel")}:</strong> {branch.address}
+          <strong>{t("branch.card.addressLabel")}:</strong>{" "}
+          {branch.branchAddress}
         </p>
         <p className="text-gray-700 text-lg">
           <strong>{t("branch.card.villageCityLabel")}:</strong>{" "}
-          {branch.villageCity}
+          {branch.location}
         </p>
       </div>
 

@@ -21,7 +21,7 @@ export const SubAdminCard = ({ subAdmin, onEdit, onDelete }) => {
     <div className="bg-gradient-to-br from-[#e8f0ff] to-[#cfd9ff] shadow-2xl rounded-2xl overflow-hidden flex flex-col items-center p-6 space-y-6 border border-gray-300 text-center transition-transform transform hover:scale-105 hover:shadow-3xl">
       <div className="w-24 h-24 flex-shrink-0 overflow-hidden rounded-full border-4 border-blue-500 hover:shadow-lg transition">
         <img
-          src={subAdmin.image}
+          src={subAdmin.profilePicture}
           alt={t("subAdmin.card.imageAlt", { name: subAdmin.name })}
           className="w-full h-full object-cover"
         />
@@ -32,7 +32,7 @@ export const SubAdminCard = ({ subAdmin, onEdit, onDelete }) => {
       <div className="w-full text-left space-y-3">
         <p className="text-lg text-gray-700">
           <span className="font-semibold">{t("subAdmin.card.mobile")}:</span>{" "}
-          {subAdmin.mobile}
+          {subAdmin.mobileNumber}
         </p>
         <div className="relative flex items-center text-lg text-gray-700">
           <span className="font-semibold">{t("subAdmin.card.password")}:</span>

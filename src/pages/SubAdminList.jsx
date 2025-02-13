@@ -2,9 +2,12 @@ import React, { useState, useEffect } from "react";
 import { SubAdminCard } from "../components/SubAdminCard";
 import { SubAdminForm } from "../components/SubAdminForm";
 import { useTranslation } from "react-i18next";
+import axios from "axios";
 
 export const SubAdminList = () => {
   const { t } = useTranslation();
+
+  // State for sub-admins and modal helpers
   const [subAdmins, setSubAdmins] = useState([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -12,69 +15,99 @@ export const SubAdminList = () => {
   const [showConfirm, setShowConfirm] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
 
+  // Form state (image is kept as a file)
   const [formData, setFormData] = useState({
     name: "",
-    image: "",
+    image: null, // file object will be stored here
     mobile: "",
     password: "",
     address: "",
     branchId: "",
   });
 
+  // Fetch sub-admins from the backend when component mounts
   useEffect(() => {
-    const storedSubAdmins = JSON.parse(localStorage.getItem("subAdmins")) || [];
-    setSubAdmins(storedSubAdmins);
+    const fetchSubAdmins = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:8000/api/v1/subadmin/get-all-subadmins",
+          { withCredentials: true }
+        );
+        console.log(response.data.data);
+
+        // Assume API returns an object with the sub-admins array in data.data
+        setSubAdmins(response.data.data);
+      } catch (error) {
+        console.error("Error fetching sub-admins:", error);
+      }
+    };
+    fetchSubAdmins();
   }, []);
 
-  useEffect(() => {
-    localStorage.setItem("subAdmins", JSON.stringify(subAdmins));
-  }, [subAdmins]);
-
+  // Handle opening edit mode
   const handleEdit = (id) => {
     const subAdminToEdit = subAdmins.find((subAdmin) => subAdmin.id === id);
-    setFormData(subAdminToEdit);
-    setIsEditing(true);
-    setEditId(id);
-    setIsFormOpen(true);
+    if (subAdminToEdit) {
+      // For security reasons, we don't prefill the password.
+      // Also, if you already have an image URL from the backend,
+      // you might choose to display it, but here we let the user pick a new file if needed.
+      setFormData({
+        name: subAdminToEdit.name,
+        image: null,
+        mobile: subAdminToEdit.mobile,
+        password: "",
+        address: subAdminToEdit.address,
+        branchId: subAdminToEdit.branchId,
+      });
+      setIsEditing(true);
+      setEditId(id);
+      setIsFormOpen(true);
+    }
   };
 
+  // Confirm deletion
   const confirmDelete = (id) => {
     setDeleteId(id);
     setShowConfirm(true);
   };
 
-  const handleDelete = () => {
-    const updatedSubAdmins = subAdmins.filter(
-      (subAdmin) => subAdmin.id !== deleteId
-    );
-    setSubAdmins(updatedSubAdmins);
-    setShowConfirm(false);
-    setDeleteId(null);
-  };
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-  };
-
-  const handleFileChange = (event) => {
-    const { name } = event.target;
-    if (name === "image") {
-      setFormData({
-        ...formData,
-        image: event.target.files[0]
-          ? URL.createObjectURL(event.target.files[0])
-          : "",
-      });
-    } else {
-      setFormData({ ...formData, [name]: event.target.value });
+  // Handle deletion API call
+  const handleDelete = async () => {
+    try {
+      await axios.delete(
+        `http://localhost:8000/api/v1/subadmin/delete-subadmin/${deleteId}`,
+        { withCredentials: true }
+      );
+      setSubAdmins((prev) =>
+        prev.filter((subAdmin) => subAdmin.id !== deleteId)
+      );
+    } catch (error) {
+      console.error("Error deleting sub-admin:", error);
+    } finally {
+      setShowConfirm(false);
+      setDeleteId(null);
     }
   };
 
-  const handleSaveSubAdmin = () => {
+  // Handle input field changes (for text fields)
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // Handle file input changes; store the file (not a URL)
+  const handleFileChange = (e) => {
+    const { name, files } = e.target;
+    if (files && files.length > 0) {
+      setFormData((prev) => ({ ...prev, [name]: files[0] }));
+    }
+  };
+
+  // Handle saving (create or update) a sub-admin via API
+  const handleSaveSubAdmin = async () => {
+    // Validate required fields
     if (
       !formData.name ||
-      !formData.image ||
       !formData.mobile ||
       !formData.password ||
       !formData.branchId
@@ -83,27 +116,74 @@ export const SubAdminList = () => {
       return;
     }
 
-    if (isEditing) {
-      const updatedSubAdmins = subAdmins.map((subAdmin) =>
-        subAdmin.id === editId ? { ...subAdmin, ...formData } : subAdmin
-      );
-      setSubAdmins(updatedSubAdmins);
-    } else {
-      const newSubAdmin = { id: subAdmins.length + 1, ...formData };
-      setSubAdmins([...subAdmins, newSubAdmin]);
-    }
+    try {
+      if (isEditing) {
+        // Update existing sub-admin using FormData to include file
+        const dataUpdate = new FormData();
+        dataUpdate.append("subAdminName", formData.name);
+        if (formData.image) {
+          dataUpdate.append("image", formData.image);
+        }
+        dataUpdate.append("mobileNumber", formData.mobile);
+        dataUpdate.append("subAdminPassword", formData.password);
+        dataUpdate.append("address", formData.address);
+        dataUpdate.append("branchId", formData.branchId);
 
-    setIsFormOpen(false);
-    setIsEditing(false);
-    setEditId(null);
-    setFormData({
-      name: "",
-      image: "",
-      mobile: "",
-      password: "",
-      address: "",
-      branchId: "",
-    });
+        const response = await axios.patch(
+          `http://localhost:8000/api/v1/subadmin/update-subadmin/${editId}`,
+          dataUpdate,
+          {
+            withCredentials: true,
+            headers: { "Content-Type": "multipart/form-data" },
+          }
+        );
+        if (response.status === 200) {
+          // Update state with the updated sub-admin returned from API
+          setSubAdmins((prev) =>
+            prev.map((subAdmin) =>
+              subAdmin.id === editId ? response.data.data : subAdmin
+            )
+          );
+        }
+      } else {
+        // Create new sub-admin using FormData
+        const dataCreate = new FormData();
+        dataCreate.append("subAdminName", formData.name);
+        if (formData.image) {
+          dataCreate.append("image", formData.image);
+        }
+        dataCreate.append("mobileNumber", formData.mobile);
+        dataCreate.append("subAdminPassword", formData.password);
+        dataCreate.append("address", formData.address);
+        dataCreate.append("branchId", formData.branchId);
+
+        const response = await axios.post(
+          "http://localhost:8000/api/v1/subadmin/addSubAdmin",
+          dataCreate,
+          {
+            withCredentials: true,
+            headers: { "Content-Type": "multipart/form-data" },
+          }
+        );
+        if (response.status === 201 || response.status === 200) {
+          setSubAdmins((prev) => [...prev, response.data.data]);
+        }
+      }
+      // Reset form state after saving
+      setIsFormOpen(false);
+      setIsEditing(false);
+      setEditId(null);
+      setFormData({
+        name: "",
+        image: null,
+        mobile: "",
+        password: "",
+        address: "",
+        branchId: "",
+      });
+    } catch (error) {
+      console.error("Error saving sub-admin:", error);
+    }
   };
 
   return (
@@ -117,19 +197,20 @@ export const SubAdminList = () => {
           <SubAdminCard
             key={subAdmin.id}
             subAdmin={subAdmin}
-            onEdit={handleEdit}
-            onDelete={confirmDelete}
+            onEdit={() => handleEdit(subAdmin.id)}
+            onDelete={() => confirmDelete(subAdmin.id)}
           />
         ))}
       </div>
 
+      {/* Floating button to add a new sub-admin */}
       <button
         onClick={() => {
           setIsFormOpen(true);
           setIsEditing(false);
           setFormData({
             name: "",
-            image: "",
+            image: null,
             mobile: "",
             password: "",
             address: "",
@@ -141,6 +222,7 @@ export const SubAdminList = () => {
         {t("subAdmin.buttons.addSubAdmin")}
       </button>
 
+      {/* Sub-admin Form Modal */}
       {isFormOpen && (
         <SubAdminForm
           isEditing={isEditing}
@@ -152,6 +234,7 @@ export const SubAdminList = () => {
         />
       )}
 
+      {/* Delete Confirmation Modal */}
       {showConfirm && (
         <div className="fixed inset-0 bg-black/50 flex justify-center items-center px-4">
           <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
@@ -181,3 +264,5 @@ export const SubAdminList = () => {
     </div>
   );
 };
+
+export default SubAdminList;
