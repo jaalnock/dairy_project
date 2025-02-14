@@ -38,7 +38,7 @@ export function ImageSlider({
           >
             <div className="absolute inset-0 bg-black/40" />
             <img
-              src={slide.image}
+              src={slide.link}
               alt={slide.title}
               className="w-full h-full object-cover"
             />
