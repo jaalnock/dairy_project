@@ -75,11 +75,11 @@ export const SubAdminList = () => {
   const handleDelete = async () => {
     try {
       await axios.delete(
-        `http://localhost:8000/api/v1/subadmin/delete-subadmin/${deleteId}`,
+        `http://localhost:8000/api/v1/subadmin/delete/${deleteId}`,
         { withCredentials: true }
       );
       setSubAdmins((prev) =>
-        prev.filter((subAdmin) => subAdmin.id !== deleteId)
+        prev.filter((subAdmin) => subAdmin._id !== deleteId)
       );
     } catch (error) {
       console.error("Error deleting sub-admin:", error);
