@@ -5,6 +5,7 @@ import userProfile from "../assets/user_profile.png";
 import { useTranslation } from "react-i18next";
 import { LanguageToggler } from "./LanguageToggler";
 import { useAuth } from "../context/AuthContext.jsx"; // Import useAuth
+import axios from "axios";
 
 export const SubAdminSidebar = ({ isOpen, setSidebarOpen }) => {
   const location = useLocation();
@@ -27,6 +28,27 @@ export const SubAdminSidebar = ({ isOpen, setSidebarOpen }) => {
     { name: t("subAdminSidebar.menu.farmer"), path: "/subadmin/farmer" },
     { name: t("subAdminSidebar.menu.report"), path: "/subadmin/report" },
   ];
+
+  const handleLogout = async () => {
+    // localStorage.removeItem("role");
+    logout();
+    try {
+      const response = await axios.post(
+        "http://localhost:8000/api/v1/subadmin/logout",
+        {},
+        {
+          withCredentials: true,
+        }
+      );
+      console.log(response);
+      console.log("Logout successful");
+      if (response.status === 200) {
+        navigate("/login");
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
   return (
     <>
@@ -93,7 +115,7 @@ export const SubAdminSidebar = ({ isOpen, setSidebarOpen }) => {
           </div>
 
           <button
-            onClick={logout}
+            onClick={handleLogout}
             className="w-full px-4 py-2 mt-2 bg-red-600 text-white font-semibold rounded-lg shadow-md hover:bg-red-700 transition duration-200"
           >
             {t("subAdminSidebar.buttons.logout")}

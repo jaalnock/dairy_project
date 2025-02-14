@@ -57,6 +57,14 @@ export const Login = () => {
       //   { adminMobileNumber: mobile, adminPassword: password },
       //   { withCredentials: true }
       // );
+      console.log(response);
+
+      if (response.status === 404) {
+        setError("Invalid Credentials");
+      }
+      if (response.status === 500) {
+        setError("Internal Server Error");
+      }
       console.log("Login successful:", response);
       login(role);
       // Redirect based on role
@@ -66,10 +74,17 @@ export const Login = () => {
         navigate("/subadmin");
       }
     } catch (err) {
-      if (err?.response?.status == 404) {
+      console.log(err.response.status);
+      if (err?.response?.status === 401) {
         setError("Invalid Credentials");
       }
-      if (err?.response?.status == 500) {
+      if (err?.response?.status === 404) {
+        if (role === "Admin") setError("Admin Not Found");
+        if (role === "SubAdmin") {
+          setError("SubAdmin Not Found");
+        }
+      }
+      if (err?.response?.status === 500) {
         setError("Internal Server Error");
       }
     }
@@ -85,7 +100,7 @@ export const Login = () => {
     setRole("");
     setMobile("");
     setPassword("");
-    setError("");
+    // setError("");
   };
 
   return (
