@@ -2,62 +2,14 @@ import React, { useState, useEffect } from "react";
 import { ImageSlider } from "../components/ImageSlider";
 import { SlideForm } from "../components/SlideForm";
 import { useTranslation } from "react-i18next";
-import axios from "axios"
+import axios from "axios";
+
 export const EditImageSlider = () => {
   const { t } = useTranslation();
 
-  // const [slides, setSlides] = useState(() => {
-  //   const savedSlides = JSON.parse(localStorage.getItem("slides"));
-  //   return (
-  //     savedSlides || [
-  //       {
-  //         id: 1,
-  //         image:
-  //           "https://images.pexels.com/photos/773253/pexels-photo-773253.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-  //         title: t("imageSlider.slides.dairy.title"),
-  //         description: t("imageSlider.slides.dairy.description"),
-  //       },
-  //       {
-  //         id: 2,
-  //         image:
-  //           "https://images.pexels.com/photos/254178/pexels-photo-254178.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-  //         title: t("imageSlider.slides.herd.title"),
-  //         description: t("imageSlider.slides.herd.description"),
-  //       },
-  //       {
-  //         id: 3,
-  //         image:
-  //           "https://images.pexels.com/photos/2064359/pexels-photo-2064359.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-  //         title: t("imageSlider.slides.quality.title"),
-  //         description: t("imageSlider.slides.quality.description"),
-  //       },
-  //     ]
-  //   );
-  // });
-  const [slides , setSlides] = useState([]);
-  const [isFileModified , setIsFileModified] = useState(false);
-  useEffect( () => {
-    //getting the slides from the BackEnd . . . 
-
-    axios.get(`http://localhost:8000/api/v1/new-offer/get-all-offers`)
-          .then((response) => {
-            console.log("response-data: " , response)
-            setSlides(response.data.data)
-            const filteredData = response.data.data.map(item => ({
-              _id: item._id,
-              title: item.title,
-              description: item.description,
-              link : item.link
-            }));
-            setSlides(filteredData)
-            setIsFileModified(false)
-          })
-          .catch((error) => {
-            console.error("Error fetching data:", error)
-            setIsFileModified(false)
-          });
-  }, []);
-
+  // State for slides and form management
+  const [slides, setSlides] = useState([]);
+  const [isFileModified, setIsFileModified] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [formData, setFormData] = useState({
     _id: null,
@@ -67,101 +19,141 @@ export const EditImageSlider = () => {
   });
   const [hoveredSlide, setHoveredSlide] = useState(null);
 
+  // Fetch slides from the backend on component mount
   useEffect(() => {
-    if (isFormOpen) {
-      document.body.classList.add("overflow-hidden");
-    } else {
-      document.body.classList.remove("overflow-hidden");
-    }
+    const fetchSlides = async () => {
+      try {
+        const { data } = await axios.get(
+          "http://localhost:8000/api/v1/new-offer/get-all-offers",
+          { withCredentials: true }
+        );
+        console.log("Fetched slides:", data);
+        // Map to a simpler structure if needed
+        const filteredSlides = data.data.map((item) => ({
+          _id: item._id,
+          title: item.title,
+          description: item.description,
+          link: item.link,
+        }));
+        setSlides(filteredSlides);
+        setIsFileModified(false);
+      } catch (error) {
+        console.error("Error fetching slides:", error);
+        setIsFileModified(false);
+      }
+    };
+
+    fetchSlides();
+  }, []);
+
+  // Toggle body overflow when form is open
+  useEffect(() => {
+    document.body.classList.toggle("overflow-hidden", isFormOpen);
   }, [isFormOpen]);
 
+  // Handler for input changes (text fields)
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    setFormData((prevData) => ({ ...prevData, [name]: value }));
   };
 
-  const handleFileChange = (event) => {
-    const file = event.target.files[0];
+  // Handler for file input changes
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
     if (file) {
-        setFormData((prevData) => ({ ...prevData, link: file }));
-        setIsFileModified(true)
+      // Store the file object temporarily in formData.link
+      setFormData((prevData) => ({ ...prevData, link: file }));
+      setIsFileModified(true);
     }
   };
 
+  // Save (create or update) slide using async/await
   const handleSaveSlide = async () => {
     if (!formData.link || !formData.title || !formData.description) {
       alert(t("imageSlider.alerts.fillAllFields"));
       return;
     }
-    console.log("formData ; " , formData)
-    if (formData._id) {
-      if(isFileModified){
-        console.log("file: " , formData.link)
-        axios.post(`http://localhost:8000/api/v1/new-offer/edit-offer/${formData._id}` , formData , {withCredentials : true , headers: { "Content-Type": "multipart/form-data" }}
-      ).then((response) => {
-            console.log("response-data: " , response)
-            setSlides(
-              slides.map((slide) =>
-                slide._id === formData._id ? { ...formData } : slide
-              )
-            );
-            setIsFileModified(false)
-          })
-          .catch((error) => {
-            console.error("Error fetching data:", error)
-          });
-      }
-      else{
-        console.log("and this time in this ")
-        axios.post(`http://localhost:8000/api/v1/new-offer/edit-offer/${formData._id}` , {title : formData.title , description : formData.description}, {withCredentials : true}
-      ).then((response) => {
-            console.log("response-data: " , response)
-            setSlides(
-              slides.map((slide) =>
-                slide._id === formData._id ? { ...formData } : slide
-              )
-            );
-            setIsFileModified(false)
-          })
-          .catch((error) => {
-            console.error("Error fetching data:", error)
-            
-          });
-      }
-      
-    } else {
-      console.log("formData: " , formData)
-      axios.post(`http://localhost:8000/api/v1/new-offer/add-new-offer` , 
-        formData , {withCredentials : true , headers: { "Content-Type": "multipart/form-data" },}
-      ).then((response) => {
-            console.log("response-data: " , response)
-            setSlides([...slides, { ...formData, _id: response.data.data._id  , link :response.data.data.link }]);
-          })
-          .catch((error) => {
-            console.error("Error fetching data:", error)
-          });
-      
-    }
 
-    setIsFormOpen(false);
-    setFormData({ _id: null, link: "", title: "", description: "" });
-  };
-
-  const handleDelete = (_id) => {
-    if (window.confirm(t("imageSlider.alerts.confirmDelete"))) {
-      axios.post(`http://localhost:8000/api/v1/new-offer/delete-offer/${_id}` , 
-        formData , {withCredentials : true , headers: { "Content-Type": "multipart/form-data" },}
-      ).then((response) => {
-            console.log("response-data: " , response)
-            setSlides(slides.filter((slide) => slide._id !== _id));
-          })
-          .catch((error) => {
-            console.error("Error fetching data:", error)
-          });
-      
+    try {
+      // Update existing slide
+      if (formData._id) {
+        let response;
+        if (isFileModified) {
+          // When file is modified, send all formData (including the file)
+          response = await axios.post(
+            `http://localhost:8000/api/v1/new-offer/edit-offer/${formData._id}`,
+            formData,
+            {
+              withCredentials: true,
+              headers: { "Content-Type": "multipart/form-data" },
+            }
+          );
+          console.log("Slide updated with new file:", response.data);
+        } else {
+          // Otherwise, send only text fields
+          response = await axios.post(
+            `http://localhost:8000/api/v1/new-offer/edit-offer/${formData._id}`,
+            { title: formData.title, description: formData.description },
+            { withCredentials: true }
+          );
+          console.log("Slide updated without new file:", response.data);
+        }
+        // Use the updated slide data returned from the server to update state
+        setSlides((prevSlides) =>
+          prevSlides.map((slide) =>
+            slide._id === formData._id ? response.data.data : slide
+          )
+        );
+        setIsFileModified(false);
+      } else {
+        // Create new slide
+        const response = await axios.post(
+          "http://localhost:8000/api/v1/new-offer/add-new-offer",
+          formData,
+          {
+            withCredentials: true,
+            headers: { "Content-Type": "multipart/form-data" },
+          }
+        );
+        console.log("New slide created:", response.data);
+        const newSlide = {
+          ...formData,
+          _id: response.data.data._id,
+          link: response.data.data.link,
+        };
+        setSlides((prevSlides) => [...prevSlides, newSlide]);
+      }
+    } catch (error) {
+      console.error("Error saving slide:", error);
+    } finally {
+      setIsFormOpen(false);
+      // Reset form data after save
+      setFormData({ _id: null, link: "", title: "", description: "" });
     }
   };
 
+  // Delete slide handler using async/await
+  const handleDelete = async (_id) => {
+    if (!window.confirm(t("imageSlider.alerts.confirmDelete"))) return;
+    try {
+      const response = await axios.post(
+        `http://localhost:8000/api/v1/new-offer/delete-offer/${_id}`,
+        {},
+        {
+          withCredentials: true,
+          headers: { "Content-Type": "multipart/form-data" },
+        }
+      );
+      console.log("Slide deleted:", response.data);
+      setSlides((prevSlides) =>
+        prevSlides.filter((slide) => slide._id !== _id)
+      );
+    } catch (error) {
+      console.error("Error deleting slide:", error);
+    }
+  };
+
+  // Open the form for a new slide
   const handleAddSlide = () => {
     setFormData({ _id: null, link: "", title: "", description: "" });
     setIsFormOpen(true);
@@ -179,10 +171,9 @@ export const EditImageSlider = () => {
               key={slide._id}
               onMouseEnter={() => setHoveredSlide(slide._id)}
               onMouseLeave={() => setHoveredSlide(null)}
-              className={`bg-gradient-to-br from-[#e8f0ff] to-[#cfd9ff] shadow-lg rounded-lg overflow-hidden p-4 flex flex-col transition-transform duration-300 ease-in-out
-              ${
+              className={`bg-gradient-to-br from-[#e8f0ff] to-[#cfd9ff] shadow-lg rounded-lg overflow-hidden p-4 flex flex-col transition-transform duration-300 ease-in-out ${
                 hoveredSlide === slide._id
-                  ? "shadow-2xl scale-105 bg-[#dae4ff] transform"
+                  ? "shadow-2xl scale-105 bg-[#dae4ff]"
                   : ""
               }`}
             >
@@ -234,7 +225,7 @@ export const EditImageSlider = () => {
         <div className="fixed inset-0 bg-opacity-30 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-md">
             <h3 className="text-xl font-semibold mb-4">
-              {formData.id
+              {formData._id
                 ? t("imageSlider.form.editTitle")
                 : t("imageSlider.form.title")}
             </h3>
