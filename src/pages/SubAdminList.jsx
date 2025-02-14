@@ -46,18 +46,18 @@ export const SubAdminList = () => {
 
   // Handle opening edit mode
   const handleEdit = (id) => {
-    const subAdminToEdit = subAdmins.find((subAdmin) => subAdmin.id === id);
+    const subAdminToEdit = subAdmins.find((subAdmin) => subAdmin._id === id);
     if (subAdminToEdit) {
       // For security reasons, we don't prefill the password.
       // Also, if you already have an image URL from the backend,
       // you might choose to display it, but here we let the user pick a new file if needed.
       setFormData({
-        name: subAdminToEdit.name,
+        name: subAdminToEdit.subAdminName,
         image: null,
-        mobile: subAdminToEdit.mobile,
-        password: "",
+        mobile: subAdminToEdit.mobileNumber,
+        password: subAdminToEdit.subAdminPassword,
         address: subAdminToEdit.address,
-        branchId: subAdminToEdit.branchId,
+        branchId: subAdminToEdit.branch.branchId,
       });
       setIsEditing(true);
       setEditId(id);
@@ -75,11 +75,11 @@ export const SubAdminList = () => {
   const handleDelete = async () => {
     try {
       await axios.delete(
-        `http://localhost:8000/api/v1/subadmin/delete-subadmin/${deleteId}`,
+        `http://localhost:8000/api/v1/subadmin/delete/${deleteId}`,
         { withCredentials: true }
       );
       setSubAdmins((prev) =>
-        prev.filter((subAdmin) => subAdmin.id !== deleteId)
+        prev.filter((subAdmin) => subAdmin._id !== deleteId)
       );
     } catch (error) {
       console.error("Error deleting sub-admin:", error);
@@ -130,7 +130,7 @@ export const SubAdminList = () => {
         dataUpdate.append("branchId", formData.branchId);
 
         const response = await axios.patch(
-          `http://localhost:8000/api/v1/subadmin/update-subadmin/${editId}`,
+          `http://localhost:8000/api/v1/subadmin/update/${editId}`,
           dataUpdate,
           {
             withCredentials: true,
@@ -141,7 +141,7 @@ export const SubAdminList = () => {
           // Update state with the updated sub-admin returned from API
           setSubAdmins((prev) =>
             prev.map((subAdmin) =>
-              subAdmin.id === editId ? response.data.data : subAdmin
+              subAdmin._id === editId ? response.data.data : subAdmin
             )
           );
         }
@@ -165,6 +165,8 @@ export const SubAdminList = () => {
             headers: { "Content-Type": "multipart/form-data" },
           }
         );
+        console.log(response);
+
         if (response.status === 201 || response.status === 200) {
           setSubAdmins((prev) => [...prev, response.data.data]);
         }
@@ -195,10 +197,10 @@ export const SubAdminList = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
         {subAdmins.map((subAdmin) => (
           <SubAdminCard
-            key={subAdmin.id}
+            key={subAdmin._id}
             subAdmin={subAdmin}
-            onEdit={() => handleEdit(subAdmin.id)}
-            onDelete={() => confirmDelete(subAdmin.id)}
+            onEdit={() => handleEdit(subAdmin._id)}
+            onDelete={() => confirmDelete(subAdmin._id)}
           />
         ))}
       </div>
