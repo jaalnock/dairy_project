@@ -98,7 +98,7 @@ export const EditImageSlider = () => {
           );
           console.log("Slide updated without new file:", response.data);
         }
-        // Use the updated slide data returned from the server to update state
+        // Update the slide in state using the returned data
         setSlides((prevSlides) =>
           prevSlides.map((slide) =>
             slide._id === formData._id ? response.data.data : slide
@@ -207,7 +207,9 @@ export const EditImageSlider = () => {
       </div>
 
       <div className="relative w-full max-w-5xl z-0">
+        {/* Adding a dynamic key to force re-mount when slides change */}
         <ImageSlider
+          key={slides.length}
           slides={slides}
           className="h-[600px] w-full relative z-0"
           autoPlayInterval={5000}

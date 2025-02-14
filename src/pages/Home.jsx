@@ -1,36 +1,18 @@
-import React, { useEffect } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import { ImageSlider, ProductImageSlider, About } from "../components/index.js";
 import { motion } from "framer-motion";
-// Added for translation support
 import { useTranslation } from "react-i18next";
 
 export function Home() {
-  const { t } = useTranslation(); // Added translation hook
+  const { t } = useTranslation();
 
-  //Fetch these slides through API
-  const slides = [
-    {
-      image:
-        "https://images.pexels.com/photos/773253/pexels-photo-773253.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-      title: "Premium Dairy Solutions",
-      description:
-        "Streamline your dairy operations with our advanced management system",
-    },
-    {
-      image:
-        "https://images.pexels.com/photos/254178/pexels-photo-254178.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-      title: "Smart Herd Management",
-      description: "Track and optimize your herd's health and productivity",
-    },
-    {
-      image:
-        "https://images.pexels.com/photos/2064359/pexels-photo-2064359.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-      title: "Quality Assurance",
-      description: "Maintain the highest standards in dairy production",
-    },
-  ];
+  // State for dynamic hero slides fetched from the backend
+  const [heroSlides, setHeroSlides] = useState([]);
+  const [loadingHero, setLoadingHero] = useState(true);
 
-  const sli = [
+  // Static product slides array
+  const staticProductSlides = [
     {
       image:
         "https://images.pexels.com/photos/799273/pexels-photo-799273.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
@@ -52,16 +34,8 @@ export function Home() {
     },
   ];
 
-  // Added: Map original slides to translated slides using t() with default values
-  const translatedSlides = slides.map((slide, index) => ({
-    ...slide,
-    title: t(`home.heroSlides.${index}.title`, { defaultValue: slide.title }),
-    description: t(`home.heroSlides.${index}.description`, {
-      defaultValue: slide.description,
-    }),
-  }));
-
-  const translatedSli = sli.map((slide, index) => ({
+  // Translate the static product slides
+  const translatedProductSlides = staticProductSlides.map((slide, index) => ({
     ...slide,
     title: t(`home.productSlides.${index}.title`, {
       defaultValue: slide.title,
@@ -71,35 +45,77 @@ export function Home() {
     }),
   }));
 
-  const preloadImages = (imageUrls) => {
-    imageUrls.forEach((url) => {
-      const img = new Image();
-      img.src = url;
-    });
+  // Function to fetch dynamic hero slides using axios
+  const fetchHeroSlides = async () => {
+    try {
+      const response = await axios.get(
+        "http://localhost:8000/api/v1/new-offer/get-all-offers"
+      );
+      console.log("Fetched hero slides:", response.data.data);
+      const data = response.data.data;
+
+      // For this example, we're just using the title and description as is.
+      const updatedHeroSlides = data.map((slide) => ({
+        ...slide,
+        title: slide.title,
+        description: slide.description,
+      }));
+      setHeroSlides(updatedHeroSlides);
+    } catch (error) {
+      console.error("Error fetching hero slides:", error);
+    } finally {
+      setLoadingHero(false);
+    }
   };
 
-  // Preload images when the component mounts
+  // Poll for hero slides: initial fetch and then every 10 seconds
   useEffect(() => {
-    preloadImages(slides.map((slide) => slide.image));
-  }, [slides]);
+    fetchHeroSlides(); // Initial fetch
+
+    const intervalId = setInterval(() => {
+      fetchHeroSlides();
+    }, 10000); // Poll every 10 seconds
+
+    return () => clearInterval(intervalId); // Clean up on unmount
+  }, [t]);
+
+  // Preload images for the hero slides after they are fetched
+  useEffect(() => {
+    const preloadImages = (imageUrls) => {
+      imageUrls.forEach((url) => {
+        const img = new Image();
+        img.src = url;
+      });
+    };
+
+    if (heroSlides.length) {
+      const imageUrls = heroSlides.map((slide) => slide.image);
+      preloadImages(imageUrls);
+    }
+  }, [heroSlides]);
 
   return (
     <motion.div className="min-h-screen space-y-0">
-      {/* ImageSlider for the Hero Section */}
-      <ImageSlider
-        slides={translatedSlides} // Now using translated slides
-        className="h-[600px]"
-        autoPlayInterval={5000}
-      />
+      {/* Dynamic Hero Section */}
+      {loadingHero ? (
+        <div>Loading hero slides...</div>
+      ) : (
+        <ImageSlider
+          key={heroSlides.length} // Using slides length as a dynamic key forces re-mount when slides change.
+          slides={heroSlides}
+          className="h-[600px]"
+          autoPlayInterval={5000}
+        />
+      )}
 
       {/* About Us Section */}
       <About />
 
-      {/* Product Image Slider for showing product images */}
+      {/* Static Product Image Slider */}
       <ProductImageSlider
-        slides={translatedSli} // Now using translated product slides
+        slides={translatedProductSlides}
         autoPlayInterval={5000}
-        className="h-[600px]" // Adjust as needed
+        className="h-[600px]"
       />
     </motion.div>
   );
