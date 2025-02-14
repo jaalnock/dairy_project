@@ -1,9 +1,14 @@
 import React, { useState, useEffect } from "react";
 
-const FarmerForm = ({ isEditing, handleSaveFarmer, setIsFormOpen, editingFarmer }) => {
+const FarmerForm = ({
+  isEditing,
+  handleSaveFarmer,
+  setIsFormOpen,
+  editingFarmer,
+}) => {
   const [formData, setFormData] = useState({
-    name: "",
-    phone: "",
+    farmerName: "",
+    mobileNumber: "",
     milkType: "",
     address: "",
     gender: "",
@@ -12,6 +17,7 @@ const FarmerForm = ({ isEditing, handleSaveFarmer, setIsFormOpen, editingFarmer 
 
   useEffect(() => {
     if (isEditing && editingFarmer) {
+      // If needed, ensure that editingFarmer.joiningDate is in the correct format (e.g., YYYY-MM-DD)
       setFormData(editingFarmer);
     }
   }, [isEditing, editingFarmer]);
@@ -22,7 +28,14 @@ const FarmerForm = ({ isEditing, handleSaveFarmer, setIsFormOpen, editingFarmer 
   };
 
   const handleSubmit = () => {
-    if (!formData.name || !formData.phone || !formData.milkType || !formData.address || !formData.gender) {
+    // Validate required fields
+    if (
+      !formData.farmerName ||
+      !formData.mobileNumber ||
+      !formData.milkType ||
+      !formData.address ||
+      !formData.gender
+    ) {
       alert("Please fill all fields!");
       return;
     }
@@ -37,20 +50,20 @@ const FarmerForm = ({ isEditing, handleSaveFarmer, setIsFormOpen, editingFarmer 
           {isEditing ? "Edit Farmer" : "New Farmer"}
         </h3>
 
-        <label className="block mb-1">Name</label>
+        <label className="block mb-1">Farmer Name</label>
         <input
           type="text"
-          name="name"
-          value={formData.name}
+          name="farmerName"
+          value={formData.farmerName}
           onChange={handleChange}
           className="w-full border p-2 rounded mb-2"
         />
 
-        <label className="block mb-1">Phone Number</label>
+        <label className="block mb-1">Mobile Number</label>
         <input
           type="tel"
-          name="phone"
-          value={formData.phone}
+          name="mobileNumber"
+          value={formData.mobileNumber}
           onChange={handleChange}
           className="w-full border p-2 rounded mb-2"
         />
@@ -96,7 +109,8 @@ const FarmerForm = ({ isEditing, handleSaveFarmer, setIsFormOpen, editingFarmer 
           onChange={handleChange}
           className="w-full border p-2 rounded mb-4"
         />
-         <div className="mt-4 flex justify-between space-x-4">
+
+        <div className="mt-4 flex justify-between space-x-4">
           <button
             onClick={() => setIsFormOpen(false)}
             className="flex-1 bg-gray-400 text-white px-4 py-2 rounded-lg hover:bg-gray-500 transition"
@@ -106,8 +120,8 @@ const FarmerForm = ({ isEditing, handleSaveFarmer, setIsFormOpen, editingFarmer 
           <button
             onClick={handleSubmit}
             className="flex-1 bg-[#2c447f] text-white px-4 py-2 rounded-lg hover:bg-[#1b2d5b] transition"
-            >
-            {isEditing ? "Update" : "Save"} Loan
+          >
+            {isEditing ? "Update" : "Save"} Farmer
           </button>
         </div>
       </div>
