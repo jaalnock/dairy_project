@@ -2,47 +2,64 @@ import React, { useState, useEffect } from "react";
 import { ImageSlider } from "../components/ImageSlider";
 import { SlideForm } from "../components/SlideForm";
 import { useTranslation } from "react-i18next";
-
+import axios from "axios"
 export const EditImageSlider = () => {
   const { t } = useTranslation();
 
-  const [slides, setSlides] = useState(() => {
-    const savedSlides = JSON.parse(localStorage.getItem("slides"));
-    return (
-      savedSlides || [
-        {
-          id: 1,
-          image:
-            "https://images.pexels.com/photos/773253/pexels-photo-773253.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-          title: t("imageSlider.slides.dairy.title"),
-          description: t("imageSlider.slides.dairy.description"),
-        },
-        {
-          id: 2,
-          image:
-            "https://images.pexels.com/photos/254178/pexels-photo-254178.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-          title: t("imageSlider.slides.herd.title"),
-          description: t("imageSlider.slides.herd.description"),
-        },
-        {
-          id: 3,
-          image:
-            "https://images.pexels.com/photos/2064359/pexels-photo-2064359.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-          title: t("imageSlider.slides.quality.title"),
-          description: t("imageSlider.slides.quality.description"),
-        },
-      ]
-    );
-  });
+  // const [slides, setSlides] = useState(() => {
+  //   const savedSlides = JSON.parse(localStorage.getItem("slides"));
+  //   return (
+  //     savedSlides || [
+  //       {
+  //         id: 1,
+  //         image:
+  //           "https://images.pexels.com/photos/773253/pexels-photo-773253.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+  //         title: t("imageSlider.slides.dairy.title"),
+  //         description: t("imageSlider.slides.dairy.description"),
+  //       },
+  //       {
+  //         id: 2,
+  //         image:
+  //           "https://images.pexels.com/photos/254178/pexels-photo-254178.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+  //         title: t("imageSlider.slides.herd.title"),
+  //         description: t("imageSlider.slides.herd.description"),
+  //       },
+  //       {
+  //         id: 3,
+  //         image:
+  //           "https://images.pexels.com/photos/2064359/pexels-photo-2064359.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+  //         title: t("imageSlider.slides.quality.title"),
+  //         description: t("imageSlider.slides.quality.description"),
+  //       },
+  //     ]
+  //   );
+  // });
+  const [slides , setSlides] = useState([]);
 
-  useEffect(() => {
-    localStorage.setItem("slides", JSON.stringify(slides));
-  }, [slides]);
+  useEffect( () => {
+    //getting the slides from the BackEnd . . . 
+
+    axios.get(`http://localhost:8000/api/v1/new-offer/get-all-offers`)
+          .then((response) => {
+            console.log("response-data: " , response)
+            setSlides(response.data.data)
+            const filteredData = response.data.data.map(item => ({
+              _id: item._id,
+              title: item.title,
+              description: item.description,
+              link : item.link
+            }));
+            setSlides(filteredData)
+          })
+          .catch((error) => {
+            console.error("Error fetching data:", error)
+          });
+  }, []);
 
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [formData, setFormData] = useState({
-    id: null,
-    image: "",
+    _id: null,
+    link: "",
     title: "",
     description: "",
   });
@@ -64,42 +81,66 @@ export const EditImageSlider = () => {
   const handleFileChange = (event) => {
     const file = event.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setFormData((prevData) => ({ ...prevData, image: reader.result }));
-      };
-      reader.readAsDataURL(file);
+        setFormData((prevData) => ({ ...prevData, link: file }));
     }
   };
 
-  const handleSaveSlide = () => {
-    if (!formData.image || !formData.title || !formData.description) {
+  const handleSaveSlide = async () => {
+    if (!formData.link || !formData.title || !formData.description) {
       alert(t("imageSlider.alerts.fillAllFields"));
       return;
     }
-
-    if (formData.id) {
-      setSlides(
-        slides.map((slide) =>
-          slide.id === formData.id ? { ...formData } : slide
-        )
-      );
+    console.log("formData ; " , formData)
+    if (formData._id) {
+      axios.post(`http://localhost:8000/api/v1/new-offer/edit-offer/${formData._id}` , 
+        formData , {withCredentials : true}
+      ).then((response) => {
+            console.log("response-data: " , response)
+            setSlides(
+              slides.map((slide) =>
+                slide._id === formData._id ? { ...formData } : slide
+              )
+            );
+          })
+          .catch((error) => {
+            console.error("Error fetching data:", error)
+          });
+      
     } else {
-      setSlides([...slides, { ...formData, id: slides.length + 1 }]);
+      console.log("formData: " , formData)
+      axios.post(`http://localhost:8000/api/v1/new-offer/add-new-offer` , 
+        formData , {withCredentials : true , headers: { "Content-Type": "multipart/form-data" },}
+      ).then((response) => {
+            console.log("response-data: " , response)
+            setSlides([...slides, { ...formData, _id: response.data.data._id  , link :response.data.data.link }]);
+          })
+          .catch((error) => {
+            console.error("Error fetching data:", error)
+          });
+      
     }
 
     setIsFormOpen(false);
-    setFormData({ id: null, image: "", title: "", description: "" });
+    setFormData({ _id: null, link: "", title: "", description: "" });
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = (_id) => {
     if (window.confirm(t("imageSlider.alerts.confirmDelete"))) {
-      setSlides(slides.filter((slide) => slide.id !== id));
+      axios.post(`http://localhost:8000/api/v1/new-offer/delete-offer/${_id}` , 
+        formData , {withCredentials : true , headers: { "Content-Type": "multipart/form-data" },}
+      ).then((response) => {
+            console.log("response-data: " , response)
+            setSlides(slides.filter((slide) => slide._id !== _id));
+          })
+          .catch((error) => {
+            console.error("Error fetching data:", error)
+          });
+      
     }
   };
 
   const handleAddSlide = () => {
-    setFormData({ id: null, image: "", title: "", description: "" });
+    setFormData({ _id: null, link: "", title: "", description: "" });
     setIsFormOpen(true);
   };
 
@@ -112,18 +153,18 @@ export const EditImageSlider = () => {
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {slides.map((slide) => (
             <div
-              key={slide.id}
-              onMouseEnter={() => setHoveredSlide(slide.id)}
+              key={slide._id}
+              onMouseEnter={() => setHoveredSlide(slide._id)}
               onMouseLeave={() => setHoveredSlide(null)}
               className={`bg-gradient-to-br from-[#e8f0ff] to-[#cfd9ff] shadow-lg rounded-lg overflow-hidden p-4 flex flex-col transition-transform duration-300 ease-in-out
               ${
-                hoveredSlide === slide.id
+                hoveredSlide === slide._id
                   ? "shadow-2xl scale-105 bg-[#dae4ff] transform"
                   : ""
               }`}
             >
               <img
-                src={slide.image}
+                src={slide.link}
                 alt={slide.title}
                 className="w-full h-40 object-cover rounded-md"
               />
@@ -141,7 +182,7 @@ export const EditImageSlider = () => {
                 </button>
                 <button
                   className="flex-1 bg-[#d9534f] text-white text-base px-3 py-2 rounded-md shadow-md hover:bg-[#b52b27] transition"
-                  onClick={() => handleDelete(slide.id)}
+                  onClick={() => handleDelete(slide._id)}
                 >
                   {t("imageSlider.buttons.delete")}
                 </button>
