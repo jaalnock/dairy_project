@@ -38,16 +38,27 @@ export const Login = () => {
     }
 
     try {
-      const response = await axios.post(
-        "http://localhost:8000/api/v1/admin/login",
-        { adminMobileNumber: mobile, adminPassword: password },
-        { withCredentials: true }
-      );
-
+      let response;
+      if (role === "Admin") {
+        response = await axios.post(
+          "http://localhost:8000/api/v1/admin/login",
+          { adminMobileNumber: mobile, adminPassword: password },
+          { withCredentials: true }
+        );
+      } else if (role === "SubAdmin") {
+        response = await axios.post(
+          "http://localhost:8000/api/v1/subadmin/login",
+          { mobileNumber: mobile, subAdminPassword: password },
+          { withCredentials: true }
+        );
+      }
+      // const response = await axios.post(
+      //   "http://localhost:8000/api/v1/admin/login",
+      //   { adminMobileNumber: mobile, adminPassword: password },
+      //   { withCredentials: true }
+      // );
       console.log("Login successful:", response);
-
       login(role);
-
       // Redirect based on role
       if (role === "Admin") {
         navigate("/admin");
