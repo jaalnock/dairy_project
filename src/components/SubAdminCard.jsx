@@ -15,7 +15,7 @@ export const SubAdminCard = ({ subAdmin, onEdit, onDelete }) => {
     if (branch) {
       setVillageCity(branch.villageCity);
     }
-  }, [subAdmin.branchId]);
+  }, [subAdmin.branch.branchId]);
 
   return (
     <div className="bg-gradient-to-br from-[#e8f0ff] to-[#cfd9ff] shadow-2xl rounded-2xl overflow-hidden flex flex-col items-center p-6 space-y-6 border border-gray-300 text-center transition-transform transform hover:scale-105 hover:shadow-3xl">
@@ -54,13 +54,13 @@ export const SubAdminCard = ({ subAdmin, onEdit, onDelete }) => {
         </p>
         <p className="text-lg text-gray-700">
           <span className="font-semibold">{t("subAdmin.card.branchId")}:</span>{" "}
-          {subAdmin.branchId}
+          {subAdmin.branch.branchId}
         </p>
         <p className="text-lg text-gray-700">
           <span className="font-semibold">
             {t("subAdmin.card.villageCity")}:
           </span>{" "}
-          {villageCity}
+          {subAdmin.branch.location}
         </p>
       </div>
       <div className="mt-4 flex justify-between space-x-4 w-full">
