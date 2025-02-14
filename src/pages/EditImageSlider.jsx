@@ -35,7 +35,7 @@ export const EditImageSlider = () => {
   //   );
   // });
   const [slides , setSlides] = useState([]);
-
+  const [isFileModified , setIsFileModified] = useState(false);
   useEffect( () => {
     //getting the slides from the BackEnd . . . 
 
@@ -50,9 +50,11 @@ export const EditImageSlider = () => {
               link : item.link
             }));
             setSlides(filteredData)
+            setIsFileModified(false)
           })
           .catch((error) => {
             console.error("Error fetching data:", error)
+            setIsFileModified(false)
           });
   }, []);
 
@@ -82,6 +84,7 @@ export const EditImageSlider = () => {
     const file = event.target.files[0];
     if (file) {
         setFormData((prevData) => ({ ...prevData, link: file }));
+        setIsFileModified(true)
     }
   };
 
@@ -92,8 +95,9 @@ export const EditImageSlider = () => {
     }
     console.log("formData ; " , formData)
     if (formData._id) {
-      axios.post(`http://localhost:8000/api/v1/new-offer/edit-offer/${formData._id}` , 
-        formData , {withCredentials : true}
+      if(isFileModified){
+        console.log("file: " , formData.link)
+        axios.post(`http://localhost:8000/api/v1/new-offer/edit-offer/${formData._id}` , formData , {withCredentials : true , headers: { "Content-Type": "multipart/form-data" }}
       ).then((response) => {
             console.log("response-data: " , response)
             setSlides(
@@ -101,10 +105,29 @@ export const EditImageSlider = () => {
                 slide._id === formData._id ? { ...formData } : slide
               )
             );
+            setIsFileModified(false)
           })
           .catch((error) => {
             console.error("Error fetching data:", error)
           });
+      }
+      else{
+        console.log("and this time in this ")
+        axios.post(`http://localhost:8000/api/v1/new-offer/edit-offer/${formData._id}` , {title : formData.title , description : formData.description}, {withCredentials : true}
+      ).then((response) => {
+            console.log("response-data: " , response)
+            setSlides(
+              slides.map((slide) =>
+                slide._id === formData._id ? { ...formData } : slide
+              )
+            );
+            setIsFileModified(false)
+          })
+          .catch((error) => {
+            console.error("Error fetching data:", error)
+            
+          });
+      }
       
     } else {
       console.log("formData: " , formData)
