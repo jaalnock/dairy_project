@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { SubAdminCard } from "../components/SubAdminCard";
 import { SubAdminForm } from "../components/SubAdminForm";
-import { useTranslation } from "react-i18next";
 import axios from "axios";
+import { ErrorDialog } from "../components/ErrorDialog";
 
 export const SubAdminList = () => {
-  const { t } = useTranslation();
-
   // State for sub-admins and modal helpers
   const [subAdmins, setSubAdmins] = useState([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -14,6 +12,7 @@ export const SubAdminList = () => {
   const [editId, setEditId] = useState(null);
   const [showConfirm, setShowConfirm] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
+  const [errors, setErrors] = useState([]);
 
   // Form state (image is kept as a file)
   const [formData, setFormData] = useState({
@@ -105,17 +104,6 @@ export const SubAdminList = () => {
 
   // Handle saving (create or update) a sub-admin via API
   const handleSaveSubAdmin = async () => {
-    // Validate required fields
-    if (
-      !formData.name ||
-      !formData.mobile ||
-      !formData.password ||
-      !formData.branchId
-    ) {
-      alert(t("subAdmin.alerts.fillAllFields"));
-      return;
-    }
-
     try {
       if (isEditing) {
         // Update existing sub-admin using FormData to include file
@@ -167,7 +155,7 @@ export const SubAdminList = () => {
         );
         console.log(response);
 
-        if (response.status === 201 || response.status === 200) {
+        if (response.status == 201 || response.status == 200) {
           setSubAdmins((prev) => [...prev, response.data.data]);
         }
       }
@@ -184,14 +172,29 @@ export const SubAdminList = () => {
         branchId: "",
       });
     } catch (error) {
-      console.error("Error saving sub-admin:", error);
+      console.log(error);
+      if (error.response && error.response.status == 400) {
+        setErrors([error.response.data.error]);
+      } else if (
+        error.response &&
+        error.response.data &&
+        error.response.data.error
+      ) {
+        setErrors([error.response.data.error]);
+      } else if (error.code === "ERR_NETWORK") {
+        setErrors([
+          "Network error. Please check your connection and try again.",
+        ]);
+      } else {
+        setErrors(["An unexpected error occurred. Please try again."]);
+      }
     }
   };
 
   return (
     <div className="p-6 relative min-h-screen">
       <h2 className="text-4xl font-bold mb-10 text-center text-[#2c447f]">
-        {t("subAdmin.title")}
+        Sub-Admin Management
       </h2>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -221,7 +224,7 @@ export const SubAdminList = () => {
         }}
         className="fixed bottom-6 right-6 bg-[#2c447f] text-white px-6 py-3 rounded-full shadow-lg hover:bg-[#1b2d5b] transition"
       >
-        {t("subAdmin.buttons.addSubAdmin")}
+        Add Sub-Admin
       </button>
 
       {/* Sub-admin Form Modal */}
@@ -241,27 +244,31 @@ export const SubAdminList = () => {
         <div className="fixed inset-0 bg-black/50 flex justify-center items-center px-4">
           <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
             <h3 className="text-xl font-semibold mb-4 text-center">
-              {t("subAdmin.alerts.confirmDeleteTitle")}
+              Confirm Deletion
             </h3>
             <p className="text-center mb-4">
-              {t("subAdmin.alerts.confirmDelete")}
+              Are you sure you want to delete this sub-admin?
             </p>
             <div className="flex justify-between mt-6 space-x-4">
               <button
                 onClick={() => setShowConfirm(false)}
                 className="flex-1 bg-[#4c76ba] text-white px-4 py-2 rounded-lg hover:bg-gray-500 transition"
               >
-                {t("subAdmin.alerts.no")}
+                No
               </button>
               <button
                 onClick={handleDelete}
                 className="flex-1 bg-[#d9534f] text-white px-4 py-2 rounded-lg hover:bg-red-700 transition"
               >
-                {t("subAdmin.alerts.yes")}
+                Yes
               </button>
             </div>
           </div>
         </div>
+      )}
+
+      {errors.length > 0 && (
+        <ErrorDialog errors={errors} onClose={() => setErrors([])} />
       )}
     </div>
   );

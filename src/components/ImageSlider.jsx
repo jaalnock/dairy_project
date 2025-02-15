@@ -40,7 +40,7 @@ export function ImageSlider({
             <img
               src={slide.link}
               alt={slide.title}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-contain"
             />
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="text-center text-white max-w-4xl px-4">

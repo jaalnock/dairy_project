@@ -51,15 +51,32 @@ export function Home() {
       const response = await axios.get(
         "http://localhost:8000/api/v1/new-offer/get-all-offers"
       );
-      console.log("Fetched hero slides:", response.data.data);
-      const data = response.data.data;
 
-      // For this example, we're just using the title and description as is.
-      const updatedHeroSlides = data.map((slide) => ({
-        ...slide,
-        title: slide.title,
-        description: slide.description,
-      }));
+      // console.log("Fetched hero slides:", response.data.data);
+      const data = response?.data?.data ?? [];
+
+      let updatedHeroSlides = [];
+
+      if (Array.isArray(data) && data.length > 0) {
+        updatedHeroSlides = data.map((slide) => ({
+          _id: slide._id,
+          title: slide.title,
+          description: slide.description,
+          link: slide.link,
+        }));
+      } else {
+        // ✅ Add a dummy slide when no slides exist
+        updatedHeroSlides = [
+          {
+            _id: "dummy",
+            title: "Borgave Dugdhalaya",
+            description:
+              "शेतातून थेट तुमच्या घरापर्यंत सर्वोत्तम दुग्धजन्य पदार्थ आणत आहोत.",
+            link: "https://images.pexels.com/photos/254178/pexels-photo-254178.jpeg",
+          },
+        ];
+      }
+
       setHeroSlides(updatedHeroSlides);
     } catch (error) {
       console.error("Error fetching hero slides:", error);
@@ -103,7 +120,7 @@ export function Home() {
         <ImageSlider
           key={heroSlides.length} // Using slides length as a dynamic key forces re-mount when slides change.
           slides={heroSlides}
-          className="h-[600px]"
+          className="h-[700px]"
           autoPlayInterval={5000}
         />
       )}

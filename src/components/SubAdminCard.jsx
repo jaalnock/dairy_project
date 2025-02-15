@@ -37,7 +37,7 @@ export const SubAdminCard = ({ subAdmin, onEdit, onDelete }) => {
         <div className="relative flex items-center text-lg text-gray-700">
           <span className="font-semibold">{t("subAdmin.card.password")}:</span>
           <span className="ml-2">
-            {showPassword ? subAdmin.password : "••••••••"}
+            {showPassword ? subAdmin.subAdminPassword : "••••••••"}
           </span>
           <button
             type="button"
