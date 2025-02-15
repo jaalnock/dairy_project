@@ -25,7 +25,7 @@ export const Navbar = () => {
   const totalItems = cartItems.reduce((acc, item) => acc + item.quantity, 0);
 
   return (
-    <nav className="bg-white shadow-lg fixed w-full top-0 z-50">
+    <nav className="bg-white shadow-lg  w-full top-0 z-50">
       <motion.div className="mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           variants={fadout("up", 0.2)}
