@@ -120,7 +120,7 @@ export function Home() {
         <ImageSlider
           key={heroSlides.length} // Using slides length as a dynamic key forces re-mount when slides change.
           slides={heroSlides}
-          className="h-[600px]"
+          className="h-[700px]"
           autoPlayInterval={5000}
         />
       )}

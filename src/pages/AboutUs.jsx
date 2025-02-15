@@ -10,6 +10,7 @@ import {
   Heart,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import aboutUsImage from "../assets/AboutUs.jpeg"; 
 
 function AnimatedCard({ icon: Icon, title, description, delay }) {
   return (
@@ -54,19 +55,20 @@ export function AboutUs() {
         "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=800&q=80",
     },
   ];
+  
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-green-50">
       {/* Hero Section */}
       <div className="relative h-[60vh] flex items-center justify-center overflow-hidden">
         <img
-          src="../assests/AboutUs.jpg"
+          src={aboutUsImage}
           alt={t("aboutUs.hero.imageAlt", {
             defaultValue: "Green dairy farm landscape",
           })}
           className="absolute w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-black bg-opacity-40" />
+        {/* <div className="absolute inset-0 bg-black bg-opacity-40" /> */}
         <div className="relative text-center text-white p-8 animate-slideDown">
           <h1 className="text-5xl font-bold mb-4">
             {t("aboutUs.hero.title", { defaultValue: "Pure Dairy Excellence" })}
