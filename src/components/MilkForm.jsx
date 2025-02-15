@@ -1,30 +1,54 @@
 import React, { useState, useEffect } from "react";
 
-const MilkForm = ({ isEditing, handleSaveMilkEntry, setIsFormOpen, editingEntry }) => {
+const MilkForm = ({
+  isEditing,
+  handleSaveMilkEntry,
+  setIsFormOpen,
+  editingEntry,
+  farmers = [],
+}) => {
   const [formData, setFormData] = useState({
-    farmerName: "",
+    farmerNumber: "",
+    transactionDate: new Date().toISOString().split("T")[0],
     milkType: "",
-    quantity: "",
-    fat: "",
-    snf: "",
-    price: "",
+    milkQuantity: "",
+    pricePerLitre: "",
   });
 
   useEffect(() => {
     if (isEditing && editingEntry) {
-      setFormData(editingEntry);
+      const {
+        farmerNumber,
+        transactionDate,
+        milkType,
+        milkQuantity,
+        pricePerLitre,
+      } = editingEntry;
+      setFormData({
+        farmerNumber: farmerNumber || "",
+        transactionDate: transactionDate
+          ? new Date(transactionDate).toISOString().split("T")[0]
+          : new Date().toISOString().split("T")[0],
+        milkType: milkType || "",
+        milkQuantity: milkQuantity || "",
+        pricePerLitre: pricePerLitre || "",
+      });
     }
   }, [isEditing, editingEntry]);
 
-  // Handle input change
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
-  // Submit form
   const handleSubmit = () => {
-    if (!formData.farmerName || !formData.milkType || !formData.quantity) {
+    if (
+      !formData.farmerNumber ||
+      !formData.transactionDate ||
+      !formData.milkType ||
+      !formData.milkQuantity ||
+      !formData.pricePerLitre
+    ) {
       alert("Please fill all required fields!");
       return;
     }
@@ -39,11 +63,27 @@ const MilkForm = ({ isEditing, handleSaveMilkEntry, setIsFormOpen, editingEntry 
           {isEditing ? "Edit Milk Entry" : "New Milk Entry"}
         </h3>
 
-        <label className="block mb-2">Farmer Name</label>
+        <label className="block mb-2">Farmer</label>
+        <select
+          name="farmerNumber"
+          value={formData.farmerNumber}
+          onChange={handleChange}
+          className="w-full border p-2 rounded"
+          required
+        >
+          <option value="">Select Farmer</option>
+          {farmers.map((farmer) => (
+            <option key={farmer._id} value={farmer.mobileNumber}>
+              {farmer.farmerName} ({farmer.mobileNumber})
+            </option>
+          ))}
+        </select>
+
+        <label className="block mt-2">Transaction Date</label>
         <input
-          type="text"
-          name="farmerName"
-          value={formData.farmerName}
+          type="date"
+          name="transactionDate"
+          value={formData.transactionDate}
           onChange={handleChange}
           className="w-full border p-2 rounded"
           required
@@ -62,17 +102,25 @@ const MilkForm = ({ isEditing, handleSaveMilkEntry, setIsFormOpen, editingEntry 
           <option value="Buffalo">Buffalo</option>
         </select>
 
-        <label className="block mt-2">Quantity (Liters)</label>
-        <input type="number" name="quantity" value={formData.quantity} onChange={handleChange} className="w-full border p-2 rounded" required />
+        <label className="block mt-2">Milk Quantity (Liters)</label>
+        <input
+          type="number"
+          name="milkQuantity"
+          value={formData.milkQuantity}
+          onChange={handleChange}
+          className="w-full border p-2 rounded"
+          required
+        />
 
-        <label className="block mt-2">Fat (%)</label>
-        <input type="number" name="fat" value={formData.fat} onChange={handleChange} className="w-full border p-2 rounded" />
-
-        <label className="block mt-2">SNF (%)</label>
-        <input type="number" name="snf" value={formData.snf} onChange={handleChange} className="w-full border p-2 rounded" />
-
-        <label className="block mt-2">Price (₹)</label>
-        <input type="number" name="price" value={formData.price} onChange={handleChange} className="w-full border p-2 rounded" required />
+        <label className="block mt-2">Price Per Litre (₹)</label>
+        <input
+          type="number"
+          name="pricePerLitre"
+          value={formData.pricePerLitre}
+          onChange={handleChange}
+          className="w-full border p-2 rounded"
+          required
+        />
 
         <div className="mt-4 flex justify-between space-x-4">
           <button
@@ -84,8 +132,8 @@ const MilkForm = ({ isEditing, handleSaveMilkEntry, setIsFormOpen, editingEntry 
           <button
             onClick={handleSubmit}
             className="flex-1 bg-[#2c447f] text-white px-4 py-2 rounded-lg hover:bg-[#1b2d5b] transition"
-            >
-            {isEditing ? "Update" : "Save"} Loan
+          >
+            {isEditing ? "Update" : "Save"} Milk Entry
           </button>
         </div>
       </div>

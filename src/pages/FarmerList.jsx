@@ -161,7 +161,9 @@ const FarmerList = () => {
                   <td className="border p-2">{farmer.milkType}</td>
                   <td className="border p-2">{farmer.address}</td>
                   <td className="border p-2">{farmer.gender}</td>
-                  <td className="border p-2">{farmer.joiningDate}</td>
+                  <td className="border p-2">
+                    {new Date(farmer.joiningDate).toLocaleDateString()}
+                  </td>
                   <td className="border p-2">
                     <button
                       onClick={() => handleEdit(farmer)}
