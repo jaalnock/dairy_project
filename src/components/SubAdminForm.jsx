@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { XCircle } from "lucide-react";
-import { useTranslation } from "react-i18next";
+import { ErrorDialog } from "./ErrorDialog";
 
 export const SubAdminForm = ({
   isEditing,
@@ -10,8 +10,8 @@ export const SubAdminForm = ({
   handleSaveSubAdmin,
   setIsFormOpen,
 }) => {
-  const { t } = useTranslation();
   const [imagePreview, setImagePreview] = useState(null);
+  const [errors, setErrors] = useState([]);
 
   // Update preview whenever formData.image changes.
   useEffect(() => {
@@ -51,37 +51,65 @@ export const SubAdminForm = ({
     handleFileChange({ target: { name: "image", files: [] } });
   };
 
+  const validateInputs = () => {
+    const newErrors = [];
+    if (!formData.name) newErrors.push("Name is required.");
+    if (!formData.mobile || isNaN(formData.mobile))
+      newErrors.push("Mobile number must be a valid number.");
+    if (!formData.password) newErrors.push("Password is required.");
+    if (!formData.branchId || isNaN(formData.branchId))
+      newErrors.push("Branch ID must be a valid number.");
+    return newErrors;
+  };
+
+  const handleSave = async () => {
+    const validationErrors = validateInputs();
+    if (validationErrors.length > 0) {
+      setErrors(validationErrors);
+    } else {
+      try {
+        await handleSaveSubAdmin();
+      } catch (error) {
+        if (error.response) {
+          if (error.response.status === 400 && error.response.data && error.response.data.message) {
+            setErrors([error.response.data.message]);
+          } else {
+            setErrors(["An unexpected error occurred. Please try again."]);
+          }
+        } else if (error.code === 'ERR_NETWORK') {
+          setErrors(["Network error. Please check your connection and try again."]);
+        } else {
+          setErrors(["An unexpected error occurred. Please try again."]);
+        }
+      }
+    }
+  };
+
   return (
     <div className="absolute top-0 left-0 w-full h-full bg-gray-500/60 flex justify-center items-center z-50">
       <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md sm:max-w-2xl z-30 relative">
         <h3 className="text-xl font-semibold mb-4 text-center">
-          {isEditing
-            ? t("subAdmin.form.editTitle")
-            : t("subAdmin.form.addTitle")}
+          {isEditing ? "Edit Sub-Admin" : "Add Sub-Admin"}
         </h3>
         <form className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-gray-700 font-semibold">
-              {t("subAdmin.form.name")}
-            </label>
+            <label className="block text-gray-700 font-semibold">Name</label>
             <input
               type="text"
               name="name"
-              placeholder={t("subAdmin.form.namePlaceholder")}
+              placeholder="Enter name"
               value={formData.name}
               onChange={handleInputChange}
               className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2c447f]"
             />
           </div>
           <div className="flex flex-col items-center">
-            <label className="block text-gray-700 font-semibold">
-              {t("subAdmin.form.image")}
-            </label>
+            <label className="block text-gray-700 font-semibold">Image</label>
             <label
               htmlFor="image"
               className="cursor-pointer bg-[#2c447f] text-white px-4 py-2 rounded-lg shadow-md hover:bg-[#1f3260] transition duration-200"
             >
-              {t("subAdmin.form.imagePlaceholder")}
+              Upload Image
             </label>
             <input
               type="file"
@@ -96,7 +124,7 @@ export const SubAdminForm = ({
               <div className="relative mt-4 w-48 h-48 border border-gray-300 rounded-md overflow-hidden">
                 <img
                   src={imagePreview}
-                  alt={t("subAdmin.form.imagePlaceholder")}
+                  alt="Image Preview"
                   className="w-full h-full object-cover"
                 />
                 <button
@@ -110,13 +138,11 @@ export const SubAdminForm = ({
             )}
           </div>
           <div>
-            <label className="block text-gray-700 font-semibold">
-              {t("subAdmin.form.mobile")}
-            </label>
+            <label className="block text-gray-700 font-semibold">Mobile</label>
             <input
               type="text"
               name="mobile"
-              placeholder={t("subAdmin.form.mobilePlaceholder")}
+              placeholder="Enter mobile number"
               value={formData.mobile}
               onChange={handleInputChange}
               className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2c447f]"
@@ -124,25 +150,23 @@ export const SubAdminForm = ({
           </div>
           <div>
             <label className="block text-gray-700 font-semibold">
-              {t("subAdmin.form.password")}
+              Password
             </label>
             <input
               type="password"
               name="password"
-              placeholder={t("subAdmin.form.passwordPlaceholder")}
+              placeholder="Enter password"
               value={formData.password}
               onChange={handleInputChange}
               className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2c447f]"
             />
           </div>
           <div>
-            <label className="block text-gray-700 font-semibold">
-              {t("subAdmin.form.address")}
-            </label>
+            <label className="block text-gray-700 font-semibold">Address</label>
             <input
               type="text"
               name="address"
-              placeholder={t("subAdmin.form.addressPlaceholder")}
+              placeholder="Enter address"
               value={formData.address}
               onChange={handleInputChange}
               className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2c447f]"
@@ -150,12 +174,12 @@ export const SubAdminForm = ({
           </div>
           <div>
             <label className="block text-gray-700 font-semibold">
-              {t("subAdmin.form.branchId")}
+              Branch ID
             </label>
             <input
               type="text"
               name="branchId"
-              placeholder={t("subAdmin.form.branchIdPlaceholder")}
+              placeholder="Enter branch ID"
               value={formData.branchId}
               onChange={handleInputChange}
               className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2c447f]"
@@ -168,16 +192,19 @@ export const SubAdminForm = ({
             onClick={() => setIsFormOpen(false)}
             className="flex-1 bg-gray-400 text-white px-4 py-2 rounded-lg hover:bg-gray-500 transition"
           >
-            {t("subAdmin.form.cancel")}
+            Cancel
           </button>
           <button
-            onClick={handleSaveSubAdmin}
+            onClick={handleSave}
             className="flex-1 bg-[#2c447f] text-white px-4 py-2 rounded-lg hover:bg-[#1b2d5b] transition"
           >
-            {t("subAdmin.form.save")}
+            Save
           </button>
         </div>
       </div>
+      {errors.length > 0 && (
+        <ErrorDialog errors={errors} onClose={() => setErrors([])} />
+      )}
     </div>
   );
 };
