@@ -59,10 +59,10 @@ export const Login = () => {
       // );
       console.log(response);
 
-      if (response.status === 404) {
+      if (response.status == 404) {
         setError("Invalid Credentials");
       }
-      if (response.status === 500) {
+      if (response.status == 500) {
         setError("Internal Server Error");
       }
       console.log("Login successful:", response);
@@ -75,16 +75,16 @@ export const Login = () => {
       }
     } catch (err) {
       console.log(err.response.status);
-      if (err?.response?.status === 401) {
+      if (err?.response?.status ==401) {
         setError("Invalid Credentials");
       }
-      if (err?.response?.status === 404) {
+      if (err?.response?.status == 404) {
         if (role === "Admin") setError("Admin Not Found");
         if (role === "SubAdmin") {
           setError("SubAdmin Not Found");
         }
       }
-      if (err?.response?.status === 500) {
+      if (err?.response?.status == 500) {
         setError("Internal Server Error");
       }
     }
