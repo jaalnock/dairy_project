@@ -1,10 +1,31 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Outlet } from "react-router-dom";
 import { AdminSidebar } from "./AdminSidebar";
 import { Menu } from "lucide-react"; // For the hamburger icon
+import axios from "axios";
 
 export const AdminLayout = () => {
   const [isSidebarOpen, setSidebarOpen] = useState(false);
+  const [admin, setAdmin] = useState(null);
+
+  const fetchAdmin = async () => {
+    try {
+      const response = await axios.get(
+        "http://localhost:8000/api/v1/admin/get-admin",
+        {
+          withCredentials: true,
+        }
+      );
+      console.log(response);
+      setAdmin(response.data.data.admin);
+    } catch (error) {
+      console.error("Error fetching admin:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchAdmin();
+  }, []);
 
   // Close sidebar when clicking outside
   const handleBackdropClick = () => {
@@ -30,7 +51,11 @@ export const AdminLayout = () => {
       )}
 
       {/* Sidebar */}
-      <AdminSidebar isOpen={isSidebarOpen} setSidebarOpen={setSidebarOpen} />
+      <AdminSidebar
+        isOpen={isSidebarOpen}
+        setSidebarOpen={setSidebarOpen}
+        admin={admin}
+      />
 
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto p-6 bg-gray-100">
