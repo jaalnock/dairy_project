@@ -1,105 +1,248 @@
 import React, { useState, useEffect } from "react";
+import axios from "axios";
 import MilkForm from "../components/MilkForm.jsx";
-import { v4 as uuidv4 } from "uuid";
 
 const MilkList = () => {
-  const [milkEntries, setMilkEntries] = useState([]);
+  const [milkEntries, setMilkEntries] = useState([]); // Array of farmer documents (each contains transactions)
+  const [farmers, setFarmers] = useState([]); // For populating the MilkForm dropdown
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [editingEntry, setEditingEntry] = useState(null);
+  const [editingEntry, setEditingEntry] = useState(null); // A flattened transaction object
+  const [error, setError] = useState(null);
+  const [loadingMilk, setLoadingMilk] = useState(false);
+  const [loadingFarmers, setLoadingFarmers] = useState(false);
 
-  // Load milk entries from localStorage on mount
-  useEffect(() => {
-    const storedMilkEntries = JSON.parse(localStorage.getItem("milkEntries")) || [];
-    setMilkEntries(storedMilkEntries);
-  }, []);
-
-  // Store milk entries in localStorage whenever they are updated
-  useEffect(() => {
-    localStorage.setItem("milkEntries", JSON.stringify(milkEntries));
-  }, [milkEntries]);
-
-  // Save new or updated milk entry
-  const handleSaveMilkEntry = (entry) => {
-    if (editingEntry) {
-      // Update existing entry
-      const updatedEntries = milkEntries.map((m) =>
-        m.id === editingEntry.id ? { ...m, ...entry } : m
+  // Fetch milk entries (farmers with transactions) from the backend
+  const fetchMilkEntries = async () => {
+    setLoadingMilk(true);
+    try {
+      const response = await axios.get(
+        "http://localhost:8000/api/v1/milk/get-all-milk",
+        {
+          withCredentials: true,
+        }
       );
-      setMilkEntries(updatedEntries);
-      setEditingEntry(null);
-    } else {
-      // Save new entry with a unique ID and automatic date
-      const newEntry = { id: uuidv4(), date: new Date().toLocaleDateString(), ...entry };
-      setMilkEntries([...milkEntries, newEntry]);
+      // Expected response: array of farmer objects with fields: farmerName, mobileNumber, transaction (array)
+      const fetchedEntries = response.data.data || response.data;
+      console.log("Fetched milk entries:", fetchedEntries);
+      setMilkEntries(fetchedEntries);
+      setError(null);
+    } catch (err) {
+      console.error("Error fetching milk entries:", err);
+      setError("Error fetching milk entries. Please try again later.");
+    } finally {
+      setLoadingMilk(false);
     }
-    setIsFormOpen(false);
   };
 
-  // Handle Edit
-  const handleEdit = (entry) => {
-    setEditingEntry(entry);
+  // Fetch farmers for the dropdown in MilkForm
+  const fetchFarmers = async () => {
+    setLoadingFarmers(true);
+    try {
+      const response = await axios.get(
+        "http://localhost:8000/api/v1/farmer/get-all-farmers",
+        {
+          withCredentials: true,
+        }
+      );
+      const fetchedFarmers = response.data.data || response.data;
+      setFarmers(fetchedFarmers);
+    } catch (err) {
+      console.error("Error fetching farmers:", err);
+    } finally {
+      setLoadingFarmers(false);
+    }
+  };
+
+  // Initial data fetch on component mount
+  useEffect(() => {
+    fetchMilkEntries();
+    fetchFarmers();
+  }, []);
+
+  // Automatically clear error messages after 5 seconds
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => setError(null), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
+
+  // Optimistically update local state when saving a milk transaction
+  const handleSaveMilkEntry = async (entry) => {
+    try {
+      if (editingEntry) {
+        // Update existing milk transaction
+        const response = await axios.patch(
+          `http://localhost:8000/api/v1/milk/update-milk/${editingEntry.farmerNumber}/${editingEntry._id}`,
+          entry,
+          { withCredentials: true }
+        );
+        console.log("Update response:", response);
+        // The response returns an updated farmer document.
+        const updatedFarmer = response.data.data;
+        // Update the farmer's transactions in local state:
+        setMilkEntries((prevEntries) =>
+          prevEntries.map((farmer) => {
+            if (farmer.mobileNumber === editingEntry.farmerNumber) {
+              return { ...farmer, transaction: updatedFarmer.transaction };
+            }
+            return farmer;
+          })
+        );
+        setEditingEntry(null);
+      } else {
+        // Add new milk transaction
+        const response = await axios.post(
+          "http://localhost:8000/api/v1/milk/add-milk",
+          entry,
+          { withCredentials: true }
+        );
+        console.log("Add response:", response);
+        const updatedFarmer = response.data.data;
+        // Update local state: if the farmer exists, update their transactions; otherwise, add the new farmer
+        setMilkEntries((prevEntries) => {
+          const index = prevEntries.findIndex(
+            (farmer) => farmer.mobileNumber === updatedFarmer.mobileNumber
+          );
+          if (index !== -1) {
+            const newEntries = [...prevEntries];
+            newEntries[index] = updatedFarmer;
+            return newEntries;
+          } else {
+            return [...prevEntries, updatedFarmer];
+          }
+        });
+      }
+      setIsFormOpen(false);
+      setError(null);
+    } catch (err) {
+      console.error("Error saving milk transaction:", err);
+      setError(
+        err.response?.data?.message ||
+          "Error saving milk entry. Please try again."
+      );
+    }
+  };
+
+  // Open the form for editing a flattened milk transaction
+  const handleEdit = (flatEntry) => {
+    setEditingEntry(flatEntry);
     setIsFormOpen(true);
   };
 
-  // Handle Delete
-  const handleDelete = (id) => {
-    const filteredEntries = milkEntries.filter((m) => m.id !== id);
-    setMilkEntries(filteredEntries);
+  // Delete a milk transaction with optimistic local update
+  const handleDelete = async (transactionId, farmerNumber) => {
+    if (
+      !window.confirm("Are you sure you want to delete this milk transaction?")
+    )
+      return;
+    try {
+      await axios.delete(
+        `http://localhost:8000/api/v1/milk/delete-milk/${farmerNumber}/${transactionId}`,
+        { withCredentials: true }
+      );
+      // Update local state: remove the transaction from the corresponding farmer
+      setMilkEntries((prevEntries) =>
+        prevEntries.map((farmer) => {
+          if (farmer.mobileNumber === farmerNumber) {
+            return {
+              ...farmer,
+              transaction: farmer.transaction.filter(
+                (txn) => txn._id !== transactionId
+              ),
+            };
+          }
+          return farmer;
+        })
+      );
+      setError(null);
+    } catch (err) {
+      console.error("Error deleting milk transaction:", err);
+      setError(
+        err.response?.data?.message ||
+          "Error deleting milk transaction. Please try again later."
+      );
+    }
   };
+
+  // Flatten the nested milkEntries into individual transaction rows.
+  // Each farmer document is expected to have: { farmerName, mobileNumber, transaction: [...] }
+  const flatMilkTransactions = milkEntries.flatMap((entry) =>
+    entry.transaction.map((txn) => ({
+      _id: txn._id,
+      farmerName: entry.farmerName,
+      farmerNumber: entry.mobileNumber, // For update/delete endpoints
+      transactionDate: txn.transactionDate,
+      milkType: txn.milkType,
+      milkQuantity: txn.milkQuantity,
+      transactionAmount: txn.transactionAmount,
+    }))
+  );
 
   return (
     <div className="p-6 relative min-h-screen">
-      <h2 className="text-4xl font-bold mb-10 text-center text-[#2c447f]">Milk Collection List</h2>
+      <h2 className="text-4xl font-bold mb-10 text-center text-[#2c447f]">
+        Milk Collection List
+      </h2>
 
-      <table className="w-full border-collapse border border-gray-300">
-        <thead>
-          <tr className="bg-gray-200">
-            <th className="border p-2">Date</th>
-            <th className="border p-2">Farmer Name</th>
-            <th className="border p-2">Milk Type</th>
-            <th className="border p-2">Quantity (Liters)</th>
-            <th className="border p-2">Fat (%)</th>
-            <th className="border p-2">SNF (%)</th>
-            <th className="border p-2">Price (₹)</th>
-            <th className="border p-2">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {milkEntries.length > 0 ? (
-            milkEntries.map((entry) => (
-              <tr key={entry.id} className="text-center">
-                <td className="border p-2">{entry.date}</td>
-                <td className="border p-2">{entry.farmerName}</td>
-                <td className="border p-2">{entry.milkType}</td>
-                <td className="border p-2">{entry.quantity}</td>
-                <td className="border p-2">{entry.fat}</td>
-                <td className="border p-2">{entry.snf}</td>
-                <td className="border p-2">₹{entry.price}</td>
-                <td className="border p-2">
-                  <button
-                    onClick={() => handleEdit(entry)}
-                    className="bg-yellow-500 text-white px-2 py-1 rounded-md mr-2 hover:bg-yellow-600"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDelete(entry.id)}
-                    className="bg-red-500 text-white px-2 py-1 rounded-md hover:bg-red-600"
-                  >
-                    Delete
-                  </button>
+      {error && <div className="text-red-500 mb-4">{error}</div>}
+
+      {loadingMilk ? (
+        <div>Loading milk entries...</div>
+      ) : (
+        <table className="w-full border-collapse border border-gray-300">
+          <thead>
+            <tr className="bg-gray-200">
+              <th className="border p-2">Farmer Name</th>
+              <th className="border p-2">Transaction Date</th>
+              <th className="border p-2">Milk Type</th>
+              <th className="border p-2">Milk Quantity (Liters)</th>
+              <th className="border p-2">Transaction Amount (₹)</th>
+              <th className="border p-2">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {flatMilkTransactions.length > 0 ? (
+              flatMilkTransactions.map((flatEntry) => (
+                <tr key={flatEntry._id} className="text-center">
+                  <td className="border p-2">{flatEntry.farmerName}</td>
+                  <td className="border p-2">
+                    {new Date(flatEntry.transactionDate).toLocaleDateString()}
+                  </td>
+                  <td className="border p-2">{flatEntry.milkType}</td>
+                  <td className="border p-2">{flatEntry.milkQuantity}</td>
+                  <td className="border p-2">₹{flatEntry.transactionAmount}</td>
+                  <td className="border p-2">
+                    <button
+                      onClick={() => handleEdit(flatEntry)}
+                      className="bg-yellow-500 text-white px-2 py-1 rounded-md mr-2 hover:bg-yellow-600"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() =>
+                        handleDelete(flatEntry._id, flatEntry.farmerNumber)
+                      }
+                      className="bg-red-500 text-white px-2 py-1 rounded-md hover:bg-red-600"
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td
+                  colSpan="6"
+                  className="border p-4 text-center text-gray-500"
+                >
+                  No milk collections available.
                 </td>
               </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan="8" className="border p-4 text-center text-gray-500">
-                No milk collections available.
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
+            )}
+          </tbody>
+        </table>
+      )}
 
       <button
         onClick={() => {
@@ -117,6 +260,7 @@ const MilkList = () => {
           handleSaveMilkEntry={handleSaveMilkEntry}
           setIsFormOpen={setIsFormOpen}
           editingEntry={editingEntry}
+          farmers={farmers} // Passing farmers to MilkForm for dropdown
         />
       )}
     </div>

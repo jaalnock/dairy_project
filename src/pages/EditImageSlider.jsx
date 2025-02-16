@@ -27,14 +27,31 @@ export const EditImageSlider = () => {
           "http://localhost:8000/api/v1/new-offer/get-all-offers",
           { withCredentials: true }
         );
+
         console.log("Fetched slides:", data);
-        // Map to a simpler structure if needed
-        const filteredSlides = data.data.map((item) => ({
-          _id: item._id,
-          title: item.title,
-          description: item.description,
-          link: item.link,
-        }));
+
+        let filteredSlides = [];
+
+        if (Array.isArray(data?.data) && data.data.length > 0) {
+          filteredSlides = data.data.map((item) => ({
+            _id: item._id,
+            title: item.title,
+            description: item.description,
+            link: item.link,
+          }));
+        } else {
+          // ✅ Set a dummy slide if no slides exist
+          filteredSlides = [
+            {
+              _id: "dummy",
+              title: "Borgave Dugdhalaya",
+              description:
+                "शेतातून थेट तुमच्या घरापर्यंत सर्वोत्तम दुग्धजन्य पदार्थ आणत आहोत.",
+              link: "https://images.pexels.com/photos/254178/pexels-photo-254178.jpeg",
+            },
+          ];
+        }
+
         setSlides(filteredSlides);
         setIsFileModified(false);
       } catch (error) {

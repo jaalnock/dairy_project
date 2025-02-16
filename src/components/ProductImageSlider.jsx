@@ -1,11 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { ArrowLeft, ArrowRight } from 'lucide-react';
+import React, { useState, useEffect } from "react";
 
-export function ProductImageSlider({ slides = [], autoPlayInterval = 5000, className = '' }) {
+export function ProductImageSlider({
+  slides = [],
+  autoPlayInterval = 500,
+  className = "",
+}) {
+  // Changed interval to 500ms
   const [currentSlide, setCurrentSlide] = useState(0);
 
   // Check for empty slides
-  if (!slides || slides.length === 0) {
+  if (!slides || slides.length == 0) {
     return <div>No products available at the moment.</div>;
   }
 
@@ -16,14 +20,6 @@ export function ProductImageSlider({ slides = [], autoPlayInterval = 5000, class
     return () => clearInterval(timer);
   }, [autoPlayInterval, slides.length]);
 
-  const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % slides.length);
-  };
-
-  const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
-  };
-
   return (
     <div className={`relative overflow-hidden ${className} mt-0`}>
       {/* Product Slider */}
@@ -32,7 +28,7 @@ export function ProductImageSlider({ slides = [], autoPlayInterval = 5000, class
           <div
             key={index}
             className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
-              currentSlide === index ? 'opacity-100 z-10' : 'opacity-0 z-0'
+              currentSlide === index ? "opacity-100 z-10" : "opacity-0 z-0"
             }`}
           >
             <img
@@ -43,30 +39,18 @@ export function ProductImageSlider({ slides = [], autoPlayInterval = 5000, class
             <div className="absolute inset-0 bg-black/50" />
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="text-center text-white max-w-4xl px-6">
-                <h2 className="text-4xl md:text-5xl font-bold mb-4 drop-shadow-xl">{slide.title}</h2>
-                <p className="text-lg md:text-xl drop-shadow-lg">{slide.description}</p>
+                <h2 className="text-4xl md:text-5xl font-bold mb-4 drop-shadow-xl">
+                  {slide.title}
+                </h2>
+                <p className="text-lg md:text-xl drop-shadow-lg">
+                  {slide.description}
+                </p>
               </div>
             </div>
           </div>
         ))}
       </div>
-
-      {/* Navigation Arrows */}
-      <button
-        onClick={prevSlide}
-        className="absolute left-6 top-1/2 transform -translate-y-1/2 z-20 bg-white/50 hover:bg-white/80 p-4 rounded-full transition-all shadow-lg"
-        aria-label="Previous slide"
-      >
-        <ArrowLeft className="h-8 w-8 text-black" />
-      </button>
-      <button
-        onClick={nextSlide}
-        className="absolute right-6 top-1/2 transform -translate-y-1/2 z-20 bg-white/50 hover:bg-white/80 p-4 rounded-full transition-all shadow-lg"
-        aria-label="Next slide"
-      >
-        <ArrowRight className="h-8 w-8 text-black" />
-      </button>
-
+      
       {/* Slide Indicators */}
       <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20 flex space-x-3">
         {slides.map((_, index) => (
@@ -74,7 +58,7 @@ export function ProductImageSlider({ slides = [], autoPlayInterval = 5000, class
             key={index}
             onClick={() => setCurrentSlide(index)}
             className={`w-5 h-5 rounded-full transition-all ${
-              currentSlide === index ? 'bg-yellow-500 w-10' : 'bg-white/50'
+              currentSlide === index ? "bg-yellow-500 w-10" : "bg-white/50"
             }`}
             aria-label={`Go to slide ${index + 1}`}
           />

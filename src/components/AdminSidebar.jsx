@@ -7,12 +7,13 @@ import { LanguageToggler } from "./LanguageToggler";
 import { useAuth } from "../context/AuthContext";
 import axios from "axios";
 
-export const AdminSidebar = ({ isOpen, setSidebarOpen }) => {
+export const AdminSidebar = ({ isOpen, setSidebarOpen, admin }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { logout } = useAuth();
   const [showReports, setShowReports] = useState(false);
   const { t } = useTranslation();
+
   useEffect(() => {
     if (!location.pathname.includes("/admin/reports")) {
       setShowReports(false);
@@ -132,7 +133,7 @@ export const AdminSidebar = ({ isOpen, setSidebarOpen }) => {
             />
             <div className="ml-5">
               <h3 className="text-base font-semibold text-gray-900">
-                {t("adminSidebar.profile.name")}
+                {admin?.adminName}
               </h3>
               <p className="text-sm text-gray-700">
                 {t("adminSidebar.profile.role")}
