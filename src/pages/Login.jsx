@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
 import { useTranslation } from "react-i18next";
+import { ArrowLeft } from "lucide-react";
 import axios from "axios";
 
 export const Login = () => {
@@ -105,6 +106,12 @@ export const Login = () => {
 
   return (
     <div className="flex items-center justify-center w-full h-screen overflow-y-auto">
+      <button
+        onClick={() => navigate("/")}
+        className="absolute sm:top-10 sm:left-10 top-4 left-4 bg-gradient-to-r from-blue-500 to-blue-600 text-white p-2 rounded-full shadow-md hover:bg-blue-700 transition"
+      >
+        <ArrowLeft size={30} />
+      </button>
       <form
         onSubmit={handleSubmit}
         className="bg-white rounded-xl shadow-lg p-8 w-96 max-w-full"
