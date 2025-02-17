@@ -44,7 +44,8 @@ export const ProductCard = ({ product }) => {
         {/* Price and Stock Status */}
         <div className="flex justify-between items-center mb-3">
           <span className="text-gray-700 text-sm">
-            {t("products.productCard.price")} ${product.price}
+            
+             ${product.price}
           </span>
           <span
             className={`px-2 py-1 rounded text-xs ${

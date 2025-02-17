@@ -21,12 +21,14 @@ export const SubAdminSidebar = ({ isOpen, setSidebarOpen, subAdmin }) => {
     }
   }, [location]);
 
+  // New and existing menu items with added Category option
   const menuItems = [
     { name: t("subAdminSidebar.menu.transactions"), path: "/subadmin" },
     { name: t("subAdminSidebar.menu.addMilk"), path: "/subadmin/add_milk" },
     { name: t("subAdminSidebar.menu.addProduct"), path: "/subadmin/products" },
     { name: t("subAdminSidebar.menu.loan"), path: "/subadmin/loan" },
     { name: t("subAdminSidebar.menu.farmer"), path: "/subadmin/farmer" },
+    { name: "Add Product Category", path: "/subadmin/category" },
     { name: t("subAdminSidebar.menu.report"), path: "/subadmin/report" },
   ];
 
@@ -56,7 +58,7 @@ export const SubAdminSidebar = ({ isOpen, setSidebarOpen, subAdmin }) => {
       className={`fixed top-0 left-0 bg-gradient-to-br from-[#d0e1f9] to-[#a8c0ff] z-50 h-screen text-white p-4 transform transition-transform duration-300 lg:relative lg:translate-x-0 w-50 lg:w-74 flex flex-col justify-between`}
       aria-label="Sidebar Navigation"
     >
-      {/* Logo & Title */}
+      {/* Top Section: Logo & Title */}
       <div>
         <div className="mb-6 flex items-center space-x-3">
           <img
@@ -89,7 +91,7 @@ export const SubAdminSidebar = ({ isOpen, setSidebarOpen, subAdmin }) => {
         </ul>
       </div>
 
-      {/* Language Toggler Section */}
+      {/* Middle Section: Language Toggler */}
       <div className="absolute md:bottom-38 bottom-42 left-4 w-[85%] bg-gradient-to-br from-[#d6e4fc] to-[#b3c7f7] p-4 rounded-xl shadow-lg">
         <div className="flex flex-col items-center">
           <h3 className="text-base font-semibold text-gray-900 mb-3">
@@ -99,7 +101,7 @@ export const SubAdminSidebar = ({ isOpen, setSidebarOpen, subAdmin }) => {
         </div>
       </div>
 
-      {/* Profile & Logout Section */}
+      {/* Bottom Section: Profile & Logout */}
       <div className="absolute bottom-4 left-4 flex flex-col items-center space-y-0 bg-gradient-to-br from-[#d6e4fc] to-[#b3c7f7] p-4 rounded-xl shadow-lg w-[85%]">
         <div className="flex items-center space-x-4">
           <img

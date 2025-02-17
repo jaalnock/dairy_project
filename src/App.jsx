@@ -26,6 +26,7 @@ import FarmerList from "./pages/FarmerList.jsx";
 import Cart from "./pages/Cart.jsx"; // import the new Cart page
 import { CartProvider } from "./context/CartContext"; // import CartProvider
 import { ProtectedRoute } from "./components/ProtectedRoute"; // make sure this is imported
+import CategoryList from "./pages/CategoryList.jsx";
 
 function App() {
   return (
@@ -65,6 +66,7 @@ function App() {
             <Route path="add_milk" element={<MilkList />} />
             <Route path="loan" element={<LoanList />} />
             <Route path="farmer" element={<FarmerList />} />
+            <Route path="category" element={<CategoryList />} />
           </Route>
         </Route>
 

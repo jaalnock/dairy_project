@@ -272,6 +272,9 @@ const resources = {
         },
       },
       subAdmin: {
+        menu: {
+          report: "SubAdmin",
+        },
         title: "SubAdmins",
         form: {
           addTitle: "Add New SubAdmin",
@@ -688,6 +691,9 @@ const resources = {
         },
       },
       subAdmin: {
+        menu: {
+          report: "उपप्रशासक",
+        },
         title: "उप प्रशासक",
         form: {
           addTitle: "नवीन उप प्रशासक जोडा",
