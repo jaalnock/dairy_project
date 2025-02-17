@@ -1,73 +1,74 @@
+// src/components/ProductCard.jsx
 import React from "react";
 import { motion } from "framer-motion";
 
 export const AddProductCard = ({ product, onEdit, onDelete }) => {
-  console.log("Rendering ProductCard with product:", product);
-
+  // Expecting product fields: productName, productPrice, productImage, snf, fat, quantity
+  // ...plus categoryName (added when flattening the data)
   return (
     <motion.div
       initial={{ opacity: 0, y: 30 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
       className="bg-white rounded-2xl shadow-lg overflow-hidden transition-transform transform hover:scale-105 hover:shadow-2xl"
     >
-      {/* Product Image or Fallback */}
-      {product.imageUrl ? (
+      {console.log(product.productImage)}
+      {/* Product Image or fallback */}
+      {product.productImage ? (
         <div className="relative">
           <img
-            src={product.imageUrl}
-            alt={product.name || "Product image"}
-            loading="lazy"
+            src={product.productImage}
+            alt={product.productName || "Product"}
             className="w-full h-56 object-cover"
+            loading="lazy"
           />
-          {/* Subtle blue overlay */}
           <div className="absolute inset-0 bg-blue-500 opacity-10" />
         </div>
       ) : (
         <div className="flex items-center justify-center bg-gray-200 w-full h-56">
-          <span className="text-gray-500 text-lg">No Image Available</span>
+          <span className="text-gray-500">No Image Available</span>
         </div>
       )}
-
       <div className="p-6">
-        {/* Product Details */}
-        <h3 className="text-2xl font-bold text-gray-800 hover:text-blue-600 transition-colors duration-200 mb-4">
-          {product.name || "Unnamed Product"}
+        <h3 className="text-2xl font-bold text-gray-800 mb-2">
+          {product.productName || "Unnamed Product"}
         </h3>
+        {product.categoryName && (
+          <p className="text-sm text-gray-500 mb-2">
+            Category: {product.categoryName}
+          </p>
+        )}
         <div className="space-y-2 text-gray-700 mb-6">
-          <p className="text-lg">
-            <span className="font-semibold">Price:</span>{" "}
-            {product.price ? `$${product.price.toFixed(2)}` : "N/A"}
+          <p>
+            <span className="font-semibold">Price:</span> $
+            {Number(product.productPrice).toFixed(2)}
           </p>
-          <p className="text-lg">
-            <span className="font-semibold">Quantity:</span>{" "}
-            {product.quantity ?? "N/A"}
+          <p>
+            <span className="font-semibold">Quantity:</span> {product.quantity}
           </p>
-          <p className="text-lg">
-            <span className="font-semibold">SNF:</span> {product.snf ?? "N/A"}
+          <p>
+            <span className="font-semibold">SNF:</span> {product.snf}
           </p>
-          <p className="text-lg">
-            <span className="font-semibold">FAT:</span> {product.fat ?? "N/A"}
+          <p>
+            <span className="font-semibold">FAT:</span> {product.fat}
           </p>
         </div>
-
-        {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-4">
           <motion.button
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
-            onClick={() => onEdit(product.id)}
-            aria-label={`Edit ${product.name || "product"}`}
-            className="flex-1 bg-blue-600 text-white text-lg py-2 px-4 rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            onClick={onEdit}
+            aria-label={`Edit ${product.productName}`}
+            className="flex-1 bg-blue-600 text-white text-lg py-2 px-4 rounded-md transition-colors duration-200"
           >
             Edit
           </motion.button>
           <motion.button
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
-            onClick={() => onDelete(product.id)}
-            aria-label={`Delete ${product.name || "product"}`}
-            className="flex-1 bg-red-500 text-white text-lg py-2 px-4 rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-red-400"
+            onClick={onDelete}
+            aria-label={`Delete ${product.productName}`}
+            className="flex-1 bg-red-500 text-white text-lg py-2 px-4 rounded-md transition-colors duration-200"
           >
             Delete
           </motion.button>
