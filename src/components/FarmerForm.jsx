@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 
 const FarmerForm = ({
   isEditing,
@@ -17,14 +18,14 @@ const FarmerForm = ({
 
   useEffect(() => {
     if (isEditing && editingFarmer) {
-      // If needed, ensure that editingFarmer.joiningDate is in the correct format (e.g., YYYY-MM-DD)
+      // Ensure that the joiningDate is in YYYY-MM-DD format if needed
       setFormData(editingFarmer);
     }
   }, [isEditing, editingFarmer]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = () => {
@@ -44,87 +45,172 @@ const FarmerForm = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex justify-center items-center px-4">
-      <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
-        <h3 className="text-xl font-semibold mb-4 text-center">
-          {isEditing ? "Edit Farmer" : "New Farmer"}
-        </h3>
-
-        <label className="block mb-1">Farmer Name</label>
-        <input
-          type="text"
-          name="farmerName"
-          value={formData.farmerName}
-          onChange={handleChange}
-          className="w-full border p-2 rounded mb-2"
-        />
-
-        <label className="block mb-1">Mobile Number</label>
-        <input
-          type="tel"
-          name="mobileNumber"
-          value={formData.mobileNumber}
-          onChange={handleChange}
-          className="w-full border p-2 rounded mb-2"
-        />
-
-        <label className="block mb-1">Type of Milk</label>
-        <select
-          name="milkType"
-          value={formData.milkType}
-          onChange={handleChange}
-          className="w-full border p-2 rounded mb-2"
-        >
-          <option value="">Select Type</option>
-          <option value="Cow">Cow</option>
-          <option value="Buffalo">Buffalo</option>
-        </select>
-
-        <label className="block mb-1">Address</label>
-        <input
-          type="text"
-          name="address"
-          value={formData.address}
-          onChange={handleChange}
-          className="w-full border p-2 rounded mb-2"
-        />
-
-        <label className="block mb-1">Gender</label>
-        <select
-          name="gender"
-          value={formData.gender}
-          onChange={handleChange}
-          className="w-full border p-2 rounded mb-2"
-        >
-          <option value="">Select Gender</option>
-          <option value="Male">Male</option>
-          <option value="Female">Female</option>
-        </select>
-
-        <label className="block mb-1">Joining Date</label>
-        <input
-          type="date"
-          name="joiningDate"
-          value={formData.joiningDate}
-          onChange={handleChange}
-          className="w-full border p-2 rounded mb-4"
-        />
-
-        <div className="mt-4 flex justify-between space-x-4">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center px-4 z-50">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95, y: -20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: -20 }}
+        transition={{ duration: 0.3 }}
+        className="bg-white rounded-2xl shadow-2xl w-full max-w-md sm:max-w-lg relative"
+      >
+        {/* Modal Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+          <h3 className="text-xl font-bold text-gray-800">
+            {isEditing ? "Edit Farmer" : "New Farmer"}
+          </h3>
           <button
             onClick={() => setIsFormOpen(false)}
-            className="flex-1 bg-gray-400 text-white px-4 py-2 rounded-lg hover:bg-gray-500 transition"
+            className="text-gray-400 hover:text-gray-600 focus:outline-none"
+            aria-label="Close form"
+          >
+            <svg
+              className="h-6 w-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
+        </div>
+
+        {/* Modal Content */}
+        <form className="px-6 py-4 space-y-5">
+          <div>
+            <label
+              htmlFor="farmerName"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Farmer Name
+            </label>
+            <input
+              type="text"
+              id="farmerName"
+              name="farmerName"
+              value={formData.farmerName}
+              onChange={handleChange}
+              placeholder="Enter farmer name"
+              className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          <div>
+            <label
+              htmlFor="mobileNumber"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Mobile Number
+            </label>
+            <input
+              type="tel"
+              id="mobileNumber"
+              name="mobileNumber"
+              value={formData.mobileNumber}
+              onChange={handleChange}
+              placeholder="Enter mobile number"
+              className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          <div>
+            <label
+              htmlFor="milkType"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Type of Milk
+            </label>
+            <select
+              id="milkType"
+              name="milkType"
+              value={formData.milkType}
+              onChange={handleChange}
+              className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">Select Type</option>
+              <option value="Cow">Cow</option>
+              <option value="Buffalo">Buffalo</option>
+            </select>
+          </div>
+
+          <div>
+            <label
+              htmlFor="address"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Address
+            </label>
+            <input
+              type="text"
+              id="address"
+              name="address"
+              value={formData.address}
+              onChange={handleChange}
+              placeholder="Enter address"
+              className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          <div>
+            <label
+              htmlFor="gender"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Gender
+            </label>
+            <select
+              id="gender"
+              name="gender"
+              value={formData.gender}
+              onChange={handleChange}
+              className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">Select Gender</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+            </select>
+          </div>
+
+          <div>
+            <label
+              htmlFor="joiningDate"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Joining Date
+            </label>
+            <input
+              type="date"
+              id="joiningDate"
+              name="joiningDate"
+              value={formData.joiningDate}
+              onChange={handleChange}
+              className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+        </form>
+
+        {/* Modal Actions */}
+        <div className="flex justify-end gap-4 px-6 py-4 border-t border-gray-200">
+          <button
+            type="button"
+            onClick={() => setIsFormOpen(false)}
+            className="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 font-medium rounded-md transition duration-200"
           >
             Cancel
           </button>
           <button
+            type="button"
             onClick={handleSubmit}
-            className="flex-1 bg-[#2c447f] text-white px-4 py-2 rounded-lg hover:bg-[#1b2d5b] transition"
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md transition duration-200"
           >
             {isEditing ? "Update" : "Save"} Farmer
           </button>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };

@@ -1,127 +1,126 @@
 import React, { useState, useEffect, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useTranslation } from "react-i18next";
 import { products } from "../config";
 import { CartContext } from "../context/CartContext";
 
 export const ProductDetails = () => {
-  const { t } = useTranslation();
   const { id } = useParams();
   const [product, setProduct] = useState(null);
+  const [selectedQuantity, setSelectedQuantity] = useState("200ml");
   const navigate = useNavigate();
   const { addToCart } = useContext(CartContext);
 
   useEffect(() => {
-    const fetchedProduct = products.find(
-      (product) => product.id === parseInt(id)
-    );
+    const fetchedProduct = products.find((p) => p.id === parseInt(id));
     setProduct(fetchedProduct);
   }, [id]);
 
-  const handleBackClick = () => {
-    navigate("/products");
-  };
+  const handleBackClick = () => navigate("/products");
 
   const handleAddToCart = () => {
-    addToCart(product);
-    navigate("/cart");
+    addToCart({ ...product, selectedQuantity });
+    // ❌ Removed navigate("/cart") to prevent auto redirection
+    alert("Product added to cart! ✅");
   };
 
-  if (!product) return <div>{t("products.productDetails.loading")}</div>;
+  if (!product)
+    return <div className="text-center text-gray-600">Loading...</div>;
 
   return (
-    <div className="p-6 bg-white rounded-lg shadow-lg max-w-4xl mx-auto my-12 relative">
+    <div className="max-w-4xl mx-auto p-6 md:p-8 bg-white rounded-xl shadow-lg my-12 border border-gray-200">
       {/* Back Button */}
       <button
         onClick={handleBackClick}
-        className="absolute top-6 left-6 bg-blue-600 hover:bg-blue-500 text-white transition duration-300 w-12 h-12 rounded-full flex items-center justify-center"
-        aria-label={t("products.productDetails.backToProducts")}
+        className="flex items-center space-x-2 bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2 rounded-lg mb-6 transition duration-300"
       >
-        <span className="text-xl">&larr;</span>
+        <span className="text-lg">&#8592;</span>
+        <span>Back to Products</span>
       </button>
 
-      <div className="flex flex-col lg:flex-row items-center lg:items-start">
-        {/* Product Image */}
-        <div className="lg:w-1/2 mb-6 lg:mb-0">
+      {/* Product Content */}
+      <div className="flex flex-col md:flex-row items-center md:items-start space-y-6 md:space-y-0 md:space-x-10">
+        {/* Image */}
+        <div className="relative w-60 h-60 md:w-80 md:h-80">
           <img
             src={product.imageUrl}
             alt={product.name}
-            className="w-full h-80 object-cover rounded-lg shadow-md"
+            className="w-full h-full object-cover rounded-lg shadow-md border border-gray-300"
           />
         </div>
 
-        {/* Product Details */}
-        <div className="lg:w-1/2 lg:pl-8 text-gray-800">
-          <h2 className="text-4xl font-semibold text-blue-600 mb-4">
+        {/* Details */}
+        <div className="flex-1 text-gray-800">
+          <h2 className="text-3xl font-bold text-gray-900 mb-2">
             {product.name}
           </h2>
+          <p className="text-2xl font-semibold text-green-600">
+            ${product.price}
+          </p>
 
-          {/* Status Badge */}
-          <div className="mt-2 mb-4">
-            <span
-              className={`text-xs font-semibold py-1 px-4 rounded-full shadow-md ${
-                product.inStock
-                  ? "bg-green-100 text-green-800"
-                  : "bg-red-100 text-red-800"
-              }`}
-            >
-              {product.inStock
-                ? t("products.productDetails.inStock")
-                : t("products.productDetails.outOfStock")}
-            </span>
-          </div>
+          {/* Stock Status */}
+          <p
+            className={`mt-2 text-sm font-medium ${
+              product.inStock ? "text-green-600" : "text-red-600"
+            }`}
+          >
+            {product.inStock ? "In Stock" : "Out of Stock"}
+          </p>
 
-          <p className="text-lg text-gray-700 mt-3">{product.description}</p>
+          {/* Description */}
+          <p className="text-gray-600 mt-4 leading-relaxed">
+            {product.description}
+          </p>
 
           {/* Specifications */}
-          <div className="mt-6">
-            <h3 className="text-2xl font-semibold text-gray-800 mb-4">
-              {t("products.productDetails.specifications")}
+          <div className="mt-4 bg-gray-100 p-4 rounded-lg">
+            <h3 className="text-lg font-semibold text-gray-700 mb-2">
+              Specifications:
             </h3>
-            <ul className="list-disc list-inside text-gray-700">
+            <ul className="text-gray-700 space-y-1">
               <li>
-                <strong>{t("products.productDetails.snf")}:</strong>{" "}
-                {product.snf || t("products.productDetails.notAvailable")}
+                <strong>SNF:</strong> {product.snf || "N/A"}
               </li>
               <li>
-                <strong>{t("products.productDetails.fatContent")}:</strong>{" "}
-                {product.fatContent ||
-                  t("products.productDetails.notAvailable")}
+                <strong>Fat Content:</strong> {product.fatContent || "N/A"}
               </li>
               <li>
-                <strong>{t("products.productDetails.quantity")}:</strong>{" "}
-                {product.quantity || t("products.productDetails.notAvailable")}
+                <strong>Quantity:</strong> {product.quantity || "N/A"}
               </li>
             </ul>
           </div>
 
-          {/* Price */}
-          <p className="text-3xl font-bold text-green-600 mt-6">
-            ${product.price}
-          </p>
-
-          {/* Status Message */}
-          <p className="text-sm text-gray-500 mt-1">
-            {t("products.productDetails.availability")}:{" "}
-            {product.inStock
-              ? t("products.productDetails.inStock")
-              : t("products.productDetails.outOfStock")}
-          </p>
+          {/* Quantity Dropdown */}
+          <div className="mt-4">
+            <label
+              htmlFor="quantity"
+              className="block text-gray-700 font-semibold mb-2"
+            >
+              Select Quantity:
+            </label>
+            <select
+              id="quantity"
+              value={selectedQuantity}
+              onChange={(e) => setSelectedQuantity(e.target.value)}
+              className="w-full md:w-auto px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
+            >
+              <option value="200ml">200ml</option>
+              <option value="300ml">300ml</option>
+              <option value="500ml">500ml</option>
+            </select>
+          </div>
 
           {/* Add to Cart Button */}
-          <div className="mt-6">
-            <button
-              onClick={handleAddToCart}
-              disabled={!product.inStock}
-              className={`${
-                product.inStock
-                  ? "bg-green-600 hover:bg-green-700"
-                  : "bg-gray-400 cursor-not-allowed opacity-50"
-              } text-white px-6 py-3 rounded-full font-semibold transition-all duration-300`}
-            >
-              AddToCart
-            </button>
-          </div>
+          <button
+            onClick={handleAddToCart}
+            disabled={!product.inStock}
+            className={`mt-6 w-full md:w-auto px-6 py-3 rounded-lg font-semibold transition-all duration-300 shadow-md transform hover:scale-105 active:scale-100 focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50 ${
+              product.inStock
+                ? "bg-blue-600 hover:bg-blue-700 text-white"
+                : "bg-gray-400 cursor-not-allowed"
+            }`}
+          >
+            Add to Cart
+          </button>
         </div>
       </div>
     </div>

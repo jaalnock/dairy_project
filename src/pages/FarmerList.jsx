@@ -1,14 +1,21 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import FarmerForm from "../components/FarmerForm.jsx";
+import { useTranslation } from "react-i18next";
+import { motion, AnimatePresence } from "framer-motion";
 
-const FarmerList = () => {
+export const FarmerList = () => {
+  const { t } = useTranslation();
+
+  // State for farmers, modal visibility, and deletion/editing helpers
   const [farmers, setFarmers] = useState([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingFarmer, setEditingFarmer] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [farmerToDelete, setFarmerToDelete] = useState(null);
 
   // Fetch farmers from the backend API on mount
   useEffect(() => {
@@ -19,8 +26,6 @@ const FarmerList = () => {
           "http://localhost:8000/api/v1/farmer/get-all-farmers",
           { withCredentials: true }
         );
-        console.log(response);
-
         // Assume the API returns { data: [farmer1, farmer2, ...] } or simply an array.
         const fetchedFarmers = response.data.data || response.data;
         setFarmers(fetchedFarmers);
@@ -39,9 +44,7 @@ const FarmerList = () => {
   // Automatically clear error messages after 5 seconds
   useEffect(() => {
     if (error) {
-      const timer = setTimeout(() => {
-        setError(null);
-      }, 5000);
+      const timer = setTimeout(() => setError(null), 5000);
       return () => clearTimeout(timer);
     }
   }, [error]);
@@ -50,7 +53,7 @@ const FarmerList = () => {
   const handleSaveFarmer = async (farmer) => {
     try {
       if (editingFarmer) {
-        // Update existing farmer (PUT request)
+        // Update existing farmer (PATCH request)
         const response = await axios.patch(
           `http://localhost:8000/api/v1/farmer/update/${editingFarmer._id}`,
           farmer,
@@ -70,23 +73,23 @@ const FarmerList = () => {
           farmer,
           { withCredentials: true }
         );
-        console.log(response);
-
         const newFarmer = response.data.data || response.data;
         setFarmers((prevFarmers) => [...prevFarmers, newFarmer]);
       }
       setIsFormOpen(false);
       setError(null);
     } catch (err) {
-      console.log(err.response.status);
-
+      console.error("Error saving farmer:", err);
       if (err.request.status === 409) {
         setError("Farmer already exists");
-      }
-      if (err.request.status === 400) {
+      } else if (err.request.status === 400) {
         setError("Please fill all fields");
+      } else {
+        setError(
+          err.response?.data?.message ||
+            "Error saving farmer. Please try again."
+        );
       }
-      console.error("Error saving farmer:", err);
     }
   };
 
@@ -96,9 +99,14 @@ const FarmerList = () => {
     setIsFormOpen(true);
   };
 
+  // Open delete confirmation modal
+  const openDeleteModal = (farmer) => {
+    setFarmerToDelete(farmer);
+    setDeleteModalOpen(true);
+  };
+
   // Delete a farmer via API
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this farmer?")) return;
     try {
       await axios.delete(`http://localhost:8000/api/v1/farmer/delete/${id}`, {
         withCredentials: true,
@@ -111,6 +119,9 @@ const FarmerList = () => {
         err.response?.data?.message ||
           "Error deleting farmer. Please try again later."
       );
+    } finally {
+      setDeleteModalOpen(false);
+      setFarmerToDelete(null);
     }
   };
 
@@ -122,96 +133,164 @@ const FarmerList = () => {
   );
 
   return (
-    <div className="p-6 relative min-h-screen">
-      <h2 className="text-4xl font-bold mb-6 text-center text-[#2c447f]">
-        Farmers List
+    <div className="bg-gray-100 min-h-screen p-6 relative">
+      <h2 className="text-4xl font-bold text-blue-800 text-center mb-10">
+        {t("branch.title")}
       </h2>
 
-      {error && <div className="text-red-500 mb-4">{error}</div>}
-
-      <input
-        type="text"
-        placeholder="Search by name or phone..."
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
-        className="w-full p-2 border border-gray-300 rounded mb-4"
-      />
-
-      {loading ? (
-        <div>Loading farmers...</div>
-      ) : (
-        <table className="w-full border-collapse border border-gray-300">
-          <thead>
-            <tr className="bg-gray-200">
-              <th className="border p-2">Name</th>
-              <th className="border p-2">Phone Number</th>
-              <th className="border p-2">Type of Milk</th>
-              <th className="border p-2">Address</th>
-              <th className="border p-2">Gender</th>
-              <th className="border p-2">Joining Date</th>
-              <th className="border p-2">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredFarmers.length > 0 ? (
-              filteredFarmers.map((farmer) => (
-                <tr key={farmer._id} className="text-center">
-                  <td className="border p-2">{farmer.farmerName}</td>
-                  <td className="border p-2">{farmer.mobileNumber}</td>
-                  <td className="border p-2">{farmer.milkType}</td>
-                  <td className="border p-2">{farmer.address}</td>
-                  <td className="border p-2">{farmer.gender}</td>
-                  <td className="border p-2">
-                    {new Date(farmer.joiningDate).toLocaleDateString()}
-                  </td>
-                  <td className="border p-2">
-                    <button
-                      onClick={() => handleEdit(farmer)}
-                      className="bg-yellow-500 text-white px-2 py-1 rounded-md mr-2 hover:bg-yellow-600"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDelete(farmer._id)}
-                      className="bg-red-500 text-white px-2 py-1 rounded-md hover:bg-red-600"
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td
-                  colSpan="7"
-                  className="border p-4 text-center text-gray-500"
-                >
-                  No farmers found.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+      {error && (
+        <div className="bg-red-200 text-red-800 p-3 rounded mb-4 text-center">
+          {error}
+        </div>
       )}
 
+      {/* Search Input */}
+      <div className="max-w-md mx-auto mb-6">
+        <input
+          type="text"
+          placeholder="Search by name or phone..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+        />
+      </div>
+
+      {loading ? (
+        <div className="text-center text-gray-600">Loading farmers...</div>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="min-w-full bg-white shadow-md rounded-lg overflow-hidden">
+            <thead className="bg-blue-500 text-white">
+              <tr>
+                <th className="px-4 py-3 text-left">Name</th>
+                <th className="px-4 py-3 text-left">Phone Number</th>
+                <th className="px-4 py-3 text-left">Type of Milk</th>
+                <th className="px-4 py-3 text-left">Address</th>
+                <th className="px-4 py-3 text-left">Gender</th>
+                <th className="px-4 py-3 text-left">Joining Date</th>
+                <th className="px-4 py-3 text-center">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              {filteredFarmers.length > 0 ? (
+                filteredFarmers.map((farmer, idx) => (
+                  <motion.tr
+                    key={farmer._id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className={idx % 2 === 0 ? "bg-gray-50" : "bg-white"}
+                  >
+                    <td className="px-4 py-3">{farmer.farmerName}</td>
+                    <td className="px-4 py-3">{farmer.mobileNumber}</td>
+                    <td className="px-4 py-3">{farmer.milkType}</td>
+                    <td className="px-4 py-3">{farmer.address}</td>
+                    <td className="px-4 py-3">{farmer.gender}</td>
+                    <td className="px-4 py-3">
+                      {new Date(farmer.joiningDate).toLocaleDateString()}
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      <button
+                        onClick={() => handleEdit(farmer)}
+                        className="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-1 px-3 rounded mr-2 transition duration-150"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => openDeleteModal(farmer)}
+                        className="bg-red-500 hover:bg-red-600 text-white font-semibold py-1 px-3 rounded transition duration-150"
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </motion.tr>
+                ))
+              ) : (
+                <tr>
+                  <td
+                    colSpan="7"
+                    className="px-4 py-4 text-center text-gray-500"
+                  >
+                    No farmers found.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* Floating Add Farmer Button */}
       <button
         onClick={() => {
           setIsFormOpen(true);
           setEditingFarmer(null);
         }}
-        className="fixed bottom-6 right-6 bg-[#2c447f] text-white px-6 py-3 rounded-full shadow-lg hover:bg-[#1b2d5b] transition"
+        className="fixed bottom-6 right-6 bg-blue-700 hover:bg-blue-800 text-white px-6 py-3 rounded-full shadow-lg transition duration-200"
       >
         + Add Farmer
       </button>
 
-      {isFormOpen && (
-        <FarmerForm
-          isEditing={!!editingFarmer}
-          handleSaveFarmer={handleSaveFarmer}
-          setIsFormOpen={setIsFormOpen}
-          editingFarmer={editingFarmer}
-        />
-      )}
+      {/* Farmer Form Modal */}
+      <AnimatePresence>
+        {isFormOpen && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ duration: 0.3 }}
+            className="fixed inset-0 bg-black/30 flex items-center justify-center z-50"
+          >
+            <FarmerForm
+              isEditing={!!editingFarmer}
+              handleSaveFarmer={handleSaveFarmer}
+              setIsFormOpen={setIsFormOpen}
+              editingFarmer={editingFarmer}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Delete Confirmation Modal */}
+      <AnimatePresence>
+        {deleteModalOpen && farmerToDelete && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+          >
+            <motion.div
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.9 }}
+              className="bg-white rounded-lg shadow-lg p-6 max-w-md mx-auto"
+            >
+              <h3 className="text-xl font-semibold text-center mb-4">
+                Confirm Delete
+              </h3>
+              <p className="text-center mb-6">
+                Are you sure you want to delete{" "}
+                <strong>{farmerToDelete.farmerName}</strong>?
+              </p>
+              <div className="flex justify-around">
+                <button
+                  onClick={() => setDeleteModalOpen(false)}
+                  className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-md transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => handleDelete(farmerToDelete._id)}
+                  className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md transition"
+                >
+                  Delete
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

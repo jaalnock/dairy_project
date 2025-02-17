@@ -3,6 +3,7 @@ import { SubAdminCard } from "../components/SubAdminCard";
 import { SubAdminForm } from "../components/SubAdminForm";
 import axios from "axios";
 import { ErrorDialog } from "../components/ErrorDialog";
+import { motion, AnimatePresence } from "framer-motion";
 
 export const SubAdminList = () => {
   // State for sub-admins and modal helpers
@@ -32,9 +33,7 @@ export const SubAdminList = () => {
           "http://localhost:8000/api/v1/subadmin/get-all-subadmins",
           { withCredentials: true }
         );
-        console.log(response.data.data);
-
-        // Assume API returns an object with the sub-admins array in data.data
+        console.log("Fetched sub-admins:", response.data.data);
         setSubAdmins(response.data.data);
       } catch (error) {
         console.error("Error fetching sub-admins:", error);
@@ -48,8 +47,6 @@ export const SubAdminList = () => {
     const subAdminToEdit = subAdmins.find((subAdmin) => subAdmin._id === id);
     if (subAdminToEdit) {
       // For security reasons, we don't prefill the password.
-      // Also, if you already have an image URL from the backend,
-      // you might choose to display it, but here we let the user pick a new file if needed.
       setFormData({
         name: subAdminToEdit.subAdminName,
         image: null,
@@ -153,9 +150,8 @@ export const SubAdminList = () => {
             headers: { "Content-Type": "multipart/form-data" },
           }
         );
-        console.log(response);
-
-        if (response.status == 201 || response.status == 200) {
+        console.log("Sub-admin created:", response);
+        if (response.status === 201 || response.status === 200) {
           setSubAdmins((prev) => [...prev, response.data.data]);
         }
       }
@@ -172,8 +168,8 @@ export const SubAdminList = () => {
         branchId: "",
       });
     } catch (error) {
-      console.log(error);
-      if (error.response && error.response.status == 400) {
+      console.error("Error saving sub-admin:", error);
+      if (error.response && error.response.status === 400) {
         setErrors([error.response.data.error]);
       } else if (
         error.response &&
@@ -192,84 +188,125 @@ export const SubAdminList = () => {
   };
 
   return (
-    <div className="p-6 relative min-h-screen">
-      <h2 className="text-4xl font-bold mb-10 text-center text-[#2c447f]">
-        Sub-Admin Management
-      </h2>
+    <div className="min-h-screen bg-gray-100 p-6 relative">
+      <div className="container mx-auto">
+        <h2 className="text-4xl font-bold mb-10 text-center text-[#2c447f]">
+          Sub-Admin Management
+        </h2>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-        {subAdmins.map((subAdmin) => (
-          <SubAdminCard
-            key={subAdmin._id}
-            subAdmin={subAdmin}
-            onEdit={() => handleEdit(subAdmin._id)}
-            onDelete={() => confirmDelete(subAdmin._id)}
-          />
-        ))}
-      </div>
-
-      {/* Floating button to add a new sub-admin */}
-      <button
-        onClick={() => {
-          setIsFormOpen(true);
-          setIsEditing(false);
-          setFormData({
-            name: "",
-            image: null,
-            mobile: "",
-            password: "",
-            address: "",
-            branchId: "",
-          });
-        }}
-        className="fixed bottom-6 right-6 bg-[#2c447f] text-white px-6 py-3 rounded-full shadow-lg hover:bg-[#1b2d5b] transition"
-      >
-        Add Sub-Admin
-      </button>
-
-      {/* Sub-admin Form Modal */}
-      {isFormOpen && (
-        <SubAdminForm
-          isEditing={isEditing}
-          formData={formData}
-          handleInputChange={handleInputChange}
-          handleFileChange={handleFileChange}
-          handleSaveSubAdmin={handleSaveSubAdmin}
-          setIsFormOpen={setIsFormOpen}
-        />
-      )}
-
-      {/* Delete Confirmation Modal */}
-      {showConfirm && (
-        <div className="fixed inset-0 bg-black/50 flex justify-center items-center px-4">
-          <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
-            <h3 className="text-xl font-semibold mb-4 text-center">
-              Confirm Deletion
-            </h3>
-            <p className="text-center mb-4">
-              Are you sure you want to delete this sub-admin?
-            </p>
-            <div className="flex justify-between mt-6 space-x-4">
-              <button
-                onClick={() => setShowConfirm(false)}
-                className="flex-1 bg-[#4c76ba] text-white px-4 py-2 rounded-lg hover:bg-gray-500 transition"
+        {/* SubAdmin Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          <AnimatePresence>
+            {subAdmins.map((subAdmin) => (
+              <motion.div
+                key={subAdmin._id}
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.3 }}
               >
-                No
-              </button>
-              <button
-                onClick={handleDelete}
-                className="flex-1 bg-[#d9534f] text-white px-4 py-2 rounded-lg hover:bg-red-700 transition"
-              >
-                Yes
-              </button>
-            </div>
-          </div>
+                <SubAdminCard
+                  subAdmin={subAdmin}
+                  onEdit={() => handleEdit(subAdmin._id)}
+                  onDelete={() => confirmDelete(subAdmin._id)}
+                />
+              </motion.div>
+            ))}
+          </AnimatePresence>
         </div>
-      )}
 
-      {errors.length > 0 && (
-        <ErrorDialog errors={errors} onClose={() => setErrors([])} />
-      )}
+        {/* Floating button to add a new sub-admin */}
+        <button
+          onClick={() => {
+            setIsFormOpen(true);
+            setIsEditing(false);
+            setFormData({
+              name: "",
+              image: null,
+              mobile: "",
+              password: "",
+              address: "",
+              branchId: "",
+            });
+          }}
+          className="fixed bottom-6 right-6 bg-[#2c447f] text-white px-6 py-3 rounded-full shadow-lg hover:bg-[#1b2d5b] transition transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-600"
+        >
+          Add Sub-Admin
+        </button>
+
+        {/* Sub-admin Form Modal */}
+        <AnimatePresence>
+          {isFormOpen && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.3 }}
+              className="fixed inset-0 bg-black/30 flex justify-center items-center px-4 z-50"
+              role="dialog"
+              aria-modal="true"
+            >
+              <SubAdminForm
+                isEditing={isEditing}
+                formData={formData}
+                handleInputChange={handleInputChange}
+                handleFileChange={handleFileChange}
+                handleSaveSubAdmin={handleSaveSubAdmin}
+                setIsFormOpen={setIsFormOpen}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Delete Confirmation Modal */}
+        <AnimatePresence>
+          {showConfirm && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="fixed inset-0 bg-black/50 flex items-center justify-center px-4 z-50"
+              role="dialog"
+              aria-modal="true"
+            >
+              <motion.div
+                initial={{ scale: 0.9 }}
+                animate={{ scale: 1 }}
+                exit={{ scale: 0.9 }}
+                transition={{ duration: 0.3 }}
+                className="bg-white rounded-lg shadow-xl p-8 w-full max-w-md mx-auto"
+              >
+                <h3 className="text-xl font-semibold mb-4 text-center">
+                  Confirm Deletion
+                </h3>
+                <p className="text-center mb-6">
+                  Are you sure you want to delete this sub-admin?
+                </p>
+                <div className="flex justify-between gap-4">
+                  <button
+                    onClick={() => setShowConfirm(false)}
+                    className="flex-1 bg-[#4c76ba] text-white px-4 py-2 rounded-lg hover:bg-gray-500 transition duration-150"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleDelete}
+                    className="flex-1 bg-[#d9534f] text-white px-4 py-2 rounded-lg hover:bg-red-700 transition duration-150"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Error Dialog */}
+        {errors.length > 0 && (
+          <ErrorDialog errors={errors} onClose={() => setErrors([])} />
+        )}
+      </div>
     </div>
   );
 };

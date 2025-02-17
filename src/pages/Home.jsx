@@ -10,6 +10,7 @@ export function Home() {
   // State for dynamic hero slides fetched from the backend
   const [heroSlides, setHeroSlides] = useState([]);
   const [loadingHero, setLoadingHero] = useState(true);
+  const [heroError, setHeroError] = useState(null);
 
   // Static product slides array
   const staticProductSlides = [
@@ -47,14 +48,14 @@ export function Home() {
 
   // Function to fetch dynamic hero slides using axios
   const fetchHeroSlides = async () => {
+    setLoadingHero(true);
+    setHeroError(null);
     try {
       const response = await axios.get(
         "http://localhost:8000/api/v1/new-offer/get-all-offers"
       );
 
-      // console.log("Fetched hero slides:", response.data.data);
       const data = response?.data?.data ?? [];
-
       let updatedHeroSlides = [];
 
       if (Array.isArray(data) && data.length > 0) {
@@ -65,7 +66,7 @@ export function Home() {
           link: slide.link,
         }));
       } else {
-        // ✅ Add a dummy slide when no slides exist
+        // Add a dummy slide when no slides exist
         updatedHeroSlides = [
           {
             _id: "dummy",
@@ -76,10 +77,13 @@ export function Home() {
           },
         ];
       }
-
       setHeroSlides(updatedHeroSlides);
     } catch (error) {
       console.error("Error fetching hero slides:", error);
+      setHeroError(
+        t("home.errorLoadingHero") ||
+          "Error loading hero slides. Please try again."
+      );
     } finally {
       setLoadingHero(false);
     }
@@ -98,42 +102,69 @@ export function Home() {
 
   // Preload images for the hero slides after they are fetched
   useEffect(() => {
-    const preloadImages = (imageUrls) => {
-      imageUrls.forEach((url) => {
-        const img = new Image();
-        img.src = url;
-      });
-    };
-
     if (heroSlides.length) {
-      const imageUrls = heroSlides.map((slide) => slide.image);
-      preloadImages(imageUrls);
+      heroSlides.forEach((slide) => {
+        const img = new Image();
+        img.src = slide.link;
+      });
     }
   }, [heroSlides]);
 
   return (
-    <motion.div className="min-h-screen space-y-0">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+      className="min-h-screen bg-white"
+    >
       {/* Dynamic Hero Section */}
-      {loadingHero ? (
-        <div>Loading hero slides...</div>
-      ) : (
-        <ImageSlider
-          key={heroSlides.length} // Using slides length as a dynamic key forces re-mount when slides change.
-          slides={heroSlides}
-          className="h-[700px]"
-          autoPlayInterval={5000}
-        />
-      )}
+      <section className="relative">
+        {loadingHero ? (
+          <div className="flex items-center justify-center h-[700px]">
+            {/* Custom spinner */}
+            <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-blue-600"></div>
+          </div>
+        ) : heroError ? (
+          <div className="flex flex-col items-center justify-center h-[700px]">
+            <p className="text-red-600 text-xl mb-4">{heroError}</p>
+            <button
+              onClick={fetchHeroSlides}
+              className="bg-blue-600 text-white px-6 py-3 rounded hover:bg-blue-700 transition"
+            >
+              {t("home.retry")}
+            </button>
+          </div>
+        ) : (
+          <ImageSlider
+            key={heroSlides.length} // Using slides length as a dynamic key forces re-mount when slides change.
+            slides={heroSlides}
+            className="h-[700px] w-full"
+            autoPlayInterval={5000}
+          />
+        )}
+      </section>
 
       {/* About Us Section */}
-      <About />
+      <motion.section
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3, duration: 0.5 }}
+      >
+        <About />
+      </motion.section>
 
       {/* Static Product Image Slider */}
-      <ProductImageSlider
-        slides={translatedProductSlides}
-        autoPlayInterval={5000}
-        className="h-[600px]"
-      />
+      <motion.section
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5, duration: 0.5 }}
+      >
+        <ProductImageSlider
+          slides={translatedProductSlides}
+          autoPlayInterval={5000}
+          className="h-[600px] w-full"
+        />
+      </motion.section>
     </motion.div>
   );
 }

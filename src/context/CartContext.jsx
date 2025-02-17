@@ -1,4 +1,3 @@
-// CartContext.jsx
 import React, { createContext, useState, useEffect } from "react";
 
 export const CartContext = createContext();
@@ -16,10 +15,16 @@ export const CartProvider = ({ children }) => {
 
   const addToCart = (product) => {
     setCartItems((prevItems) => {
-      const existingItem = prevItems.find((item) => item.id === product.id);
+      const existingItem = prevItems.find(
+        (item) =>
+          item.id === product.id &&
+          item.selectedQuantity === product.selectedQuantity
+      );
+
       if (existingItem) {
         return prevItems.map((item) =>
-          item.id === product.id
+          item.id === product.id &&
+          item.selectedQuantity === product.selectedQuantity
             ? { ...item, quantity: item.quantity + 1 }
             : item
         );
@@ -29,27 +34,30 @@ export const CartProvider = ({ children }) => {
     });
   };
 
-  const removeFromCart = (productId) => {
+  const removeFromCart = (productId, selectedQuantity) => {
     setCartItems((prevItems) =>
-      prevItems.filter((item) => item.id !== productId)
+      prevItems.filter(
+        (item) =>
+          !(item.id === productId && item.selectedQuantity === selectedQuantity)
+      )
     );
   };
 
-  const increaseQuantity = (productId) => {
+  const increaseQuantity = (productId, selectedQuantity) => {
     setCartItems((prevItems) =>
       prevItems.map((item) =>
-        item.id === productId
+        item.id === productId && item.selectedQuantity === selectedQuantity
           ? { ...item, quantity: item.quantity + 1 }
           : item
       )
     );
   };
 
-  const decreaseQuantity = (productId) => {
+  const decreaseQuantity = (productId, selectedQuantity) => {
     setCartItems((prevItems) =>
       prevItems
         .map((item) =>
-          item.id === productId
+          item.id === productId && item.selectedQuantity === selectedQuantity
             ? { ...item, quantity: item.quantity - 1 }
             : item
         )
@@ -71,3 +79,4 @@ export const CartProvider = ({ children }) => {
     </CartContext.Provider>
   );
 };
+x

@@ -1,70 +1,62 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
+import { motion } from "framer-motion";
 
 export const LanguageToggler = ({ isMobile = false }) => {
   const { t, i18n } = useTranslation();
 
-  const handleToggleLanguage = () => {
-    const newLang = i18n.language === "en" ? "mr" : "en";
-    i18n.changeLanguage(newLang);
+  // Function to explicitly set language
+  const handleChangeLanguage = (lang) => {
+    if (i18n.language !== lang) {
+      i18n.changeLanguage(lang);
+    }
   };
 
-  // Only internal styling related to the toggler's appearance
+  // Define container and button dimensions based on mobile prop
+  const containerClasses = isMobile ? "w-[100px] h-7" : "w-[140px] h-8";
+  const buttonClasses = isMobile
+    ? "w-[47px] h-6 text-xs"
+    : "w-[66px] h-7 text-sm";
+
+  // Calculate the left position of the sliding background.
+  // These values can be adjusted to match your design requirements.
+  const sliderLeft =
+    i18n.language === "en"
+      ? "0.125rem" // For English, slide to the left.
+      : isMobile
+      ? "51px" // For mobile when Marathi is active.
+      : "72px"; // For desktop when Marathi is active.
+
   return (
     <div className="bg-gray-100/80 rounded-full shadow-inner">
-      <div
-        className={`relative flex items-center ${
-          isMobile ? "w-[100px] h-7" : "w-[140px] h-8"
-        }`}
-      >
-        {/* Sliding Background */}
-        <div
-          className={`
-            absolute 
-            bg-gradient-to-r from-blue-500 to-blue-600
-            rounded-full shadow-md transition-all duration-300 ease-in-out
-            ${isMobile ? "w-[47px] h-6" : "w-[66px] h-7"}
-            ${
-              isMobile
-                ? i18n.language === "en"
-                  ? "left-0.5"
-                  : "left-[51px]"
-                : i18n.language === "en"
-                ? "left-0.5"
-                : "left-[72px]"
-            }
-          `}
+      <div className={`relative flex items-center ${containerClasses}`}>
+        {/* Animated Sliding Background */}
+        <motion.div
+          layout
+          className={`absolute bg-gradient-to-r from-blue-500 to-blue-600 rounded-full shadow-md transition-all duration-300 ease-in-out ${buttonClasses}`}
+          style={{ left: sliderLeft }}
         />
-
-        {/* Language Buttons */}
+        {/* English Button */}
         <button
-          onClick={handleToggleLanguage}
-          className={`
-            relative z-10 flex items-center justify-center
-            rounded-full font-medium transition-colors duration-300
-            ${isMobile ? "w-[47px] h-6 text-xs" : "w-[66px] h-7 text-sm"}
-            ${
-              i18n.language === "en"
-                ? "text-white"
-                : "text-gray-600 hover:text-gray-900"
-            }
-          `}
+          onClick={() => handleChangeLanguage("en")}
+          className={`relative z-10 flex items-center justify-center rounded-full font-medium transition-colors duration-300 ${buttonClasses} ${
+            i18n.language === "en"
+              ? "text-white"
+              : "text-gray-600 hover:text-gray-900"
+          }`}
+          aria-pressed={i18n.language === "en"}
         >
           <span className="tracking-wide">{t("navbar.language.english")}</span>
         </button>
-
+        {/* Marathi Button */}
         <button
-          onClick={handleToggleLanguage}
-          className={`
-            relative z-10 flex items-center justify-center
-            rounded-full font-medium transition-colors duration-300
-            ${isMobile ? "w-[47px] h-6 text-xs" : "w-[66px] h-7 text-sm"}
-            ${
-              i18n.language === "mr"
-                ? "text-white"
-                : "text-gray-600 hover:text-gray-900"
-            }
-          `}
+          onClick={() => handleChangeLanguage("mr")}
+          className={`relative z-10 flex items-center justify-center rounded-full font-medium transition-colors duration-300 ${buttonClasses} ${
+            i18n.language === "mr"
+              ? "text-white"
+              : "text-gray-600 hover:text-gray-900"
+          }`}
+          aria-pressed={i18n.language === "mr"}
         >
           <span>{t("navbar.language.marathi")}</span>
         </button>

@@ -1,41 +1,109 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Outlet } from "react-router-dom";
 import { SubAdminSidebar } from "./SubAdminSidebar";
 import { Menu } from "lucide-react"; // For the hamburger icon
+import axios from "axios";
+import { motion, AnimatePresence } from "framer-motion";
 
 export const SubAdminLayout = () => {
   const [isSidebarOpen, setSidebarOpen] = useState(false);
+  const [subAdmin, setSubAdmin] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Close sidebar when clicking outside
+  // Safely retrieve sub-admin info from localStorage
+  const responseByLS = JSON.parse(localStorage.getItem("response") || "{}");
+
+  const fetchSubAdmin = async () => {
+    if (!responseByLS.data?.data?.subAdmin?.id) {
+      console.error("No sub-admin info found in localStorage.");
+      setIsLoading(false);
+      return;
+    }
+    const subAdminId = responseByLS.data.data.subAdmin.id;
+    try {
+      const response = await axios.get(
+        `http://localhost:8000/api/v1/subadmin/get/${subAdminId}`,
+        { withCredentials: true }
+      );
+      setSubAdmin(response.data.data);
+    } catch (error) {
+      console.error("Error fetching subadmin:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchSubAdmin();
+  }, []);
+
+  // Closes the mobile sidebar when the backdrop is clicked
   const handleBackdropClick = () => {
     setSidebarOpen(false);
   };
 
   return (
-    <div className="flex h-screen">
+    <div className="flex h-screen bg-gray-50">
       {/* Mobile Hamburger Menu */}
       <button
-        className="absolute top-4 left-4 z-50 p-2 bg-gray-800 text-white rounded-md lg:hidden"
         onClick={() => setSidebarOpen(!isSidebarOpen)}
+        className="absolute top-4 left-4 z-50 p-2 bg-gray-800 text-white rounded-md lg:hidden focus:outline-none focus:ring-2 focus:ring-gray-600"
+        aria-label="Toggle sidebar"
       >
         <Menu size={24} />
       </button>
 
-      {/* Backdrop */}
-      {isSidebarOpen && (
-        <div
-          className="fixed inset-0 z-40 lg:hidden opacity-50"
-          onClick={handleBackdropClick}
-        ></div>
-      )}
+      {/* Mobile Backdrop */}
+      <AnimatePresence>
+        {isSidebarOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 0.5 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="fixed inset-0 z-40 lg:hidden bg-black backdrop-blur-sm"
+            onClick={handleBackdropClick}
+          />
+        )}
+      </AnimatePresence>
 
-      {/* Sidebar */}
-      <SubAdminSidebar isOpen={isSidebarOpen} setSidebarOpen={setSidebarOpen} />
+      {/* Mobile Sidebar */}
+      <AnimatePresence>
+        {isSidebarOpen && (
+          <motion.div
+            initial={{ x: "-100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "-100%" }}
+            transition={{ duration: 0.3 }}
+            className="fixed inset-y-0 left-0 z-50 lg:static lg:translate-x-0"
+          >
+            <SubAdminSidebar
+              isOpen={isSidebarOpen}
+              setSidebarOpen={setSidebarOpen}
+              subAdmin={subAdmin}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Desktop Sidebar (always visible) */}
+      <div className="hidden lg:block">
+        <SubAdminSidebar
+          isOpen={true}
+          setSidebarOpen={setSidebarOpen}
+          subAdmin={subAdmin}
+        />
+      </div>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto p-6 bg-gray-100">
-        {/* Content of the page */}
-        <Outlet /> {/* This will render the child routes */}
+      <main className="flex-1 overflow-y-auto p-6">
+        {isLoading ? (
+          <div className="flex items-center justify-center h-full">
+            <p className="text-gray-600">Loading...</p>
+          </div>
+        ) : (
+          <Outlet />
+        )}
       </main>
     </div>
   );

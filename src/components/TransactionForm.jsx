@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 
 export const TransactionForm = ({
   isEditing,
@@ -10,7 +11,6 @@ export const TransactionForm = ({
     products: [],
     netTotalPrice: 0,
   });
-
   const [availableProducts, setAvailableProducts] = useState([]);
 
   // Load products from localStorage
@@ -29,7 +29,7 @@ export const TransactionForm = ({
     }
   }, [isEditing, editingTransaction]);
 
-  // Handle product selection change
+  // Handle product selection and quantity changes
   const handleProductChange = (index, event) => {
     const { name, value } = event.target;
     const updatedProducts = [...formData.products];
@@ -41,37 +41,38 @@ export const TransactionForm = ({
         productId: value,
         name: selectedProduct ? selectedProduct.name : "",
         price: selectedProduct ? selectedProduct.price : 0,
-        quantity: updatedProducts[index]?.quantity || "", // Clear input initially
+        quantity: updatedProducts[index]?.quantity || "",
       };
     } else if (name === "quantity") {
-      // Allow empty input temporarily
-      const newQuantity = value === "" ? "" : Math.max(parseInt(value, 10) || 0, 0);
+      // Allow empty input temporarily; enforce minimum of 0
+      const newQuantity =
+        value === "" ? "" : Math.max(parseInt(value, 10) || 0, 0);
       updatedProducts[index] = {
         ...updatedProducts[index],
         quantity: newQuantity,
       };
     }
 
+    // Recalculate net total price
     const totalPrice = updatedProducts.reduce(
-      (sum, product) => sum + (product.price * (product.quantity || 0)),
+      (sum, product) => sum + product.price * (product.quantity || 0),
       0
     );
-
     setFormData({ products: updatedProducts, netTotalPrice: totalPrice });
   };
 
-  // Add new product row
+  // Add a new product row
   const addProduct = () => {
     setFormData({
       ...formData,
       products: [
         ...formData.products,
-        { productId: "", name: "", price: 0, quantity: "" }, // Set quantity as empty
+        { productId: "", name: "", price: 0, quantity: "" },
       ],
     });
   };
 
-  // Remove product row
+  // Remove a product row
   const removeProduct = (index) => {
     const updatedProducts = [...formData.products];
     updatedProducts.splice(index, 1);
@@ -82,8 +83,9 @@ export const TransactionForm = ({
     setFormData({ products: updatedProducts, netTotalPrice: totalPrice });
   };
 
-  // Save Transaction
-  const handleSubmit = () => {
+  // Save Transaction using form submission
+  const handleSubmit = (e) => {
+    e.preventDefault();
     if (formData.products.length === 0) {
       alert("Please add at least one product!");
       return;
@@ -93,22 +95,42 @@ export const TransactionForm = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex justify-center items-center px-4 overflow-y-auto">
-      <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md max-h-[90vh] flex flex-col">
-        <h3 className="text-xl font-semibold mb-4 text-center">
+    <div
+      className="fixed inset-0 bg-black/50 flex justify-center items-center px-4 overflow-y-auto z-50"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="transaction-form-title"
+    >
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.95 }}
+        transition={{ duration: 0.3 }}
+        className="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] flex flex-col"
+      >
+        <h3
+          id="transaction-form-title"
+          className="text-2xl font-bold text-gray-800 text-center mb-6"
+        >
           {isEditing ? "Edit Transaction" : "New Transaction"}
         </h3>
 
-        {/* Scrollable content */}
-        <div className="flex-1 overflow-y-auto max-h-[65vh] pr-2">
+        {/* Scrollable Form Content */}
+        <form
+          onSubmit={handleSubmit}
+          className="flex-1 overflow-y-auto max-h-[65vh] pr-2 space-y-6"
+        >
           {formData.products.map((product, index) => (
-            <div key={index} className="mb-4 border p-3 rounded-md">
-              <label className="block mb-1">Product</label>
+            <div key={index} className="border p-4 rounded-md shadow-sm">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Product
+              </label>
               <select
                 name="productId"
                 value={product.productId}
                 onChange={(e) => handleProductChange(index, e)}
-                className="w-full border p-2 rounded"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2c447f]"
+                required
               >
                 <option value="">Select a product</option>
                 {availableProducts.length > 0 ? (
@@ -122,24 +144,29 @@ export const TransactionForm = ({
                 )}
               </select>
 
-              <label className="block mt-2">Quantity</label>
+              <label className="block mt-3 text-sm font-medium text-gray-700">
+                Quantity
+              </label>
               <input
                 type="number"
                 name="quantity"
                 value={product.quantity}
                 onChange={(e) => handleProductChange(index, e)}
                 min="0"
-                className="w-full border p-2 rounded"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2c447f]"
+                required
               />
 
-              <p className="mt-2 text-gray-600">
-                Price: ${product.price} | Total: ${product.price * (product.quantity || 0)}
+              <p className="mt-2 text-sm text-gray-600">
+                Price: ${product.price} | Total: $
+                {(product.price * (product.quantity || 0)).toFixed(2)}
               </p>
 
               {formData.products.length > 1 && (
                 <button
+                  type="button"
                   onClick={() => removeProduct(index)}
-                  className="mt-2 bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+                  className="mt-3 bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600 transition duration-200 focus:outline-none focus:ring-2 focus:ring-red-400"
                 >
                   Remove
                 </button>
@@ -148,31 +175,38 @@ export const TransactionForm = ({
           ))}
 
           <button
+            type="button"
             onClick={addProduct}
-            className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 w-full"
+            className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 w-full transition duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             + Add Another Product
           </button>
 
-          <p className="text-lg font-bold mt-4">Net Total Price: ${formData.netTotalPrice}</p>
-        </div>
+          <p className="text-lg font-bold mt-4">
+            Net Total Price: ${formData.netTotalPrice.toFixed(2)}
+          </p>
+        </form>
 
-        {/* Buttons - Always Visible */}
-        <div className="mt-4 flex justify-between space-x-4">
+        {/* Action Buttons */}
+        <div className="mt-8 flex justify-between space-x-4">
           <button
+            type="button"
             onClick={() => setIsFormOpen(false)}
-            className="flex-1 bg-gray-400 text-white px-4 py-2 rounded-lg hover:bg-gray-500 transition"
+            className="flex-1 bg-gray-400 text-white px-4 py-2 rounded-lg hover:bg-gray-500 transition duration-200 focus:outline-none focus:ring-2 focus:ring-gray-400"
           >
             Cancel
           </button>
           <button
+            type="submit"
             onClick={handleSubmit}
-            className="flex-1 bg-[#2c447f] text-white px-4 py-2 rounded-lg hover:bg-[#1b2d5b] transition"
-            >
-            {isEditing ? "Update" : "Save"} Loan
+            className="flex-1 bg-[#2c447f] text-white px-4 py-2 rounded-lg hover:bg-[#1b2d5b] transition duration-200 focus:outline-none focus:ring-2 focus:ring-[#2c447f]"
+          >
+            {isEditing ? "Update Transaction" : "Save Transaction"}
           </button>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };
+
+export default TransactionForm;

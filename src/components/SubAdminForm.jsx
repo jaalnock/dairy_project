@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { XCircle } from "lucide-react";
 import { ErrorDialog } from "./ErrorDialog";
+import { motion } from "framer-motion";
 
 export const SubAdminForm = ({
   isEditing,
@@ -13,18 +14,14 @@ export const SubAdminForm = ({
   const [imagePreview, setImagePreview] = useState(null);
   const [errors, setErrors] = useState([]);
 
-  // Update preview whenever formData.image changes.
+  // Update image preview whenever formData.image changes
   useEffect(() => {
     if (formData.image) {
-      // If the image is a File object, create an object URL for preview.
       if (typeof formData.image === "object") {
         const previewUrl = URL.createObjectURL(formData.image);
         setImagePreview(previewUrl);
-
-        // Revoke object URL on cleanup to avoid memory leaks.
         return () => URL.revokeObjectURL(previewUrl);
       } else if (typeof formData.image === "string") {
-        // If it's already a URL (from backend, for example), use it.
         setImagePreview(formData.image);
       }
     } else {
@@ -32,25 +29,23 @@ export const SubAdminForm = ({
     }
   }, [formData.image]);
 
-  // Handle file input changes. Generate a preview and pass the file to parent.
+  // Handle file input changes: update preview and pass file to parent handler
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
     if (file) {
-      // Generate preview URL.
       const previewUrl = URL.createObjectURL(file);
       setImagePreview(previewUrl);
-      // Let the parent update the formData with the file.
       handleFileChange(event);
     }
   };
 
-  // Remove the selected image.
+  // Remove the selected image and clear the parent's image field
   const handleRemoveImage = () => {
     setImagePreview(null);
-    // Trigger parent's file change handler to set the image field to null.
     handleFileChange({ target: { name: "image", files: [] } });
   };
 
+  // Validate inputs and return an array of error messages
   const validateInputs = () => {
     const newErrors = [];
     if (!formData.name) newErrors.push("Name is required.");
@@ -62,6 +57,7 @@ export const SubAdminForm = ({
     return newErrors;
   };
 
+  // Handle save action with validation and error handling
   const handleSave = async () => {
     const validationErrors = validateInputs();
     if (validationErrors.length > 0) {
@@ -69,15 +65,22 @@ export const SubAdminForm = ({
     } else {
       try {
         await handleSaveSubAdmin();
+        setIsFormOpen(false);
       } catch (error) {
         if (error.response) {
-          if (error.response.status === 400 && error.response.data && error.response.data.message) {
+          if (
+            error.response.status === 400 &&
+            error.response.data &&
+            error.response.data.message
+          ) {
             setErrors([error.response.data.message]);
           } else {
             setErrors(["An unexpected error occurred. Please try again."]);
           }
-        } else if (error.code === 'ERR_NETWORK') {
-          setErrors(["Network error. Please check your connection and try again."]);
+        } else if (error.code === "ERR_NETWORK") {
+          setErrors([
+            "Network error. Please check your connection and try again.",
+          ]);
         } else {
           setErrors(["An unexpected error occurred. Please try again."]);
         }
@@ -86,12 +89,29 @@ export const SubAdminForm = ({
   };
 
   return (
-    <div className="absolute top-0 left-0 w-full h-full bg-gray-500/60 flex justify-center items-center z-50">
-      <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md sm:max-w-2xl z-30 relative">
-        <h3 className="text-xl font-semibold mb-4 text-center">
+    <div
+      className="absolute top-0 left-0 w-full h-full bg-gray-500/60 flex justify-center items-center z-50"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="subadmin-form-title"
+    >
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.95 }}
+        transition={{ duration: 0.3 }}
+        className="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md sm:max-w-2xl z-30 relative"
+      >
+        {/* Form Title */}
+        <h3
+          id="subadmin-form-title"
+          className="text-2xl font-bold text-gray-800 text-center mb-6"
+        >
           {isEditing ? "Edit Sub-Admin" : "Add Sub-Admin"}
         </h3>
-        <form className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+        <form className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          {/* Name Field */}
           <div>
             <label className="block text-gray-700 font-semibold">Name</label>
             <input
@@ -103,6 +123,8 @@ export const SubAdminForm = ({
               className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2c447f]"
             />
           </div>
+
+          {/* Image Upload Section */}
           <div className="flex flex-col items-center">
             <label className="block text-gray-700 font-semibold">Image</label>
             <label
@@ -119,7 +141,6 @@ export const SubAdminForm = ({
               onChange={handleFileUpload}
               className="hidden"
             />
-
             {imagePreview && (
               <div className="relative mt-4 w-48 h-48 border border-gray-300 rounded-md overflow-hidden">
                 <img
@@ -131,12 +152,15 @@ export const SubAdminForm = ({
                   type="button"
                   onClick={handleRemoveImage}
                   className="absolute top-2 right-2 bg-white rounded-full p-1 shadow-md hover:bg-gray-200 transition"
+                  aria-label="Remove image"
                 >
                   <XCircle className="h-6 w-6 text-red-500" />
                 </button>
               </div>
             )}
           </div>
+
+          {/* Mobile Number Field */}
           <div>
             <label className="block text-gray-700 font-semibold">Mobile</label>
             <input
@@ -148,6 +172,8 @@ export const SubAdminForm = ({
               className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2c447f]"
             />
           </div>
+
+          {/* Password Field */}
           <div>
             <label className="block text-gray-700 font-semibold">
               Password
@@ -161,6 +187,8 @@ export const SubAdminForm = ({
               className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2c447f]"
             />
           </div>
+
+          {/* Address Field */}
           <div>
             <label className="block text-gray-700 font-semibold">Address</label>
             <input
@@ -172,6 +200,8 @@ export const SubAdminForm = ({
               className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2c447f]"
             />
           </div>
+
+          {/* Branch ID Field */}
           <div>
             <label className="block text-gray-700 font-semibold">
               Branch ID
@@ -187,24 +217,31 @@ export const SubAdminForm = ({
           </div>
         </form>
 
-        <div className="flex justify-between mt-6 space-x-4">
+        {/* Action Buttons */}
+        <div className="flex justify-between mt-8 space-x-4">
           <button
+            type="button"
             onClick={() => setIsFormOpen(false)}
-            className="flex-1 bg-gray-400 text-white px-4 py-2 rounded-lg hover:bg-gray-500 transition"
+            className="flex-1 bg-gray-400 text-white px-4 py-2 rounded-lg hover:bg-gray-500 transition duration-200 focus:outline-none"
           >
             Cancel
           </button>
           <button
+            type="button"
             onClick={handleSave}
-            className="flex-1 bg-[#2c447f] text-white px-4 py-2 rounded-lg hover:bg-[#1b2d5b] transition"
+            className="flex-1 bg-[#2c447f] text-white px-4 py-2 rounded-lg hover:bg-[#1b2d5b] transition duration-200 focus:outline-none"
           >
             Save
           </button>
         </div>
-      </div>
+      </motion.div>
+
+      {/* Error Dialog (if any errors exist) */}
       {errors.length > 0 && (
         <ErrorDialog errors={errors} onClose={() => setErrors([])} />
       )}
     </div>
   );
 };
+
+export default SubAdminForm;

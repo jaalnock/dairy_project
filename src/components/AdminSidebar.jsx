@@ -6,6 +6,8 @@ import userProfile from "../assets/user_profile.png";
 import { LanguageToggler } from "./LanguageToggler";
 import { useAuth } from "../context/AuthContext";
 import axios from "axios";
+import { motion, AnimatePresence } from "framer-motion";
+import { Menu, X } from "lucide-react"; // Added X for the mobile close button
 
 export const AdminSidebar = ({ isOpen, setSidebarOpen, admin }) => {
   const location = useLocation();
@@ -26,39 +28,35 @@ export const AdminSidebar = ({ isOpen, setSidebarOpen, admin }) => {
   };
 
   const handleLogout = async () => {
-    // localStorage.removeItem("role");
     logout();
     try {
       const response = await axios.post(
         "http://localhost:8000/api/v1/admin/logout",
         {},
-        {
-          withCredentials: true,
-        }
+        { withCredentials: true }
       );
       console.log(response);
       console.log("Logout successful");
       navigate("/login");
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   };
 
   return (
-    <>
-      <aside
-        className={`fixed top-0 left-0 bg-gradient-to-br from-[#d0e1f9] to-[#a8c0ff] z-50 h-screen text-white p-4 transform transition-transform duration-300 lg:relative lg:translate-x-0 ${
-          isOpen ? "translate-x-0" : "-translate-x-full"
-        } w-50 lg:w-74 flex flex-col`}
-      >
-        <div className="flex-1 mb-32">
-          <div className="mb-6 flex items-center space-x-3">
-            <img src={logoImage} alt="logo" className="w-10 h-10" />
-            <h1 className="text-lg font-bold text-black">
-              {t("adminSidebar.title")}
-            </h1>
-          </div>
-          <ul className="text-left">
+    <aside
+      className={`fixed top-0 left-0 bg-gradient-to-br from-blue-200 to-blue-400 z-50 h-screen p-6 transform transition-transform duration-300 lg:relative lg:translate-x-0 w-64 lg:w-80 flex flex-col border-r border-blue-300`}
+    >
+      {/* Top Section: Logo and Navigation */}
+      <div className="flex-1 mb-16">
+        <div className="mb-8 flex items-center space-x-3">
+          <img src={logoImage} alt="Logo" className="w-10 h-10" />
+          <h1 className="text-xl font-bold text-blue-900">
+            {t("adminSidebar.title")}
+          </h1>
+        </div>
+        <nav>
+          <ul className="text-left space-y-2">
             {[
               { name: t("adminSidebar.menu.home"), path: "/admin" },
               {
@@ -67,13 +65,13 @@ export const AdminSidebar = ({ isOpen, setSidebarOpen, admin }) => {
               },
               { name: t("adminSidebar.menu.branch"), path: "/admin/branch" },
             ].map((item) => (
-              <li key={item.name} className="mb-4">
+              <li key={item.name}>
                 <Link
                   to={item.path}
-                  className={`block px-3 py-2 rounded-lg transition duration-200 ${
+                  className={`block px-4 py-2 rounded-lg transition-all duration-200 ${
                     location.pathname === item.path
-                      ? "bg-blue-500 text-white shadow-md"
-                      : "text-black hover:bg-gray-300"
+                      ? "bg-blue-600 text-white shadow-md"
+                      : "text-blue-900 hover:bg-blue-100 hover:shadow-sm"
                   }`}
                   onClick={() => setShowReports(false)}
                 >
@@ -82,80 +80,89 @@ export const AdminSidebar = ({ isOpen, setSidebarOpen, admin }) => {
               </li>
             ))}
 
-            <li className="mb-4 relative">
+            {/* Reports Dropdown */}
+            <li className="relative">
               <button
-                className="text-left px-3 w-full py-2 rounded-lg bg-[#8095b5] text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-                onClick={() => setShowReports(!showReports)}
+                className="w-full px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 transition flex justify-between items-center"
+                onClick={() => setShowReports((prev) => !prev)}
+                aria-expanded={showReports}
+                aria-controls="reports-dropdown"
               >
-                {t("adminSidebar.reports.title")} ▼
+                {t("adminSidebar.reports.title")}{" "}
+                <span className="text-sm">{showReports ? "▲" : "▼"}</span>
               </button>
-              {showReports && (
-                <div className="absolute left-0 mt-2 w-full bg-white shadow-md rounded-lg overflow-hidden">
-                  <button
-                    className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-200"
-                    onClick={() => handleReportSelection("daily")}
+              <AnimatePresence>
+                {showReports && (
+                  <motion.div
+                    id="reports-dropdown"
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.2 }}
+                    className="absolute left-0 mt-2 w-full bg-white shadow-lg rounded-lg overflow-hidden z-10"
                   >
-                    {t("adminSidebar.reports.daily")}
-                  </button>
-                  <button
-                    className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-200"
-                    onClick={() => handleReportSelection("weekly")}
-                  >
-                    {t("adminSidebar.reports.weekly")}
-                  </button>
-                  <button
-                    className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-200"
-                    onClick={() => handleReportSelection("monthly")}
-                  >
-                    {t("adminSidebar.reports.monthly")}
-                  </button>
-                </div>
-              )}
+                    {["daily", "weekly", "monthly"].map((type) => (
+                      <button
+                        key={type}
+                        className="w-full text-left px-4 py-2 text-blue-900 hover:bg-blue-50 transition-all duration-200"
+                        onClick={() => handleReportSelection(type)}
+                      >
+                        {t(`adminSidebar.reports.${type}`)}
+                      </button>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </li>
           </ul>
-        </div>
+        </nav>
+      </div>
 
-        <div className="absolute md:bottom-38 bottom-42 left-4 w-[85%] bg-gradient-to-br from-[#d6e4fc] to-[#b3c7f7] p-4 rounded-xl shadow-lg">
+      {/* Middle Section: Language Toggler */}
+      <div className="mb-6">
+        <div className="bg-gradient-to-br from-blue-100 to-blue-300 p-4 rounded-xl shadow-lg mb-4">
           <div className="flex flex-col items-center">
-            <h3 className="text-base font-semibold text-gray-900 mb-3">
+            <h3 className="text-base font-semibold text-blue-900 mb-2">
               {t("adminSidebar.language.select")}
             </h3>
             <LanguageToggler isMobile={false} />
           </div>
         </div>
 
-        <div className="absolute bottom-4 left-4 flex flex-col items-center space-y-0 bg-gradient-to-br from-[#d6e4fc] to-[#b3c7f7] p-3 rounded-xl shadow-lg w-[85%]">
+        {/* Bottom Section: Profile & Logout */}
+        <div className="bg-gradient-to-br from-blue-100 to-blue-300 p-4 rounded-xl shadow-lg">
           <div className="flex items-center space-x-4">
             <img
               src={userProfile}
               alt={t("adminSidebar.profile.userImageAlt")}
               className="w-12 h-12 rounded-full border-2 border-white shadow-md"
             />
-            <div className="ml-5">
-              <h3 className="text-base font-semibold text-gray-900">
-                {admin?.adminName}
+            <div>
+              <h3 className="text-base font-semibold text-blue-900">
+                {admin?.adminName || "Admin"}
               </h3>
-              <p className="text-sm text-gray-700">
+              <p className="text-sm text-blue-800">
                 {t("adminSidebar.profile.role")}
               </p>
             </div>
           </div>
-
           <button
             onClick={handleLogout}
-            className="w-full px-4 py-2 mt-2 bg-red-600 text-white font-semibold rounded-lg shadow-md hover:bg-red-700 transition duration-200"
+            className="w-full mt-3 px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg shadow-md transition duration-200"
           >
             {t("adminSidebar.buttons.logout")}
           </button>
         </div>
+      </div>
 
-        <button
-          className="lg:hidden mt-4 p-2 bg-gray-600 rounded text-white"
-          onClick={() => setSidebarOpen(false)}
-        >
-          {t("adminSidebar.buttons.close")}
-        </button>
-      </aside>
-    </>
+      {/* Mobile Close Button */}
+      <button
+        className="lg:hidden mt-4 p-2 bg-blue-600 hover:bg-blue-700 rounded text-white transition flex items-center justify-center"
+        onClick={() => setSidebarOpen(false)}
+        aria-label={t("adminSidebar.buttons.close")}
+      >
+        <X size={24} />
+      </button>
+    </aside>
   );
 };

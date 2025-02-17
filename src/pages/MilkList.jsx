@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import MilkForm from "../components/MilkForm.jsx";
+import { motion, AnimatePresence } from "framer-motion";
 
 const MilkList = () => {
   const [milkEntries, setMilkEntries] = useState([]); // Array of farmer documents (each contains transactions)
@@ -10,6 +11,11 @@ const MilkList = () => {
   const [error, setError] = useState(null);
   const [loadingMilk, setLoadingMilk] = useState(false);
   const [loadingFarmers, setLoadingFarmers] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(""); // In YYYY-MM-DD format
+
+  // New state for custom delete confirmation modal
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [entryToDelete, setEntryToDelete] = useState(null);
 
   // Fetch milk entries (farmers with transactions) from the backend
   const fetchMilkEntries = async () => {
@@ -17,9 +23,7 @@ const MilkList = () => {
     try {
       const response = await axios.get(
         "http://localhost:8000/api/v1/milk/get-all-milk",
-        {
-          withCredentials: true,
-        }
+        { withCredentials: true }
       );
       // Expected response: array of farmer objects with fields: farmerName, mobileNumber, transaction (array)
       const fetchedEntries = response.data.data || response.data;
@@ -40,9 +44,7 @@ const MilkList = () => {
     try {
       const response = await axios.get(
         "http://localhost:8000/api/v1/farmer/get-all-farmers",
-        {
-          withCredentials: true,
-        }
+        { withCredentials: true }
       );
       const fetchedFarmers = response.data.data || response.data;
       setFarmers(fetchedFarmers);
@@ -130,12 +132,14 @@ const MilkList = () => {
     setIsFormOpen(true);
   };
 
-  // Delete a milk transaction with optimistic local update
-  const handleDelete = async (transactionId, farmerNumber) => {
-    if (
-      !window.confirm("Are you sure you want to delete this milk transaction?")
-    )
-      return;
+  // Open the custom delete confirmation modal
+  const openDeleteModal = (flatEntry) => {
+    setEntryToDelete(flatEntry);
+    setIsDeleteModalOpen(true);
+  };
+
+  // Delete a milk transaction with optimistic local update (called after confirmation)
+  const handleDeleteConfirmed = async (transactionId, farmerNumber) => {
     try {
       await axios.delete(
         `http://localhost:8000/api/v1/milk/delete-milk/${farmerNumber}/${transactionId}`,
@@ -162,6 +166,9 @@ const MilkList = () => {
         err.response?.data?.message ||
           "Error deleting milk transaction. Please try again later."
       );
+    } finally {
+      setIsDeleteModalOpen(false);
+      setEntryToDelete(null);
     }
   };
 
@@ -179,90 +186,234 @@ const MilkList = () => {
     }))
   );
 
+  // Sort the transactions in descending order (newest first) based on the full timestamp
+  const sortedMilkTransactions = [...flatMilkTransactions].sort(
+    (a, b) => new Date(b.transactionDate) - new Date(a.transactionDate)
+  );
+
+  // Calculate total milk quantity per milkType for the selected day.
+  // We assume selectedDate is in YYYY-MM-DD format.
+  const totalsForSelectedDate = sortedMilkTransactions.filter((txn) => {
+    const txnDate = new Date(txn.transactionDate).toISOString().split("T")[0];
+    return txnDate === selectedDate;
+  });
+
+  const totalsByMilkType = totalsForSelectedDate.reduce((acc, txn) => {
+    const type = txn.milkType;
+    acc[type] = (acc[type] || 0) + txn.milkQuantity;
+    return acc;
+  }, {});
+
   return (
-    <div className="p-6 relative min-h-screen">
-      <h2 className="text-4xl font-bold mb-10 text-center text-[#2c447f]">
-        Milk Collection List
-      </h2>
+    <div className="bg-gray-100 min-h-screen py-10 px-4">
+      <div className="container mx-auto max-w-screen-xl">
+        {/* Header */}
+        <header className="text-center mb-8">
+          <h2 className="text-4xl font-bold text-blue-800 border-b-2 border-blue-300 pb-4">
+            Milk Collection List
+          </h2>
+        </header>
 
-      {error && <div className="text-red-500 mb-4">{error}</div>}
+        {/* Error Alert */}
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-6 text-center">
+            {error}
+          </div>
+        )}
 
-      {loadingMilk ? (
-        <div>Loading milk entries...</div>
-      ) : (
-        <table className="w-full border-collapse border border-gray-300">
-          <thead>
-            <tr className="bg-gray-200">
-              <th className="border p-2">Farmer Name</th>
-              <th className="border p-2">Transaction Date</th>
-              <th className="border p-2">Milk Type</th>
-              <th className="border p-2">Milk Quantity (Liters)</th>
-              <th className="border p-2">Transaction Amount (₹)</th>
-              <th className="border p-2">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {flatMilkTransactions.length > 0 ? (
-              flatMilkTransactions.map((flatEntry) => (
-                <tr key={flatEntry._id} className="text-center">
-                  <td className="border p-2">{flatEntry.farmerName}</td>
-                  <td className="border p-2">
-                    {new Date(flatEntry.transactionDate).toLocaleDateString()}
-                  </td>
-                  <td className="border p-2">{flatEntry.milkType}</td>
-                  <td className="border p-2">{flatEntry.milkQuantity}</td>
-                  <td className="border p-2">₹{flatEntry.transactionAmount}</td>
-                  <td className="border p-2">
-                    <button
-                      onClick={() => handleEdit(flatEntry)}
-                      className="bg-yellow-500 text-white px-2 py-1 rounded-md mr-2 hover:bg-yellow-600"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() =>
-                        handleDelete(flatEntry._id, flatEntry.farmerNumber)
-                      }
-                      className="bg-red-500 text-white px-2 py-1 rounded-md hover:bg-red-600"
-                    >
-                      Delete
-                    </button>
+        {/* Date Picker & Totals Card */}
+        <div className="mb-8">
+          <div className="bg-gradient-to-r from-blue-200 to-blue-700 text-white rounded-lg shadow-lg p-6">
+            <div className="flex flex-col md:flex-row md:justify-between md:items-center">
+              <label className="font-semibold text-lg mb-2 md:mb-0">
+                Select a date to view daily totals:
+              </label>
+              <input
+                type="date"
+                value={selectedDate}
+                onChange={(e) => setSelectedDate(e.target.value)}
+                className="border border-white rounded px-4 py-2 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
+              />
+            </div>
+            {selectedDate && (
+              <div className="mt-4">
+                <h3 className="text-xl font-semibold">
+                  Totals for {new Date(selectedDate).toLocaleDateString()}:
+                </h3>
+                {Object.keys(totalsByMilkType).length > 0 ? (
+                  <ul className="mt-2">
+                    {Object.entries(totalsByMilkType).map(([type, total]) => (
+                      <li key={type} className="text-lg">
+                        <span className="font-bold">{type} Milk:</span> {total}{" "}
+                        Liters
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-lg">
+                    No transactions found for this date.
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Milk Transactions Table */}
+        <div className="overflow-x-auto shadow-lg rounded-lg bg-white">
+          <table className="min-w-full">
+            <thead className="bg-blue-500 text-white">
+              <tr>
+                <th className="px-4 py-3 text-left">Farmer Name</th>
+                <th className="px-4 py-3 text-left">Transaction Date</th>
+                <th className="px-4 py-3 text-left">Milk Type</th>
+                <th className="px-4 py-3 text-left">Milk Quantity (Liters)</th>
+                <th className="px-4 py-3 text-left">Transaction Amount (₹)</th>
+                <th className="px-4 py-3 text-center">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              {loadingMilk ? (
+                <tr>
+                  <td
+                    colSpan="6"
+                    className="px-4 py-4 text-center text-gray-500"
+                  >
+                    Loading milk entries...
                   </td>
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td
-                  colSpan="6"
-                  className="border p-4 text-center text-gray-500"
-                >
-                  No milk collections available.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      )}
+              ) : sortedMilkTransactions.length > 0 ? (
+                sortedMilkTransactions.map((flatEntry, idx) => (
+                  <tr
+                    key={flatEntry._id}
+                    className={`transition-colors duration-200 ${
+                      idx % 2 === 0
+                        ? "bg-gray-50 hover:bg-gray-100"
+                        : "bg-white hover:bg-gray-50"
+                    }`}
+                  >
+                    <td className="px-4 py-3">{flatEntry.farmerName}</td>
+                    <td className="px-4 py-3">
+                      {new Date(flatEntry.transactionDate).toLocaleDateString()}
+                    </td>
+                    <td className="px-4 py-3">{flatEntry.milkType}</td>
+                    <td className="px-4 py-3">{flatEntry.milkQuantity}</td>
+                    <td className="px-4 py-3">
+                      ₹{flatEntry.transactionAmount}
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      <button
+                        onClick={() => handleEdit(flatEntry)}
+                        className="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-1 px-3 rounded mr-2 transition duration-150"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => openDeleteModal(flatEntry)}
+                        className="bg-red-500 hover:bg-red-600 text-white font-semibold py-1 px-3 rounded transition duration-150"
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td
+                    colSpan="6"
+                    className="px-4 py-4 text-center text-gray-500"
+                  >
+                    No milk collections available.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
 
-      <button
-        onClick={() => {
-          setIsFormOpen(true);
-          setEditingEntry(null);
-        }}
-        className="fixed bottom-6 right-6 bg-[#2c447f] text-white px-6 py-3 rounded-full shadow-lg hover:bg-[#1b2d5b] transition"
-      >
-        + Add Milk Entry
-      </button>
+        {/* Floating Add Milk Entry Button */}
+        <button
+          onClick={() => {
+            setIsFormOpen(true);
+            setEditingEntry(null);
+          }}
+          className="fixed bottom-6 right-6 bg-blue-700 hover:bg-blue-800 text-white px-6 py-3 rounded-full shadow-lg transition duration-200 transform hover:scale-105"
+        >
+          + Add Milk Entry
+        </button>
 
-      {isFormOpen && (
-        <MilkForm
-          isEditing={!!editingEntry}
-          handleSaveMilkEntry={handleSaveMilkEntry}
-          setIsFormOpen={setIsFormOpen}
-          editingEntry={editingEntry}
-          farmers={farmers} // Passing farmers to MilkForm for dropdown
-        />
-      )}
+        {/* Milk Form Modal */}
+        <AnimatePresence>
+          {isFormOpen && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.3 }}
+              className="fixed inset-0 bg-black/50 flex justify-center items-center px-4 z-50"
+              role="dialog"
+              aria-modal="true"
+            >
+              <MilkForm
+                isEditing={!!editingEntry}
+                handleSaveMilkEntry={handleSaveMilkEntry}
+                setIsFormOpen={setIsFormOpen}
+                editingEntry={editingEntry}
+                farmers={farmers} // Passing farmers to MilkForm for dropdown
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Delete Confirmation Modal */}
+        <AnimatePresence>
+          {isDeleteModalOpen && entryToDelete && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+              role="dialog"
+              aria-modal="true"
+            >
+              <motion.div
+                initial={{ scale: 0.9 }}
+                animate={{ scale: 1 }}
+                exit={{ scale: 0.9 }}
+                transition={{ duration: 0.3 }}
+                className="bg-white rounded-lg shadow-lg p-6 max-w-md mx-auto"
+              >
+                <h3 className="text-xl font-semibold text-center mb-4">
+                  Confirm Delete
+                </h3>
+                <p className="text-center mb-6">
+                  Are you sure you want to delete the milk transaction for{" "}
+                  <strong>{entryToDelete.farmerName}</strong>?
+                </p>
+                <div className="flex justify-around">
+                  <button
+                    onClick={() => setIsDeleteModalOpen(false)}
+                    className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-md transition duration-150"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() =>
+                      handleDeleteConfirmed(
+                        entryToDelete._id,
+                        entryToDelete.farmerNumber
+                      )
+                    }
+                    className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md transition duration-150"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
     </div>
   );
 };

@@ -2,6 +2,7 @@ import React, { useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { CartContext } from "../context/CartContext";
+import { motion } from "framer-motion";
 
 export const ProductCard = ({ product }) => {
   const navigate = useNavigate();
@@ -13,13 +14,20 @@ export const ProductCard = ({ product }) => {
   };
 
   const handleAddToCart = (e) => {
-    // Prevent the event from bubbling up if needed
+    // Prevent click from propagating to the card container
     e.stopPropagation();
     addToCart(product);
   };
 
   return (
-    <div className="w-full sm:max-w-sm rounded overflow-hidden shadow-lg bg-white">
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+      whileHover={{ scale: 1.02 }}
+      className="w-full sm:max-w-sm rounded overflow-hidden shadow-lg bg-white cursor-pointer transition-transform"
+      onClick={handleClick}
+    >
       {/* Product Image */}
       <div className="relative h-48">
         <img
@@ -53,24 +61,22 @@ export const ProductCard = ({ product }) => {
 
         {/* Buttons */}
         <div className="flex flex-col sm:flex-row sm:space-x-2 space-y-2 sm:space-y-0">
-          {/* View Details Button */}
           <button
             onClick={handleClick}
-            className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold text-xs sm:text-sm py-1 sm:py-2 px-3 rounded"
+            className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold text-xs sm:text-sm py-1 sm:py-2 px-3 rounded transition-colors duration-200"
           >
             {t("products.productCard.viewDetails")}
           </button>
 
-          {/* Add to Cart Button */}
           <button
             onClick={handleAddToCart}
-            className="w-full bg-green-500 hover:bg-green-700 text-white font-bold text-xs sm:text-sm py-1 sm:py-2 px-3 rounded"
+            className="w-full bg-green-500 hover:bg-green-600 text-white font-bold text-xs sm:text-sm py-1 sm:py-2 px-3 rounded transition-colors duration-200"
           >
             Add to cart
           </button>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { motion } from "framer-motion";
 
 export const AdminReport = () => {
   const location = useLocation();
@@ -8,6 +9,7 @@ export const AdminReport = () => {
   const [reportData, setReportData] = useState(null);
   const { t } = useTranslation();
 
+  // Sample data for reports
   const fetchReportData = (type) => {
     const data = {
       daily: {
@@ -26,7 +28,6 @@ export const AdminReport = () => {
         "Branch 3": 70000,
       },
     };
-
     return data[type] || {};
   };
 
@@ -49,28 +50,62 @@ export const AdminReport = () => {
     navigate(`/branch-details?branch=${branch}`);
   };
 
+  // For hover effects on branch cards
   const [hoveredBranch, setHoveredBranch] = useState(null);
 
-  const boxShadowStyle = hoveredBranch
-    ? "0 4px 20px rgba(0, 0, 0, 0.15)"
-    : "0 10px 20px rgba(0, 0, 0, 0.1)";
+  // Framer Motion variants for branch cards
+  const branchVariants = {
+    initial: { opacity: 0, y: 10 },
+    animate: { opacity: 1, y: 0 },
+    hover: { scale: 1.02 },
+  };
+
+  // Variants for the summary box
+  const summaryVariants = {
+    initial: { opacity: 0, scale: 0.95 },
+    animate: { opacity: 1, scale: 1 },
+    hover: { scale: 1.02 },
+  };
+
+  // Allow keyboard navigation for branch cards
+  const handleKeyPress = (event, branch) => {
+    if (event.key === "Enter" || event.key === " ") {
+      handleBranchClick(branch);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#d0e1f9] to-[#a8c0ff] flex flex-col p-8">
-      <h1 className="text-4xl font-semibold text-gray-800 mb-8 text-center">
+      <motion.h1
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+        className="text-4xl font-semibold text-gray-800 mb-8 text-center"
+      >
         {reportType &&
           t("report.title", { type: t(`report.types.${reportType}`) })}
-      </h1>
+      </motion.h1>
 
       {reportData ? (
         <div className="space-y-6">
           <div className="space-y-4">
             {Object.keys(reportData).map((branch) => (
-              <div
+              <motion.div
                 key={branch}
-                className="flex justify-between items-center cursor-pointer bg-white p-6 rounded-lg transition-all duration-300 transform hover:bg-blue-100"
+                variants={branchVariants}
+                initial="initial"
+                animate="animate"
+                whileHover="hover"
+                transition={{ duration: 0.3 }}
+                role="button"
+                tabIndex={0}
+                onKeyPress={(e) => handleKeyPress(e, branch)}
+                className="flex justify-between items-center cursor-pointer bg-white p-6 rounded-lg transition-all duration-300 transform hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 style={{
-                  boxShadow: hoveredBranch === branch ? boxShadowStyle : "none",
+                  boxShadow:
+                    hoveredBranch === branch
+                      ? "0 4px 20px rgba(0, 0, 0, 0.15)"
+                      : "none",
                 }}
                 onClick={() => handleBranchClick(branch)}
                 onMouseEnter={() => setHoveredBranch(branch)}
@@ -88,11 +123,20 @@ export const AdminReport = () => {
                     ? t("report.loss", { amount: Math.abs(reportData[branch]) })
                     : t("report.profit", { amount: reportData[branch] })}
                 </span>
-              </div>
+              </motion.div>
             ))}
           </div>
 
-          <div className="mt-8 p-8 rounded-lg shadow-xl bg-white opacity-90 transform hover:scale-105 transition-all duration-500">
+          <motion.div
+            variants={summaryVariants}
+            initial="initial"
+            animate="animate"
+            whileHover="hover"
+            transition={{ duration: 0.5 }}
+            className="mt-8 p-8 rounded-lg shadow-xl bg-white opacity-95 transition-all duration-500"
+            role="region"
+            aria-label="Report Summary"
+          >
             <h2 className="text-2xl font-semibold text-gray-800 mb-6">
               {t("report.summary.title")}
             </h2>
@@ -112,7 +156,7 @@ export const AdminReport = () => {
                 ? t("report.summary.lossMessage")
                 : t("report.summary.profitMessage")}
             </p>
-          </div>
+          </motion.div>
         </div>
       ) : (
         <p className="text-gray-700 text-center mt-6">{t("report.noData")}</p>
