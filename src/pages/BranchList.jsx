@@ -32,11 +32,41 @@ export const BranchList = () => {
           { withCredentials: true }
         );
         setBranches(response.data.data);
-      } catch (err) {
-        console.error("Error fetching branches:", err);
-        setError(t("branch.alerts.fetchError") || "Failed to load branches.");
-      } finally {
-        setLoading(false);
+
+        if (response.status === 200) {
+          setBranches(response.data.data);
+        } else {
+          setError("Unexpected response from the server.");
+        }
+      } catch (error) {
+        if (error.response) {
+          // The request was made, and the server responded with a status code outside 2xx
+          if (error.response.status === 400) {
+            setError("Bad Request: Please check your input.");
+          } else if (error.response.status === 401) {
+            setError("Unauthorized: Please log in again.");
+          } else if (error.response.status === 403) {
+            setError(
+              "Forbidden: You don’t have permission to access this resource."
+            );
+          } else if (error.response.status === 404) {
+            setError("Not Found: The requested resource was not found.");
+          } else if (error.response.status === 500) {
+            setError("Internal Server Error: Please try again later.");
+          } else {
+            setError(
+              `Error ${error.response.status}: ${error.response.statusText}`
+            );
+          }
+        } else if (error.request) {
+          // The request was made, but no response was received
+          setError(
+            "Network Error: Unable to reach the server. Please check your internet connection."
+          );
+        } else {
+          // Something else happened in setting up the request
+          setError(`Error: ${error.message}`);
+        }
       }
     };
     fetchBranches();

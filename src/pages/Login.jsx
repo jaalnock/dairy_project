@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
 import { useTranslation } from "react-i18next";
+import { ArrowLeft } from "lucide-react";
 import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -55,8 +56,24 @@ export const Login = () => {
           { mobileNumber: mobile, subAdminPassword: password },
           { withCredentials: true }
         );
+<<<<<<< HEAD
         console.log(response);
         localStorage.setItem("response", JSON.stringify(response));
+=======
+      }
+      // const response = await axios.post(
+      //   "http://localhost:8000/api/v1/admin/login",
+      //   { adminMobileNumber: mobile, adminPassword: password },
+      //   { withCredentials: true }
+      // );
+      console.log(response);
+
+      if (response.status == 404) {
+        setError("Invalid Credentials");
+      }
+      if (response.status == 500) {
+        setError("Internal Server Error");
+>>>>>>> f470d709715e0f897ff2ed8c3ae8f1594c8ad04c
       }
       console.log("Login successful:", response);
       login(role);
@@ -66,6 +83,7 @@ export const Login = () => {
         navigate("/subadmin");
       }
     } catch (err) {
+<<<<<<< HEAD
       console.log(err.response?.status);
       if (err?.response?.status === 401) {
         setError(t("login.errors.invalidCredentials") || "Invalid Credentials");
@@ -81,6 +99,20 @@ export const Login = () => {
         setError(
           t("login.errors.unknownError") || "Login failed. Please try again."
         );
+=======
+      console.log(err.response.status);
+      if (err?.response?.status ==401) {
+        setError("Invalid Credentials");
+      }
+      if (err?.response?.status == 404) {
+        if (role === "Admin") setError("Admin Not Found");
+        if (role === "SubAdmin") {
+          setError("SubAdmin Not Found");
+        }
+      }
+      if (err?.response?.status == 500) {
+        setError("Internal Server Error");
+>>>>>>> f470d709715e0f897ff2ed8c3ae8f1594c8ad04c
       }
     } finally {
       setIsSubmitting(false);
@@ -92,12 +124,22 @@ export const Login = () => {
   };
 
   return (
+<<<<<<< HEAD
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.5 }}
       className="flex items-center justify-center w-full h-screen overflow-y-auto bg-gradient-to-br from-white to-blue-50"
     >
+=======
+    <div className="flex items-center justify-center w-full h-screen overflow-y-auto">
+      <button
+        onClick={() => navigate("/")}
+        className="absolute sm:top-10 sm:left-10 top-4 left-4 bg-gradient-to-r from-blue-500 to-blue-600 text-white p-2 rounded-full shadow-md hover:bg-blue-700 transition"
+      >
+        <ArrowLeft size={30} />
+      </button>
+>>>>>>> f470d709715e0f897ff2ed8c3ae8f1594c8ad04c
       <form
         onSubmit={handleSubmit}
         className="bg-white rounded-xl shadow-2xl p-10 w-96 max-w-full"
