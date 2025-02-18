@@ -209,7 +209,7 @@ const LoanForm = ({
             )}
           </div>
 
-          <div className="flex justify-between mt-8 space-x-4">
+          <div className="flex flex-col sm:flex-row justify-between mt-8 space-y-4 sm:space-y-0 sm:space-x-4">
             <button
               type="button"
               onClick={() => setIsFormOpen(false)}

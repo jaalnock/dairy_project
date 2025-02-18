@@ -106,11 +106,11 @@ export const TransactionForm = ({
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
         transition={{ duration: 0.3 }}
-        className="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] flex flex-col"
+        className="bg-white p-6 sm:p-8 rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] flex flex-col"
       >
         <h3
           id="transaction-form-title"
-          className="text-2xl font-bold text-gray-800 text-center mb-6"
+          className="text-xl sm:text-2xl font-bold text-gray-800 text-center mb-4 sm:mb-6"
         >
           {isEditing ? "Edit Transaction" : "New Transaction"}
         </h3>
@@ -118,7 +118,7 @@ export const TransactionForm = ({
         {/* Scrollable Form Content */}
         <form
           onSubmit={handleSubmit}
-          className="flex-1 overflow-y-auto max-h-[65vh] pr-2 space-y-6"
+          className="flex-1 overflow-y-auto max-h-[65vh] pr-2 space-y-4 sm:space-y-6"
         >
           {formData.products.map((product, index) => (
             <div key={index} className="border p-4 rounded-md shadow-sm">
@@ -188,18 +188,18 @@ export const TransactionForm = ({
         </form>
 
         {/* Action Buttons */}
-        <div className="mt-8 flex justify-between space-x-4">
+        <div className="mt-6 sm:mt-8 flex justify-between space-x-2 sm:space-x-4">
           <button
             type="button"
             onClick={() => setIsFormOpen(false)}
-            className="flex-1 bg-gray-400 text-white px-4 py-2 rounded-lg hover:bg-gray-500 transition duration-200 focus:outline-none focus:ring-2 focus:ring-gray-400"
+            className="flex-1 bg-gray-400 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-gray-500 transition duration-200 focus:outline-none focus:ring-2 focus:ring-gray-400"
           >
             Cancel
           </button>
           <button
             type="submit"
             onClick={handleSubmit}
-            className="flex-1 bg-[#2c447f] text-white px-4 py-2 rounded-lg hover:bg-[#1b2d5b] transition duration-200 focus:outline-none focus:ring-2 focus:ring-[#2c447f]"
+            className="flex-1 bg-[#2c447f] text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-[#1b2d5b] transition duration-200 focus:outline-none focus:ring-2 focus:ring-[#2c447f]"
           >
             {isEditing ? "Update Transaction" : "Save Transaction"}
           </button>

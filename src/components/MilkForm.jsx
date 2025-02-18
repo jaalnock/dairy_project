@@ -94,7 +94,7 @@ const MilkForm = ({
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
         transition={{ duration: 0.3 }}
-        className="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md sm:max-w-lg relative"
+        className="bg-white p-6 sm:p-8 rounded-2xl shadow-2xl w-full max-w-md sm:max-w-lg relative"
       >
         {/* Close Icon */}
         <button
@@ -119,12 +119,12 @@ const MilkForm = ({
 
         <h3
           id="milk-form-title"
-          className="text-2xl font-bold text-gray-800 text-center mb-6"
+          className="text-xl sm:text-2xl font-bold text-gray-800 text-center mb-4 sm:mb-6"
         >
           {isEditing ? "Edit Milk Entry" : "New Milk Entry"}
         </h3>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
           {/* Farmer Selector */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -239,17 +239,17 @@ const MilkForm = ({
           </div>
 
           {/* Action Buttons */}
-          <div className="flex justify-between mt-8 space-x-4">
+          <div className="flex justify-between mt-6 sm:mt-8 space-x-2 sm:space-x-4">
             <button
               type="button"
               onClick={() => setIsFormOpen(false)}
-              className="flex-1 bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded-lg transition duration-200 focus:outline-none"
+              className="flex-1 bg-gray-400 hover:bg-gray-500 text-white px-3 sm:px-4 py-2 rounded-lg transition duration-200 focus:outline-none"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="flex-1 bg-[#2c447f] hover:bg-[#1b2d5b] text-white px-4 py-2 rounded-lg transition duration-200 focus:outline-none"
+              className="flex-1 bg-[#2c447f] hover:bg-[#1b2d5b] text-white px-3 sm:px-4 py-2 rounded-lg transition duration-200 focus:outline-none"
             >
               {isEditing ? "Update" : "Save"} Milk Entry
             </button>

@@ -7,7 +7,7 @@ import { LanguageToggler } from "./LanguageToggler";
 import { useAuth } from "../context/AuthContext";
 import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X } from "lucide-react"; // Added X for the mobile close button
+import { Menu, X } from "lucide-react";
 
 export const AdminSidebar = ({ isOpen, setSidebarOpen, admin }) => {
   const location = useLocation();
@@ -21,6 +21,18 @@ export const AdminSidebar = ({ isOpen, setSidebarOpen, admin }) => {
       setShowReports(false);
     }
   }, [location]);
+
+  // Ensure sidebar state updates on window resize
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth > 1024) {
+        setSidebarOpen(false);
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [setSidebarOpen]);
 
   const handleReportSelection = (reportType) => {
     navigate(`/admin/reports?type=${reportType}`);
@@ -47,7 +59,6 @@ export const AdminSidebar = ({ isOpen, setSidebarOpen, admin }) => {
     <aside
       className={`fixed top-0 left-0 bg-gradient-to-br from-blue-200 to-blue-400 z-50 h-screen p-6 transform transition-transform duration-300 lg:relative lg:translate-x-0 w-64 lg:w-80 flex flex-col border-r border-blue-300`}
     >
-      {/* Top Section: Logo and Navigation */}
       <div className="flex-1 mb-16">
         <div className="mb-8 flex items-center space-x-3">
           <img src={logoImage} alt="Logo" className="w-10 h-10" />
@@ -79,8 +90,6 @@ export const AdminSidebar = ({ isOpen, setSidebarOpen, admin }) => {
                 </Link>
               </li>
             ))}
-
-            {/* Reports Dropdown */}
             <li className="relative">
               <button
                 className="w-full px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 transition flex justify-between items-center"
@@ -118,7 +127,6 @@ export const AdminSidebar = ({ isOpen, setSidebarOpen, admin }) => {
         </nav>
       </div>
 
-      {/* Middle Section: Language Toggler */}
       <div className="mb-6">
         <div className="bg-gradient-to-br from-blue-100 to-blue-300 p-4 rounded-xl shadow-lg mb-4">
           <div className="flex flex-col items-center">
@@ -128,8 +136,6 @@ export const AdminSidebar = ({ isOpen, setSidebarOpen, admin }) => {
             <LanguageToggler isMobile={false} />
           </div>
         </div>
-
-        {/* Bottom Section: Profile & Logout */}
         <div className="bg-gradient-to-br from-blue-100 to-blue-300 p-4 rounded-xl shadow-lg">
           <div className="flex items-center space-x-4">
             <img
@@ -154,8 +160,6 @@ export const AdminSidebar = ({ isOpen, setSidebarOpen, admin }) => {
           </button>
         </div>
       </div>
-
-      {/* Mobile Close Button */}
       <button
         className="lg:hidden mt-4 p-2 bg-blue-600 hover:bg-blue-700 rounded text-white transition flex items-center justify-center"
         onClick={() => setSidebarOpen(false)}

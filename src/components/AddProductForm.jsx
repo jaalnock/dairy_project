@@ -144,7 +144,7 @@ export const AddProductForm = ({
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Price
@@ -176,7 +176,7 @@ export const AddProductForm = ({
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   SNF
@@ -247,7 +247,7 @@ export const AddProductForm = ({
             </div>
 
             {/* Action Buttons */}
-            <div className="mt-6 flex space-x-4">
+            <div className="mt-6 flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
               <button
                 type="button"
                 onClick={onClose}

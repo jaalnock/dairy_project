@@ -21,7 +21,18 @@ export const SubAdminSidebar = ({ isOpen, setSidebarOpen, subAdmin }) => {
     }
   }, [location]);
 
-  // New and existing menu items with added Category option
+  // Fix: Close sidebar when window resizes to avoid UI inconsistencies
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth > 1024) {
+        setSidebarOpen(false);
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [setSidebarOpen]);
+
   const menuItems = [
     { name: t("subAdminSidebar.menu.transactions"), path: "/subadmin" },
     { name: t("subAdminSidebar.menu.addMilk"), path: "/subadmin/add_milk" },
@@ -55,7 +66,7 @@ export const SubAdminSidebar = ({ isOpen, setSidebarOpen, subAdmin }) => {
       initial={{ x: isOpen ? 0 : -250 }}
       animate={{ x: isOpen ? 0 : -250 }}
       transition={{ duration: 0.3 }}
-      className={`fixed top-0 left-0 bg-gradient-to-br from-[#d0e1f9] to-[#a8c0ff] z-50 h-screen text-white p-4 transform transition-transform duration-300 lg:relative lg:translate-x-0 w-50 lg:w-74 flex flex-col justify-between`}
+      className={`fixed top-0 left-0 bg-gradient-to-br from-[#d0e1f9] to-[#a8c0ff] z-50 h-screen text-white p-4 transform transition-transform duration-300 lg:relative lg:translate-x-0 w-64 lg:w-74 flex flex-col justify-between`}
       aria-label="Sidebar Navigation"
     >
       {/* Top Section: Logo & Title */}

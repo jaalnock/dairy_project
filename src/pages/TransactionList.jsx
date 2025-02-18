@@ -56,9 +56,9 @@ const TransactionList = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
+    <div className="min-h-screen bg-gray-50 p-4 sm:p-8">
       <div className="container mx-auto">
-        <h2 className="text-4xl font-bold mb-8 text-center text-[#2c447f]">
+        <h2 className="text-3xl sm:text-4xl font-bold mb-6 sm:mb-8 text-center text-[#2c447f]">
           Transactions
         </h2>
 
@@ -67,25 +67,25 @@ const TransactionList = () => {
           <table className="min-w-full divide-y divide-gray-300">
             <thead className="bg-blue-100">
               <tr>
-                <th className="px-4 py-3 text-left font-medium text-gray-700">
+                <th className="px-2 sm:px-4 py-2 sm:py-3 text-left font-medium text-gray-700">
                   Transaction ID
                 </th>
-                <th className="px-4 py-3 text-left font-medium text-gray-700">
+                <th className="px-2 sm:px-4 py-2 sm:py-3 text-left font-medium text-gray-700">
                   Product Name
                 </th>
-                <th className="px-4 py-3 text-center font-medium text-gray-700">
+                <th className="px-2 sm:px-4 py-2 sm:py-3 text-center font-medium text-gray-700">
                   Quantity
                 </th>
-                <th className="px-4 py-3 text-right font-medium text-gray-700">
+                <th className="px-2 sm:px-4 py-2 sm:py-3 text-right font-medium text-gray-700">
                   Price
                 </th>
-                <th className="px-4 py-3 text-right font-medium text-gray-700">
+                <th className="px-2 sm:px-4 py-2 sm:py-3 text-right font-medium text-gray-700">
                   Total Price
                 </th>
-                <th className="px-4 py-3 text-right font-medium text-gray-700">
+                <th className="px-2 sm:px-4 py-2 sm:py-3 text-right font-medium text-gray-700">
                   Net Total Price
                 </th>
-                <th className="px-4 py-3 text-center font-medium text-gray-700">
+                <th className="px-2 sm:px-4 py-2 sm:py-3 text-center font-medium text-gray-700">
                   Actions
                 </th>
               </tr>
@@ -106,45 +106,45 @@ const TransactionList = () => {
                         {/* Render transaction id once per transaction */}
                         {index === 0 && (
                           <td
-                            className="px-4 py-2 font-semibold bg-gray-50"
+                            className="px-2 sm:px-4 py-2 font-semibold bg-gray-50"
                             rowSpan={transaction.products.length}
                           >
                             {transaction.id}
                           </td>
                         )}
-                        <td className="px-4 py-2">{product.name}</td>
-                        <td className="px-4 py-2 text-center">
+                        <td className="px-2 sm:px-4 py-2">{product.name}</td>
+                        <td className="px-2 sm:px-4 py-2 text-center">
                           {product.quantity}
                         </td>
-                        <td className="px-4 py-2 text-right">
+                        <td className="px-2 sm:px-4 py-2 text-right">
                           ${product.price}
                         </td>
-                        <td className="px-4 py-2 text-right">
+                        <td className="px-2 sm:px-4 py-2 text-right">
                           ${(product.price * product.quantity).toFixed(2)}
                         </td>
                         {/* Render Net Total and Actions once per transaction */}
                         {index === 0 && (
                           <>
                             <td
-                              className="px-4 py-2 text-right font-bold bg-gray-50"
+                              className="px-2 sm:px-4 py-2 text-right font-bold bg-gray-50"
                               rowSpan={transaction.products.length}
                             >
                               ${transaction.netTotalPrice}
                             </td>
                             <td
-                              className="px-4 py-2 bg-gray-50"
+                              className="px-2 sm:px-4 py-2 bg-gray-50"
                               rowSpan={transaction.products.length}
                             >
                               <div className="flex justify-center space-x-2">
                                 <button
                                   onClick={() => handleEdit(transaction)}
-                                  className="bg-yellow-500 text-white px-3 py-1 rounded-md hover:bg-yellow-600 transition"
+                                  className="bg-yellow-500 text-white px-2 sm:px-3 py-1 rounded-md hover:bg-yellow-600 transition"
                                 >
                                   Edit
                                 </button>
                                 <button
                                   onClick={() => handleDelete(transaction.id)}
-                                  className="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600 transition"
+                                  className="bg-red-500 text-white px-2 sm:px-3 py-1 rounded-md hover:bg-red-600 transition"
                                 >
                                   Delete
                                 </button>
