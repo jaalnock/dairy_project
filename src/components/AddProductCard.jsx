@@ -1,10 +1,14 @@
-// src/components/ProductCard.jsx
+// src/components/AddProductCard.jsx
 import React from "react";
 import { motion } from "framer-motion";
 
-export const AddProductCard = ({ product, onEdit, onDelete }) => {
-  // Expecting product fields: productName, productPrice, productImage, snf, fat, quantity
-  // ...plus categoryName (added when flattening the data)
+export const AddProductCard = ({
+  product,
+  onEdit,
+  onDelete,
+  onIncreaseStock,
+  onDecreaseStock,
+}) => {
   return (
     <motion.div
       initial={{ opacity: 0, y: 30 }}
@@ -12,7 +16,6 @@ export const AddProductCard = ({ product, onEdit, onDelete }) => {
       exit={{ opacity: 0, y: -20 }}
       className="bg-white rounded-2xl shadow-lg overflow-hidden transition-transform transform hover:scale-105 hover:shadow-2xl"
     >
-      {console.log(product.productImage)}
       {/* Product Image or fallback */}
       {product.productImage ? (
         <div className="relative">
@@ -38,7 +41,7 @@ export const AddProductCard = ({ product, onEdit, onDelete }) => {
             Category: {product.categoryName}
           </p>
         )}
-        <div className="space-y-2 text-gray-700 mb-6">
+        <div className="space-y-2 text-gray-700 mb-4">
           <p>
             <span className="font-semibold">Price:</span> $
             {Number(product.productPrice).toFixed(2)}
@@ -53,7 +56,8 @@ export const AddProductCard = ({ product, onEdit, onDelete }) => {
             <span className="font-semibold">FAT:</span> {product.fat}
           </p>
         </div>
-        <div className="flex flex-col sm:flex-row gap-4">
+        {/* First row: Edit & Delete */}
+        <div className="flex flex-col sm:flex-row gap-4 mb-2">
           <motion.button
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
@@ -71,6 +75,27 @@ export const AddProductCard = ({ product, onEdit, onDelete }) => {
             className="flex-1 bg-red-500 text-white text-lg py-2 px-4 rounded-md transition-colors duration-200"
           >
             Delete
+          </motion.button>
+        </div>
+        {/* Second row: Increase & Decrease Stock */}
+        <div className="flex flex-col sm:flex-row gap-4">
+          <motion.button
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+            onClick={onIncreaseStock}
+            aria-label={`Increase stock for ${product.productName}`}
+            className="flex-1 bg-green-600 text-white text-lg py-2 px-4 rounded-md transition-colors duration-200"
+          >
+            + Stock
+          </motion.button>
+          <motion.button
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+            onClick={onDecreaseStock}
+            aria-label={`Decrease stock for ${product.productName}`}
+            className="flex-1 bg-yellow-500 text-white text-lg py-2 px-4 rounded-md transition-colors duration-200"
+          >
+            - Stock
           </motion.button>
         </div>
       </div>

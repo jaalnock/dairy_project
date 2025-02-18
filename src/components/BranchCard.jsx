@@ -10,7 +10,7 @@ export const BranchCard = ({ branch, onEdit, onDelete }) => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className="bg-white shadow-lg rounded-xl p-6 border-l-4 border-blue-600 min-h-[18rem] flex flex-col justify-between transition-transform transform hover:scale-105 hover:shadow-2xl"
+      className="bg-[#F0F8FF] shadow-lg rounded-xl p-6 border-l-4 border-blue-600 min-h-[18rem] flex flex-col justify-between transition-transform transform hover:scale-105 hover:shadow-2xl"
     >
       <div className="space-y-4">
         <h2 className="text-2xl font-semibold text-gray-900 border-b border-blue-600 pb-2">

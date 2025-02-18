@@ -7,6 +7,7 @@ import { AddProductForm } from "../components/AddProductForm";
 
 // Set your backend API base URL (adjust as needed)
 const API_URL = "http://localhost:8000/api/v1/category";
+
 export const SubAdminProductsList = () => {
   const [categories, setCategories] = useState([]);
   const [products, setProducts] = useState([]); // flattened list of products
@@ -23,11 +24,11 @@ export const SubAdminProductsList = () => {
   const fetchCategories = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(
-        "http://localhost:8000/api/v1/category/get-all-categories",
-        { withCredentials: true }
-      );
+      const response = await axios.get(`${API_URL}/get-all-categories`, {
+        withCredentials: true,
+      });
       console.log(response);
+
       if (response.data && response.data.data) {
         const fetchedCategories = response.data.data;
         setCategories(fetchedCategories);
@@ -75,20 +76,53 @@ export const SubAdminProductsList = () => {
     setShowConfirm(true);
   };
 
+  // Increase stock by 1 unit
+  const handleIncreaseStock = async (product) => {
+    try {
+      const updatedQuantity = product.quantity + 1;
+      const updatedProduct = { ...product, quantity: updatedQuantity };
+      const url = `${API_URL}/${product.categoryId}/product/update/${product._id}`;
+      await axios.put(url, updatedProduct, { withCredentials: true });
+      fetchCategories();
+    } catch (err) {
+      console.error(err);
+      alert("Error increasing stock");
+    }
+  };
+
+  // Decrease stock by 1 unit (if above 0)
+  const handleDecreaseStock = async (product) => {
+    try {
+      if (product.quantity <= 0) {
+        alert("Stock is already 0");
+        return;
+      }
+      const updatedQuantity = product.quantity - 1;
+      const updatedProduct = { ...product, quantity: updatedQuantity };
+      const url = `${API_URL}/${product.categoryId}/product/update/${product._id}`;
+      await axios.put(url, updatedProduct, { withCredentials: true });
+      fetchCategories();
+    } catch (err) {
+      console.error(err);
+      alert("Error decreasing stock");
+    }
+  };
+
   // Save product (for add or update)
-  // For adding: POST to /:categoryId/product/add
-  // For updating: PUT to /:categoryId/product/update/:productId
   const handleSaveProduct = async (categoryId, productData) => {
     try {
       if (isEditing && editingProduct) {
         const url = `${API_URL}/${editingProduct.categoryId}/product/update/${editingProduct._id}`;
-        await axios.put(url, productData, { withCredentials: true });
+        await axios.patch(url, productData, {
+          withCredentials: true,
+          headers: { "Content-Type": "multipart/form-data" },
+        });
       } else {
         const url = `${API_URL}/${categoryId}/product/add`;
-        const response = await axios.post(url, productData, {
+        await axios.post(url, productData, {
           withCredentials: true,
+          headers: { "Content-Type": "multipart/form-data" },
         });
-        console.log(response);
       }
       setIsFormOpen(false);
       setEditingProduct(null);
@@ -132,7 +166,7 @@ export const SubAdminProductsList = () => {
             {products.length > 0
               ? products.map((product, index) => (
                   <motion.div
-                    key={`${product.categoryId} -${index}`}
+                    key={`${product.categoryId}-${index}`}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -20 }}
@@ -142,6 +176,8 @@ export const SubAdminProductsList = () => {
                       product={product}
                       onEdit={() => handleEdit(product)}
                       onDelete={() => handleDelete(product)}
+                      onIncreaseStock={() => handleIncreaseStock(product)}
+                      onDecreaseStock={() => handleDecreaseStock(product)}
                     />
                   </motion.div>
                 ))

@@ -1,4 +1,4 @@
-// src/components/ProductForm.jsx
+// src/components/AddProductForm.jsx
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 
@@ -9,14 +9,14 @@ export const AddProductForm = ({
   onClose,
   onSave,
 }) => {
-  // The form’s initial state includes the fields expected by your backend.
+  // Initialize form state with expected fields
   const [formData, setFormData] = useState({
     productName: "",
     productPrice: "",
     quantity: "",
     snf: "",
     fat: "",
-    unit: "", // you can add a default unit if needed
+    unit: "",
     categoryId: "",
     productImage: "",
     ...initialData,
@@ -27,7 +27,7 @@ export const AddProductForm = ({
     formData.productImage || null
   );
 
-  // Update state if editing changes
+  // Update form state when editing changes
   useEffect(() => {
     setFormData({
       productName: "",
@@ -56,7 +56,7 @@ export const AddProductForm = ({
     }
   };
 
-  // Basic form validation
+  // Basic validation for required fields
   const isFormValid =
     formData.productName.trim() &&
     formData.productPrice &&
@@ -77,18 +77,22 @@ export const AddProductForm = ({
       alert("Please fill in all required fields with valid values!");
       return;
     }
-    // In a real app you might first upload the image and get its URL.
-    // Here we simply use the preview URL as a placeholder.
-    const productData = {
-      productName: formData.productName,
-      productPrice: parseFloat(formData.productPrice),
-      quantity: parseInt(formData.quantity, 10),
-      snf: parseFloat(formData.snf),
-      fat: parseFloat(formData.fat),
-      unit: formData.unit || 0,
-      productImage: imagePreview,
-    };
-    onSave(formData.categoryId, productData);
+    // Create a FormData object to send both text fields and the file
+    const formDataToSend = new FormData();
+    formDataToSend.append("productName", formData.productName);
+    formDataToSend.append("productPrice", parseFloat(formData.productPrice));
+    formDataToSend.append("quantity", parseInt(formData.quantity, 10));
+    formDataToSend.append("snf", parseFloat(formData.snf));
+    formDataToSend.append("fat", parseFloat(formData.fat));
+    formDataToSend.append("unit", formData.unit || 0);
+
+    // Append the file (if one was selected) using the key "file"
+    if (imageFile) {
+      formDataToSend.append("file", imageFile);
+    }
+
+    // Call the parent's onSave handler with the categoryId and FormData
+    onSave(formData.categoryId, formDataToSend);
   };
 
   return (
@@ -101,7 +105,7 @@ export const AddProductForm = ({
         className="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] flex flex-col"
       >
         {/* Header */}
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex justify-between items-center mb-6 border-b pb-2">
           <h3 className="text-2xl font-bold text-gray-800">
             {isEditing ? "Edit Product" : "Add Product"}
           </h3>
@@ -215,7 +219,6 @@ export const AddProductForm = ({
                 value={formData.categoryId}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                // disabled={isEditing} // Optionally disable category change on edit
               >
                 <option value="">Select Category</option>
                 {categories.map((cat) => (
@@ -233,6 +236,7 @@ export const AddProductForm = ({
               </label>
               <input
                 type="file"
+                name="file"
                 accept="image/*"
                 onChange={handleImageChange}
                 className="w-full text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 hover:file:bg-blue-100"

@@ -31,6 +31,8 @@ export const BranchList = () => {
           "http://localhost:8000/api/v1/branch/get-branches",
           { withCredentials: true }
         );
+        console.log("Branches fetched:", response.data.data);
+
         setBranches(response.data.data);
 
         if (response.status === 200) {
@@ -67,6 +69,8 @@ export const BranchList = () => {
           // Something else happened in setting up the request
           setError(`Error: ${error.message}`);
         }
+      } finally {
+        setLoading(false);
       }
     };
     fetchBranches();
