@@ -4,7 +4,6 @@ import { useAuth } from "../context/AuthContext.jsx";
 import { useTranslation } from "react-i18next";
 import { ArrowLeft } from "lucide-react";
 import axios from "axios";
-import { motion, AnimatePresence } from "framer-motion";
 
 export const Login = () => {
   const { t } = useTranslation();
@@ -12,12 +11,10 @@ export const Login = () => {
   const [mobile, setMobile] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const navigate = useNavigate();
   const { role: savedRole, login } = useAuth();
 
-  // Redirect if already logged in
   useEffect(() => {
     if (savedRole === "Admin") {
       navigate("/admin");
@@ -30,18 +27,17 @@ export const Login = () => {
     event.preventDefault();
     setError("");
 
-    // Basic validation
     if (!role || !mobile || !password) {
       setError(t("login.errors.fillAllFields"));
       return;
     }
+
     const mobileRegex = /^[0-9]{10}$/;
     if (!mobileRegex.test(mobile)) {
       setError(t("login.errors.invalidMobile"));
       return;
     }
 
-    setIsSubmitting(true);
     try {
       let response;
       if (role === "Admin") {
@@ -56,8 +52,6 @@ export const Login = () => {
           { mobileNumber: mobile, subAdminPassword: password },
           { withCredentials: true }
         );
-        console.log(response);
-        localStorage.setItem("response", JSON.stringify(response));
       }
       // const response = await axios.post(
       //   "http://localhost:8000/api/v1/admin/login",
@@ -66,72 +60,70 @@ export const Login = () => {
       // );
       console.log(response);
 
-      if (response.status == 404) {
+      if (response.status === 404) {
         setError("Invalid Credentials");
       }
-      if (response.status == 500) {
+      if (response.status === 500) {
         setError("Internal Server Error");
       }
       console.log("Login successful:", response);
       login(role);
+      // Redirect based on role
       if (role === "Admin") {
         navigate("/admin");
       } else if (role === "SubAdmin") {
         navigate("/subadmin");
       }
     } catch (err) {
-      console.log(err.response?.status);
+      console.log(err.response.status);
       if (err?.response?.status === 401) {
-        setError(t("login.errors.invalidCredentials") || "Invalid Credentials");
-      } else if (err?.response?.status === 404) {
-        setError(
-          role === "Admin"
-            ? t("login.errors.adminNotFound") || "Admin Not Found"
-            : t("login.errors.subAdminNotFound") || "SubAdmin Not Found"
-        );
-      } else if (err?.response?.status === 500) {
-        setError(t("login.errors.internalServer") || "Internal Server Error");
-      } else {
-        setError(
-          t("login.errors.unknownError") || "Login failed. Please try again."
-        );
+        setError("Invalid Credentials");
       }
-    } finally {
-      setIsSubmitting(false);
-      // Clear form fields after submission
-      setRole("");
-      setMobile("");
-      setPassword("");
+      if (err?.response?.status === 404) {
+        if (role === "Admin") setError("Admin Not Found");
+        if (role === "SubAdmin") {
+          setError("SubAdmin Not Found");
+        }
+      }
+      if (err?.response?.status === 500) {
+        setError("Internal Server Error");
+      }
     }
+
+    // Password Validation: Min 8 characters, at least one special character
+    // const passwordRegex = /^(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    // if (!passwordRegex.test(password)) {
+    //   setError(t("login.errors.invalidPassword"));
+    //   return;
+    // }
+
+    // Clear form fields
+    setRole("");
+    setMobile("");
+    setPassword("");
+    // setError("");
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.5 }}
-      className="flex items-center justify-center w-full h-screen overflow-y-auto bg-gradient-to-br from-white to-blue-50"
-    >
+    <div className="flex items-center justify-center w-full h-screen overflow-y-auto">
+      <button
+        onClick={() => navigate("/")}
+        className="absolute sm:top-10 sm:left-10 top-4 left-4 bg-gradient-to-r from-blue-500 to-blue-600 text-white p-2 rounded-full shadow-md hover:bg-blue-700 transition"
+      >
+        <ArrowLeft size={30} />
+      </button>
       <form
         onSubmit={handleSubmit}
-        className="bg-white rounded-xl shadow-2xl p-10 w-96 max-w-full"
+        className="bg-white rounded-xl shadow-lg p-8 w-96 max-w-full"
       >
-        <h2 className="text-3xl font-bold text-blue-700 mb-8 text-center">
+        <h2 className="text-2xl font-semibold text-gray-700 mb-6 text-center">
           {t("login.title")}
         </h2>
-
-        <AnimatePresence>
-          {error && (
-            <motion.p
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="bg-red-100 text-red-600 p-3 rounded mb-6 text-sm text-center"
-            >
-              {error}
-            </motion.p>
-          )}
-        </AnimatePresence>
+        {error && (
+          <p className="bg-red-100 text-red-600 p-2 rounded mb-6 text-sm">
+            {error}
+          </p>
+        )}
 
         <div className="mb-6">
           <label
@@ -161,7 +153,7 @@ export const Login = () => {
             {t("login.form.mobileLabel")}
           </label>
           <input
-            type="tel"
+            type="text"
             id="mobile"
             value={mobile}
             onChange={(e) => setMobile(e.target.value)}
@@ -185,24 +177,17 @@ export const Login = () => {
             onChange={(e) => setPassword(e.target.value)}
             placeholder={t("login.form.passwordPlaceholder")}
             required
-            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-400"
+            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
           />
         </div>
 
         <button
           type="submit"
-          disabled={isSubmitting}
-          className={`w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg shadow-md transition duration-300 focus:outline-none focus:ring-2 focus:ring-blue-600 ${
-            isSubmitting ? "opacity-50 cursor-not-allowed" : ""
-          }`}
+          className="w-full bg-[#4c76ba] text-white py-3 rounded-lg shadow-md hover:bg-[#1b2d5b] transition duration-300"
         >
-          {isSubmitting
-            ? t("login.form.submitting") || "Logging in..."
-            : t("login.form.submitButton")}
+          {t("login.form.submitButton")}
         </button>
       </form>
-    </motion.div>
+    </div>
   );
 };
-
-export default Login;

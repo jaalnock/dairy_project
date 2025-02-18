@@ -8,6 +8,7 @@ import logoImage from "../assets/Borgave_Logo_BG_Removed.png";
 import { useTranslation } from "react-i18next";
 import { LanguageToggler } from "./LanguageToggler";
 import { CartContext } from "../context/CartContext"; // import CartContext
+import LanguageToggler2 from "./LanguageToggler2";
 
 const NavLink = ({ to, children, className }) => (
   <Link
@@ -48,6 +49,7 @@ export const Navbar = () => {
             {/* Language Toggler positioning for desktop */}
             <div className="px-2">
               <LanguageToggler isMobile={false} />
+              {/* <LanguageToggler2 isMobile={false} /> */}
             </div>
 
             <NavLink to="/">{t("navbar.links.home")}</NavLink>

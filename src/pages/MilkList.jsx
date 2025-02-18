@@ -209,7 +209,7 @@ const MilkList = () => {
       <div className="container mx-auto max-w-screen-xl">
         {/* Header */}
         <header className="text-center mb-8">
-          <h2 className="text-4xl font-bold text-blue-800 border-b-2 border-blue-300 pb-4">
+          <h2 className="text-3xl sm:text-4xl font-bold text-blue-800 border-b-2 border-blue-300 pb-4">
             Milk Collection List
           </h2>
         </header>

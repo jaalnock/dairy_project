@@ -75,6 +75,20 @@ export const EditImageSlider = () => {
     document.body.classList.toggle("overflow-hidden", isFormOpen);
   }, [isFormOpen]);
 
+  useEffect(() => {
+    if (slides.length === 0) {
+      setSlides([
+        {
+          _id: "dummy",
+          title: "Borgave Dugdhalaya",
+          description:
+            "शेतातून थेट तुमच्या घरापर्यंत सर्वोत्तम दुग्धजन्य पदार्थ आणत आहोत.",
+          link: "https://images.pexels.com/photos/254178/pexels-photo-254178.jpeg",
+        },
+      ]);
+    }
+  }, [slides]);
+
   // Handlers for text and file input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
