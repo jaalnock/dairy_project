@@ -4,6 +4,8 @@ import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
 import { AddProductCard } from "../components/AddProductCard";
 import { AddProductForm } from "../components/AddProductForm";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 // Set your backend API base URL (adjust as needed)
 const API_URL = "http://localhost:8000/api/v1/category";
@@ -50,6 +52,7 @@ export const SubAdminProductsList = () => {
     } catch (err) {
       console.error(err);
       setError("Failed to fetch categories and products");
+      toast.error("Failed to fetch categories and products");
     } finally {
       setLoading(false);
     }
@@ -76,35 +79,18 @@ export const SubAdminProductsList = () => {
     setShowConfirm(true);
   };
 
-  // Increase stock by 1 unit
-  const handleIncreaseStock = async (product) => {
+  // Unified handler to update stock based on a delta value (positive for add, negative for subtract)
+  const handleUpdateStock = async (product, delta) => {
     try {
-      const updatedQuantity = product.quantity + 1;
-      const updatedProduct = { ...product, quantity: updatedQuantity };
-      const url = `${API_URL}/${product.categoryId}/product/update/${product._id}`;
-      await axios.put(url, updatedProduct, { withCredentials: true });
+      const operation = delta > 0 ? "add" : "subtract";
+      const value = Math.abs(delta);
+      const url = `${API_URL}/${product.categoryId}/product/update-stock/${product._id}`;
+      await axios.patch(url, { operation, value }, { withCredentials: true });
+      toast.success("Stock updated successfully");
       fetchCategories();
     } catch (err) {
       console.error(err);
-      alert("Error increasing stock");
-    }
-  };
-
-  // Decrease stock by 1 unit (if above 0)
-  const handleDecreaseStock = async (product) => {
-    try {
-      if (product.quantity <= 0) {
-        alert("Stock is already 0");
-        return;
-      }
-      const updatedQuantity = product.quantity - 1;
-      const updatedProduct = { ...product, quantity: updatedQuantity };
-      const url = `${API_URL}/${product.categoryId}/product/update/${product._id}`;
-      await axios.put(url, updatedProduct, { withCredentials: true });
-      fetchCategories();
-    } catch (err) {
-      console.error(err);
-      alert("Error decreasing stock");
+      toast.error("Error updating stock");
     }
   };
 
@@ -117,12 +103,14 @@ export const SubAdminProductsList = () => {
           withCredentials: true,
           headers: { "Content-Type": "multipart/form-data" },
         });
+        toast.success("Product updated successfully");
       } else {
         const url = `${API_URL}/${categoryId}/product/add`;
         await axios.post(url, productData, {
           withCredentials: true,
           headers: { "Content-Type": "multipart/form-data" },
         });
+        toast.success("Product added successfully");
       }
       setIsFormOpen(false);
       setEditingProduct(null);
@@ -130,7 +118,7 @@ export const SubAdminProductsList = () => {
       fetchCategories();
     } catch (err) {
       console.error(err);
-      alert("Error saving product");
+      toast.error("Error saving product");
     }
   };
 
@@ -140,12 +128,13 @@ export const SubAdminProductsList = () => {
       try {
         const url = `${API_URL}/${deleteTarget.categoryId}/product/delete/${deleteTarget._id}`;
         await axios.delete(url, { withCredentials: true });
+        toast.success("Product deleted successfully");
         setShowConfirm(false);
         setDeleteTarget(null);
         fetchCategories();
       } catch (err) {
         console.error(err);
-        alert("Error deleting product");
+        toast.error("Error deleting product");
       }
     }
   };
@@ -176,8 +165,9 @@ export const SubAdminProductsList = () => {
                       product={product}
                       onEdit={() => handleEdit(product)}
                       onDelete={() => handleDelete(product)}
-                      onIncreaseStock={() => handleIncreaseStock(product)}
-                      onDecreaseStock={() => handleDecreaseStock(product)}
+                      onUpdateStock={(delta) =>
+                        handleUpdateStock(product, delta)
+                      }
                     />
                   </motion.div>
                 ))
@@ -262,6 +252,17 @@ export const SubAdminProductsList = () => {
           )}
         </AnimatePresence>
       </div>
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
     </div>
   );
 };

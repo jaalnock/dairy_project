@@ -1,6 +1,7 @@
 // src/components/AddProductForm.jsx
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { toast } from "react-toastify";
 
 export const AddProductForm = ({
   isEditing,
@@ -56,25 +57,28 @@ export const AddProductForm = ({
     }
   };
 
-  // Basic validation for required fields
+  // Basic validation for required fields.
+  // Note: Allowing quantity, snf, and fat to be 0 (using >= 0)
   const isFormValid =
     formData.productName.trim() &&
     formData.productPrice &&
     !isNaN(formData.productPrice) &&
     Number(formData.productPrice) > 0 &&
-    formData.quantity &&
+    formData.quantity !== "" &&
     !isNaN(formData.quantity) &&
-    Number(formData.quantity) > 0 &&
-    formData.snf &&
+    Number(formData.quantity) >= 0 &&
+    formData.snf !== "" &&
     !isNaN(formData.snf) &&
-    formData.fat &&
+    Number(formData.snf) >= 0 &&
+    formData.fat !== "" &&
     !isNaN(formData.fat) &&
+    Number(formData.fat) >= 0 &&
     formData.categoryId;
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!isFormValid) {
-      alert("Please fill in all required fields with valid values!");
+      toast.error("Please fill in all required fields with valid values!");
       return;
     }
     // Create a FormData object to send both text fields and the file
@@ -261,7 +265,6 @@ export const AddProductForm = ({
               </button>
               <button
                 type="submit"
-                disabled={!isFormValid}
                 className={`flex-1 ${
                   isFormValid ? "bg-blue-600 hover:bg-blue-700" : "bg-blue-400"
                 } text-white py-2 rounded-lg transition duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400`}
