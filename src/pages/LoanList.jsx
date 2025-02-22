@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import LoanForm from "../components/LoanForm.jsx";
-import { v4 as uuidv4 } from "uuid";
 import { motion, AnimatePresence } from "framer-motion";
+import axios from "axios";
 
 const LoanList = () => {
   const [loans, setLoans] = useState([]);
@@ -10,33 +10,81 @@ const LoanList = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [loanToDelete, setLoanToDelete] = useState(null);
 
-  // Fetch stored loans from localStorage on mount
-  useEffect(() => {
-    const storedLoans = JSON.parse(localStorage.getItem("loans")) || [];
-    setLoans(storedLoans);
-  }, []);
+  // States for Deduct Loan Modal
+  const [isDeductModalOpen, setIsDeductModalOpen] = useState(false);
+  const [loanToDeduct, setLoanToDeduct] = useState(null);
+  const [deductAmount, setDeductAmount] = useState("");
 
-  // Persist loans to localStorage when they change
-  useEffect(() => {
-    localStorage.setItem("loans", JSON.stringify(loans));
-  }, [loans]);
-
-  // Save (add or update) a loan record
-  const handleSaveLoan = (loan) => {
-    if (editingLoan) {
-      const updatedLoans = loans.map((l) =>
-        l.id === editingLoan.id ? { ...l, ...loan } : l
+  // Fetch loans from the backend and flatten the embedded loan arrays
+  const fetchLoans = async () => {
+    try {
+      const response = await axios.get(
+        "http://localhost:8000/api/v1/loan/get-all-loans",
+        { withCredentials: true }
       );
-      setLoans(updatedLoans);
-      setEditingLoan(null);
-    } else {
-      const newLoan = { id: uuidv4(), ...loan };
-      setLoans([...loans, newLoan]);
+      console.log(response);
+
+      if (response.data && response.data.data) {
+        // Assume response.data.data is an array of farmers with a "loan" array.
+        const farmers = response.data.data;
+        let loansList = [];
+        farmers.forEach((farmer) => {
+          if (Array.isArray(farmer.loan) && farmer.loan.length > 0) {
+            farmer.loan.forEach((loanI) => {
+              // Filter out soft-deleted loans
+              if (!loanI.isDeleted) {
+                loansList.push({
+                  id: loanI._id, // each loan must have a unique id
+                  farmerName: farmer.farmerName,
+                  phoneNumber: farmer.mobileNumber,
+                  dueAmount: loanI.loanAmount,
+                  loanDate: loanI.loanDate,
+                });
+              }
+            });
+          }
+        });
+        setLoans(loansList);
+        console.log("Loans fetched:", loansList);
+      }
+    } catch (error) {
+      console.error("Error fetching loans:", error);
     }
-    setIsFormOpen(false);
   };
 
-  // Open the form for editing a loan
+  useEffect(() => {
+    fetchLoans();
+  }, []);
+
+  // Save (create or update) a loan via the backend
+  const handleSaveLoan = async (loan) => {
+    try {
+      if (editingLoan) {
+        // Update existing loan
+        const response = await axios.put(
+          `http://localhost:8000/api/v1/loan/update/${editingLoan.id}`,
+          loan,
+          { withCredentials: true }
+        );
+        console.log("Loan updated:", response.data);
+      } else {
+        // Create new loan
+        const response = await axios.post(
+          "http://localhost:8000/api/v1/loan/add-loan",
+          loan,
+          { withCredentials: true }
+        );
+        console.log("Loan created:", response.data);
+      }
+      setIsFormOpen(false);
+      setEditingLoan(null);
+      fetchLoans();
+    } catch (error) {
+      console.error("Error saving loan:", error);
+    }
+  };
+
+  // Open form for editing
   const handleEdit = (loan) => {
     setEditingLoan(loan);
     setIsFormOpen(true);
@@ -48,12 +96,59 @@ const LoanList = () => {
     setIsDeleteModalOpen(true);
   };
 
-  // Delete a loan record after confirmation
-  const handleDeleteConfirmed = (id) => {
-    const filteredLoans = loans.filter((l) => l.id !== id);
-    setLoans(filteredLoans);
-    setIsDeleteModalOpen(false);
-    setLoanToDelete(null);
+  // Delete loan via backend
+  const handleDeleteConfirmed = async (id) => {
+    try {
+      const response = await axios.delete(
+        `http://localhost:8000/api/v1/loan/delete/${id}`,
+        { withCredentials: true }
+      );
+      console.log("Loan deleted:", response.data);
+      setIsDeleteModalOpen(false);
+      setLoanToDelete(null);
+      fetchLoans();
+    } catch (error) {
+      console.error("Error deleting loan:", error);
+    }
+  };
+
+  // Open Deduct Loan Modal
+  const openDeductModal = (loan) => {
+    setLoanToDeduct(loan);
+    setDeductAmount(""); // Reset the deduction amount
+    setIsDeductModalOpen(true);
+  };
+
+  // Handle changes in the deduct amount input
+  const handleDeductInputChange = (e) => {
+    setDeductAmount(e.target.value);
+  };
+
+  // Handle submission of the deduction amount
+  const handleDeductSubmit = async (e) => {
+    e.preventDefault();
+    const amount = parseFloat(deductAmount);
+    if (isNaN(amount) || amount <= 0) {
+      alert("Please enter a valid positive number.");
+      return;
+    }
+    if (amount > parseFloat(loanToDeduct.dueAmount)) {
+      alert("Deduct amount cannot exceed the due amount.");
+      return;
+    }
+    try {
+      const response = await axios.post(
+        `http://localhost:8000/api/v1/loan/deduct/${loanToDeduct.id}`,
+        { loanAmount: amount },
+        { withCredentials: true }
+      );
+      console.log("Loan deducted:", response.data);
+      setIsDeductModalOpen(false);
+      setLoanToDeduct(null);
+      fetchLoans();
+    } catch (error) {
+      console.error("Error deducting loan:", error);
+    }
   };
 
   return (
@@ -69,7 +164,7 @@ const LoanList = () => {
               <th className="px-4 py-3 text-left">Farmer Name</th>
               <th className="px-4 py-3 text-left">Phone Number</th>
               <th className="px-4 py-3 text-left">Due Amount ($)</th>
-              <th className="px-4 py-3 text-left">Transaction Date</th>
+              <th className="px-4 py-3 text-left">Loan Date</th>
               <th className="px-4 py-3 text-center">Actions</th>
             </tr>
           </thead>
@@ -86,14 +181,24 @@ const LoanList = () => {
                     <td className="px-4 py-3">{loan.farmerName}</td>
                     <td className="px-4 py-3">{loan.phoneNumber}</td>
                     <td className="px-4 py-3">${loan.dueAmount}</td>
-                    <td className="px-4 py-3">{loan.transactionDate}</td>
-                    <td className="px-4 py-3 text-center">
+                    <td className="px-4 py-3">
+                      {loan.loanDate &&
+                        new Date(loan.loanDate).toLocaleDateString()}
+                    </td>
+                    <td className="px-4 py-3 text-center space-x-2">
                       <button
                         onClick={() => handleEdit(loan)}
-                        className="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-1 px-3 rounded mr-2 transition duration-150 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                        className="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-1 px-3 rounded transition duration-150 focus:outline-none focus:ring-2 focus:ring-yellow-400"
                         aria-label={`Edit loan for ${loan.farmerName}`}
                       >
                         Edit
+                      </button>
+                      <button
+                        onClick={() => openDeductModal(loan)}
+                        className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-1 px-3 rounded transition duration-150 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        aria-label={`Deduct loan for ${loan.farmerName}`}
+                      >
+                        Deduct Loan
                       </button>
                       <button
                         onClick={() => openDeleteModal(loan)}
@@ -191,6 +296,70 @@ const LoanList = () => {
                   Delete
                 </button>
               </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Deduct Loan Modal */}
+      <AnimatePresence>
+        {isDeductModalOpen && loanToDeduct && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ duration: 0.3 }}
+            className="fixed inset-0 bg-black/50 flex justify-center items-center px-4 z-50"
+            aria-modal="true"
+            role="dialog"
+          >
+            <motion.div
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.9 }}
+              transition={{ duration: 0.3 }}
+              className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full mx-auto"
+            >
+              <h3 className="text-xl font-semibold text-center mb-4">
+                Deduct Loan
+              </h3>
+              <form onSubmit={handleDeductSubmit} className="space-y-4">
+                <div>
+                  <label
+                    htmlFor="deductAmount"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    Amount to Deduct ($)
+                  </label>
+                  <input
+                    type="number"
+                    id="deductAmount"
+                    name="deductAmount"
+                    value={deductAmount}
+                    onChange={handleDeductInputChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                    min="0"
+                    step="0.01"
+                  />
+                </div>
+                <div className="flex justify-between mt-4">
+                  <button
+                    type="button"
+                    onClick={() => setIsDeductModalOpen(false)}
+                    className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-md transition focus:outline-none focus:ring-2 focus:ring-gray-500"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    onClick={handleDeductSubmit}
+                  >
+                    Confirm Deduction
+                  </button>
+                </div>
+              </form>
             </motion.div>
           </motion.div>
         )}

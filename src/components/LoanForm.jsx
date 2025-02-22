@@ -1,71 +1,100 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import axios from "axios";
 
 const LoanForm = ({
-  isEditing,
-  handleSaveLoan,
   setIsFormOpen,
+  handleSaveLoan,
+  isEditing,
   editingLoan,
 }) => {
   const initialFormData = {
-    farmerName: "",
-    phoneNumber: "",
-    dueAmount: "",
-    transactionDate: new Date().toISOString().split("T")[0], // Default to today
+    mobileNumber: "",
+    loanAmount: "",
+    loanDate: new Date().toISOString().split("T")[0],
   };
 
   const [formData, setFormData] = useState(initialFormData);
   const [errors, setErrors] = useState({});
+  const [farmers, setFarmers] = useState([]);
 
+  // When editing, prefill the form with the provided loan values.
+  // Ensure each field is defined so that inputs remain controlled.
   useEffect(() => {
     if (isEditing && editingLoan) {
       setFormData({
-        farmerName: editingLoan.farmerName,
-        phoneNumber: editingLoan.phoneNumber,
-        dueAmount: editingLoan.dueAmount,
-        transactionDate:
-          editingLoan.transactionDate || new Date().toISOString().split("T")[0],
+        mobileNumber: editingLoan.mobileNumber || "",
+        loanAmount: editingLoan.loanAmount || "",
+        // If a loanDate exists, split off the time portion; otherwise, use today's date.
+        loanDate: editingLoan.loanDate
+          ? editingLoan.loanDate.split("T")[0]
+          : new Date().toISOString().split("T")[0],
       });
+    } else {
+      setFormData(initialFormData);
     }
   }, [isEditing, editingLoan]);
 
+  // Fetch the list of farmers from the backend
+  useEffect(() => {
+    const fetchFarmers = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:8000/api/v1/farmer/get-all-farmers",
+          { withCredentials: true }
+        );
+        const fetchedFarmers = response.data.data || response.data;
+        setFarmers(fetchedFarmers);
+      } catch (error) {
+        console.error("Error fetching farmers:", error);
+      }
+    };
+    fetchFarmers();
+  }, []);
+
+  // Update the form data and clear errors for the changed field
   const handleChange = (event) => {
     const { name, value } = event.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    // Clear the error for the specific field when the user types
     setErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
+  // Validate the form data
   const validate = () => {
     const newErrors = {};
-    if (!formData.farmerName.trim()) {
-      newErrors.farmerName = "Farmer name is required.";
+    if (!formData.mobileNumber) {
+      newErrors.mobileNumber = "Please select a farmer.";
     }
-    if (!/^\d{10}$/.test(formData.phoneNumber)) {
-      newErrors.phoneNumber = "Phone number must be exactly 10 digits.";
+    if (!formData.loanAmount || parseFloat(formData.loanAmount) <= 0) {
+      newErrors.loanAmount = "Loan amount must be a positive number.";
     }
-    if (!formData.dueAmount || parseFloat(formData.dueAmount) <= 0) {
-      newErrors.dueAmount = "Due amount must be a positive number.";
-    }
-    if (!formData.transactionDate) {
-      newErrors.transactionDate = "Transaction date is required.";
+    if (!formData.loanDate) {
+      newErrors.loanDate = "Loan date is required.";
     }
     return newErrors;
   };
 
-  const handleSubmit = (e) => {
+  // Handle form submission
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const validationErrors = validate();
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       return;
     }
-    handleSaveLoan(formData);
-    setIsFormOpen(false);
+    try {
+      await handleSaveLoan(formData);
+      setIsFormOpen(false);
+    } catch (error) {
+      console.error("Error saving loan:", error);
+    }
   };
 
   return (
-    <div
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
       className="fixed inset-0 bg-black/50 flex justify-center items-center px-4 overflow-y-auto z-50"
       role="dialog"
       aria-modal="true"
@@ -106,12 +135,11 @@ const LoanForm = ({
           {isEditing ? "Edit Loan Record" : "New Loan Record"}
         </h3>
 
-        {/* Inline Error Summary (optional) */}
         {Object.keys(errors).length > 0 && (
           <div className="mb-4">
             <ul className="list-disc list-inside text-red-600 text-sm">
-              {Object.values(errors).map((error, index) => (
-                <li key={index}>{error}</li>
+              {Object.values(errors).map((error, idx) => (
+                <li key={idx}>{error}</li>
               ))}
             </ul>
           </div>
@@ -120,113 +148,94 @@ const LoanForm = ({
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
             <label
-              htmlFor="farmerName"
+              htmlFor="mobileNumber"
               className="block text-sm font-medium text-gray-700 mb-1"
             >
-              Farmer Name
+              Select Farmer
             </label>
-            <input
-              type="text"
-              id="farmerName"
-              name="farmerName"
-              value={formData.farmerName}
+            <select
+              id="mobileNumber"
+              name="mobileNumber"
+              value={formData.mobileNumber}
               onChange={handleChange}
               className={`w-full px-4 py-2 border ${
-                errors.farmerName ? "border-red-500" : "border-gray-300"
+                errors.mobileNumber ? "border-red-500" : "border-gray-300"
               } rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
-            />
-            {errors.farmerName && (
-              <p className="text-red-500 text-xs mt-1">{errors.farmerName}</p>
+            >
+              <option value="">-- Select Farmer --</option>
+              {farmers.map((farmer) => (
+                <option key={farmer._id} value={farmer.mobileNumber}>
+                  {farmer.farmerName} ({farmer.mobileNumber})
+                </option>
+              ))}
+            </select>
+            {errors.mobileNumber && (
+              <p className="text-red-500 text-xs mt-1">{errors.mobileNumber}</p>
             )}
           </div>
 
           <div>
             <label
-              htmlFor="phoneNumber"
+              htmlFor="loanAmount"
               className="block text-sm font-medium text-gray-700 mb-1"
             >
-              Phone Number
-            </label>
-            <input
-              type="text"
-              id="phoneNumber"
-              name="phoneNumber"
-              value={formData.phoneNumber}
-              onChange={handleChange}
-              maxLength="10"
-              className={`w-full px-4 py-2 border ${
-                errors.phoneNumber ? "border-red-500" : "border-gray-300"
-              } rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
-            />
-            {errors.phoneNumber && (
-              <p className="text-red-500 text-xs mt-1">{errors.phoneNumber}</p>
-            )}
-          </div>
-
-          <div>
-            <label
-              htmlFor="dueAmount"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
-              Due Amount ($)
+              Loan Amount ($)
             </label>
             <input
               type="number"
-              id="dueAmount"
-              name="dueAmount"
-              value={formData.dueAmount}
+              id="loanAmount"
+              name="loanAmount"
+              value={formData.loanAmount}
               onChange={handleChange}
               className={`w-full px-4 py-2 border ${
-                errors.dueAmount ? "border-red-500" : "border-gray-300"
+                errors.loanAmount ? "border-red-500" : "border-gray-300"
               } rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
             />
-            {errors.dueAmount && (
-              <p className="text-red-500 text-xs mt-1">{errors.dueAmount}</p>
+            {errors.loanAmount && (
+              <p className="text-red-500 text-xs mt-1">{errors.loanAmount}</p>
             )}
           </div>
 
           <div>
             <label
-              htmlFor="transactionDate"
+              htmlFor="loanDate"
               className="block text-sm font-medium text-gray-700 mb-1"
             >
-              Transaction Date
+              Loan Date
             </label>
             <input
               type="date"
-              id="transactionDate"
-              name="transactionDate"
-              value={formData.transactionDate}
+              id="loanDate"
+              name="loanDate"
+              value={formData.loanDate}
               onChange={handleChange}
               className={`w-full px-4 py-2 border ${
-                errors.transactionDate ? "border-red-500" : "border-gray-300"
+                errors.loanDate ? "border-red-500" : "border-gray-300"
               } rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
             />
-            {errors.transactionDate && (
-              <p className="text-red-500 text-xs mt-1">
-                {errors.transactionDate}
-              </p>
+            {errors.loanDate && (
+              <p className="text-red-500 text-xs mt-1">{errors.loanDate}</p>
             )}
           </div>
 
-          <div className="flex flex-col sm:flex-row justify-between mt-8 space-y-4 sm:space-y-0 sm:space-x-4">
+          <div className="flex justify-between mt-8">
             <button
               type="button"
               onClick={() => setIsFormOpen(false)}
-              className="flex-1 bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded-lg transition duration-200 focus:outline-none"
+              className="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded-lg transition duration-200 focus:outline-none"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="flex-1 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition duration-200 focus:outline-none"
+              className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition duration-200 focus:outline-none"
             >
-              {isEditing ? "Update" : "Save"} Loan
+              {isEditing ? "Update Loan" : "Save Loan"}
             </button>
           </div>
         </form>
       </motion.div>
-    </div>
+    </motion.div>
   );
 };
 
