@@ -1,3 +1,4 @@
+// TransactionForm.jsx
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 
@@ -6,45 +7,65 @@ export const TransactionForm = ({
   handleSaveTransaction,
   setIsFormOpen,
   editingTransaction,
+  availableProducts,
 }) => {
   const [formData, setFormData] = useState({
-    products: [],
+    customerName: "",
+    mobileNumber: "",
+    time: "", // for datetime-local input
+    products: [], // local mapping of items (each with productId, name, price, quantity)
     netTotalPrice: 0,
   });
-  const [availableProducts, setAvailableProducts] = useState([]);
 
-  // Load products from localStorage
+  // When editing, map the backend's "items" to the local "products" state.
   useEffect(() => {
-    const storedProducts = JSON.parse(localStorage.getItem("products")) || [];
-    setAvailableProducts(storedProducts);
-  }, []);
-
-  // Load editing transaction (if editing)
-  useEffect(() => {
-    if (isEditing && editingTransaction) {
+    if (isEditing && editingTransaction && availableProducts.length > 0) {
+      const mappedProducts = editingTransaction.items.map((item) => {
+        const product = availableProducts.find((p) => p._id === item.product);
+        return {
+          productId: item.product,
+          name: product ? product.productName : "",
+          price: product ? product.productPrice : 0,
+          quantity: item.quantity,
+        };
+      });
+      const totalPrice = mappedProducts.reduce(
+        (sum, prod) => sum + prod.price * prod.quantity,
+        0
+      );
       setFormData({
-        products: editingTransaction.products || [],
-        netTotalPrice: editingTransaction.netTotalPrice || 0,
+        customerName: editingTransaction.customerName || "",
+        mobileNumber: editingTransaction.mobileNumber || "",
+        time: editingTransaction.time
+          ? new Date(editingTransaction.time).toISOString().slice(0, 16)
+          : "",
+        products: mappedProducts,
+        netTotalPrice: totalPrice,
       });
     }
-  }, [isEditing, editingTransaction]);
+  }, [isEditing, editingTransaction, availableProducts]);
 
-  // Handle product selection and quantity changes
+  // General input handler for customer details and time
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // Handle changes to product selection and quantity
   const handleProductChange = (index, event) => {
     const { name, value } = event.target;
     const updatedProducts = [...formData.products];
 
     if (name === "productId") {
-      const selectedProduct = availableProducts.find((p) => p.id === value);
+      const selectedProduct = availableProducts.find((p) => p._id === value);
       updatedProducts[index] = {
         ...updatedProducts[index],
         productId: value,
-        name: selectedProduct ? selectedProduct.name : "",
-        price: selectedProduct ? selectedProduct.price : 0,
-        quantity: updatedProducts[index]?.quantity || "",
+        name: selectedProduct ? selectedProduct.productName : "",
+        price: selectedProduct ? selectedProduct.productPrice : 0,
+        quantity: updatedProducts[index]?.quantity || 0,
       };
     } else if (name === "quantity") {
-      // Allow empty input temporarily; enforce minimum of 0
       const newQuantity =
         value === "" ? "" : Math.max(parseInt(value, 10) || 0, 0);
       updatedProducts[index] = {
@@ -55,10 +76,14 @@ export const TransactionForm = ({
 
     // Recalculate net total price
     const totalPrice = updatedProducts.reduce(
-      (sum, product) => sum + product.price * (product.quantity || 0),
+      (sum, prod) => sum + prod.price * (prod.quantity || 0),
       0
     );
-    setFormData({ products: updatedProducts, netTotalPrice: totalPrice });
+    setFormData({
+      ...formData,
+      products: updatedProducts,
+      netTotalPrice: totalPrice,
+    });
   };
 
   // Add a new product row
@@ -67,7 +92,7 @@ export const TransactionForm = ({
       ...formData,
       products: [
         ...formData.products,
-        { productId: "", name: "", price: 0, quantity: "" },
+        { productId: "", name: "", price: 0, quantity: 0 },
       ],
     });
   };
@@ -77,20 +102,44 @@ export const TransactionForm = ({
     const updatedProducts = [...formData.products];
     updatedProducts.splice(index, 1);
     const totalPrice = updatedProducts.reduce(
-      (sum, product) => sum + product.price * (product.quantity || 0),
+      (sum, prod) => sum + prod.price * (prod.quantity || 0),
       0
     );
-    setFormData({ products: updatedProducts, netTotalPrice: totalPrice });
+    setFormData({
+      ...formData,
+      products: updatedProducts,
+      netTotalPrice: totalPrice,
+    });
   };
 
-  // Save Transaction using form submission
+  // Handle form submission
   const handleSubmit = (e) => {
     e.preventDefault();
+    // Validate required fields
+    if (!formData.customerName || !formData.mobileNumber || !formData.time) {
+      alert(
+        "Please fill out customer name, mobile number, and transaction date/time"
+      );
+      return;
+    }
     if (formData.products.length === 0) {
       alert("Please add at least one product!");
       return;
     }
-    handleSaveTransaction(formData);
+    // Build payload according to backend schema.
+    // The payload includes "customerName", "mobileNumber", "time", and an "items" array.
+    const transactionPayload = {
+      customerName: formData.customerName,
+      mobileNumber: formData.mobileNumber,
+      time: formData.time,
+      items: formData.products.map((item) => ({
+        product: item.productId,
+        quantity: item.quantity,
+        pamount: item.price * item.quantity,
+      })),
+    };
+
+    handleSaveTransaction(transactionPayload);
     setIsFormOpen(false);
   };
 
@@ -114,12 +163,52 @@ export const TransactionForm = ({
         >
           {isEditing ? "Edit Transaction" : "New Transaction"}
         </h3>
-
-        {/* Scrollable Form Content */}
         <form
           onSubmit={handleSubmit}
           className="flex-1 overflow-y-auto max-h-[65vh] pr-2 space-y-4 sm:space-y-6"
         >
+          {/* Customer Details */}
+          <div className="border p-4 rounded-md shadow-sm">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Customer Name
+            </label>
+            <input
+              type="text"
+              name="customerName"
+              value={formData.customerName}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2c447f]"
+              required
+            />
+          </div>
+          <div className="border p-4 rounded-md shadow-sm">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Mobile Number
+            </label>
+            <input
+              type="text"
+              name="mobileNumber"
+              value={formData.mobileNumber}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2c447f]"
+              required
+            />
+          </div>
+          <div className="border p-4 rounded-md shadow-sm">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Transaction Date & Time
+            </label>
+            <input
+              type="datetime-local"
+              name="time"
+              value={formData.time}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2c447f]"
+              required
+            />
+          </div>
+
+          {/* Product Items */}
           {formData.products.map((product, index) => (
             <div key={index} className="border p-4 rounded-md shadow-sm">
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -135,8 +224,8 @@ export const TransactionForm = ({
                 <option value="">Select a product</option>
                 {availableProducts.length > 0 ? (
                   availableProducts.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.name} - ${p.price}
+                    <option key={p._id} value={p._id}>
+                      {p.productName} - ${p.productPrice.toFixed(2)}
                     </option>
                   ))
                 ) : (
@@ -158,7 +247,7 @@ export const TransactionForm = ({
               />
 
               <p className="mt-2 text-sm text-gray-600">
-                Price: ${product.price} | Total: $
+                Price: ${product.price.toFixed(2)} | Total: $
                 {(product.price * (product.quantity || 0)).toFixed(2)}
               </p>
 
@@ -185,25 +274,23 @@ export const TransactionForm = ({
           <p className="text-lg font-bold mt-4">
             Net Total Price: ${formData.netTotalPrice.toFixed(2)}
           </p>
-        </form>
 
-        {/* Action Buttons */}
-        <div className="mt-6 sm:mt-8 flex justify-between space-x-2 sm:space-x-4">
-          <button
-            type="button"
-            onClick={() => setIsFormOpen(false)}
-            className="flex-1 bg-gray-400 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-gray-500 transition duration-200 focus:outline-none focus:ring-2 focus:ring-gray-400"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            onClick={handleSubmit}
-            className="flex-1 bg-[#2c447f] text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-[#1b2d5b] transition duration-200 focus:outline-none focus:ring-2 focus:ring-[#2c447f]"
-          >
-            {isEditing ? "Update Transaction" : "Save Transaction"}
-          </button>
-        </div>
+          <div className="mt-6 sm:mt-8 flex justify-between space-x-2 sm:space-x-4">
+            <button
+              type="button"
+              onClick={() => setIsFormOpen(false)}
+              className="flex-1 bg-gray-400 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-gray-500 transition duration-200 focus:outline-none focus:ring-2 focus:ring-gray-400"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="flex-1 bg-[#2c447f] text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-[#1b2d5b] transition duration-200 focus:outline-none focus:ring-2 focus:ring-[#2c447f]"
+            >
+              {isEditing ? "Update Transaction" : "Save Transaction"}
+            </button>
+          </div>
+        </form>
       </motion.div>
     </div>
   );
