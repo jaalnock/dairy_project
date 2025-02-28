@@ -67,6 +67,7 @@ export const Login = () => {
         setError("Internal Server Error");
       }
       console.log("Login successful:", response);
+      localStorage.setItem("response", JSON.stringify(response))
       login(role);
       // Redirect based on role
       if (role === "Admin") {

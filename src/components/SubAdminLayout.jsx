@@ -13,6 +13,7 @@ export const SubAdminLayout = () => {
   // Safely retrieve sub-admin info from localStorage
   const responseByLS = JSON.parse(localStorage.getItem("response") || "{}");
 
+  //This should be asked that whether is it required to make this api call or not . . .
   const fetchSubAdmin = async () => {
     if (!responseByLS.data?.data?.subAdmin?.id) {
       console.error("No sub-admin info found in localStorage.");
