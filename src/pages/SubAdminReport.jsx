@@ -7,25 +7,25 @@ export const SubAdminReport = () => {
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("farmersLoan");
 
-  const BASE_URL = "http://localhost:5173/api/v1";
+  const BASE_URL = "http://localhost:8000/api/v1";
 
   const downloadReport = async (url, filename) => {
     try {
       setLoading(true);
       const response = await axios.get(`${BASE_URL}${url}`, {
         responseType: "blob",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
+        withCredentials:true
       });
 
       const blob = new Blob([response.data]);
+      console.log("blob: " , blob)
       const link = document.createElement("a");
       link.href = window.URL.createObjectURL(blob);
       link.setAttribute("download", filename);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+      
     } catch (error) {
       console.error("Error downloading report:", error);
       alert("Failed to download the report.");
@@ -168,7 +168,7 @@ export const SubAdminReport = () => {
           <button
             onClick={() =>
               downloadReport(
-                "/milk/subAdmin/excel/branch-transactionsv",
+                "/milk/subAdmin/excel/branch-transactions",
                 "Farmers_Transaction_Report.xlsx"
               )
             }
@@ -236,7 +236,7 @@ export const SubAdminReport = () => {
           <button
             onClick={() =>
               downloadReport(
-                `/transaction/subAdmin/transactions/report?reportType=${reportType}`,
+                `/transaction/subAdmin/customer-reports/report?reportType=${reportType}`,
                 `${reportType}_Product_Transaction_Report.xlsx`
               )
             }
