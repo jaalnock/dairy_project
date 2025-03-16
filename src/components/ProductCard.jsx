@@ -4,13 +4,13 @@ import { useTranslation } from "react-i18next";
 import { CartContext } from "../context/CartContext";
 import { motion } from "framer-motion";
 
-export const ProductCard = ({ product }) => {
+export const ProductCard = ({ product , selectedBranch, categoryId}) => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { addToCart } = useContext(CartContext);
 
   const handleClick = () => {
-    navigate(`/products/${product.id}`);
+    navigate(`/products/${product._id}`); 
   };
 
   const handleAddToCart = (e) => {
@@ -31,30 +31,31 @@ export const ProductCard = ({ product }) => {
       {/* Product Image */}
       <div className="relative h-48">
         <img
-          src={product?.imageUrl}
-          alt={product?.name}
+          src={product?.productImage}
+          alt={product?.productName}
           className="w-full h-full object-cover"
         />
       </div>
 
       <div className="px-4 py-3">
         {/* Product Name */}
-        <h3 className="font-bold text-lg mb-2">{product.name}</h3>
+        <h3 className="font-bold text-lg mb-2">{product.productName}</h3>
 
+        <span>Total Remaining: {product.quantity} packets</span>
         {/* Price and Stock Status */}
-        <div className="flex justify-between items-center mb-3">
+        <div className="flex justify-between items-center mb-3 mt-2">
           <span className="text-gray-700 text-sm">
             
-             ${product.price}
+             ${product.productPrice}
           </span>
           <span
             className={`px-2 py-1 rounded text-xs ${
-              product.inStock
+              product.productInstock
                 ? "bg-green-100 text-green-800"
                 : "bg-red-100 text-red-800"
             }`}
           >
-            {product.inStock
+            {product.productInstock
               ? t("products.productCard.inStock")
               : t("products.productCard.outOfStock")}
           </span>

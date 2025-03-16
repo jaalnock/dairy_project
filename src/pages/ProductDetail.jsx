@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { products, branches } from "../config";
+// import { products, branches } from "../config";
 import { CartContext } from "../context/CartContext";
 
 export const ProductDetails = () => {
