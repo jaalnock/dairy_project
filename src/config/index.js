@@ -167,3 +167,8 @@ export const products = [
     quantity: 35,
   },
 ];
+export const branches = [
+  { id: "branch1", location: "Downtown Dairy Store" },
+  { id: "branch2", location: "Suburb Outlet" },
+  { id: "branch3", location: "City Center Dairy" },
+];
