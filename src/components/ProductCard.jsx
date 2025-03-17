@@ -10,7 +10,8 @@ export const ProductCard = ({ product , selectedBranch, categoryId}) => {
   const { addToCart } = useContext(CartContext);
 
   const handleClick = () => {
-    navigate(`/products/${product._id}`); 
+    const id = product._id ; 
+    navigate("/products/" + `${selectedBranch}/${categoryId}/${id}`, {state : product});
   };
 
   const handleAddToCart = (e) => {
@@ -41,7 +42,8 @@ export const ProductCard = ({ product , selectedBranch, categoryId}) => {
         {/* Product Name */}
         <h3 className="font-bold text-lg mb-2">{product.productName}</h3>
 
-        <span>Total Remaining: {product.quantity} packets</span>
+        {/* Ask to peers whether this field should be kept or not */}
+        {/* <span>Total Remaining: {product.quantity} packets</span> */}
         {/* Price and Stock Status */}
         <div className="flex justify-between items-center mb-3 mt-2">
           <span className="text-gray-700 text-sm">

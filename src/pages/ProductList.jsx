@@ -79,7 +79,29 @@ export const ProductList = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // Fetch branches from backend
+  // ✅ Always reset selectedBranch when user visits ProductList
+  useEffect(() => {
+    setSelectedBranch(""); // Clear the selection every time user visits
+  }, []);
+
+  // ✅ Store selected branch in localStorage when changed
+  const handleBranchChange = (e) => {
+    const branchId = e.target.value;
+    const branchName = e.target.options[e.target.selectedIndex].text;
+    
+    console.log("Selected Branch:", branchId, branchName);
+
+    setSelectedBranch(branchId);
+    
+    // ✅ Store both values correctly in localStorage
+    localStorage.setItem("selectedBranch", JSON.stringify({ branchId, branchName }));
+
+    setCategories([]); // Clear categories
+    setProducts([]); // Clear products
+};
+
+
+  // Fetch branches
   useEffect(() => {
     const fetchBranches = async () => {
       try {
@@ -97,71 +119,57 @@ export const ProductList = () => {
     fetchBranches();
   }, []);
 
-  // Function to handle branch selection
-  const handleBranchChange = (e) => {
-    const branchId = e.target.value;
-    console.log(branchId)
-    setSelectedBranch(branchId); // Update selected branch
-    setCategories([]); // Clear previous categories
-    setProducts([]); // Clear previous products
-  };
-
   // Fetch categories when a branch is selected
-  // Fetch categories when a branch is selected
-useEffect(() => {
-  if (selectedBranch) {
-    const fetchCategories = async () => {
-      try {
-        const response = await axios.get(
-          `http://localhost:8000/api/v1/category/get-categories-by-branch/${selectedBranch}`
-        );
+  useEffect(() => {
+    if (selectedBranch) {
+      const fetchCategories = async () => {
+        try {
+          const response = await axios.get(
+            `http://localhost:8000/api/v1/category/get-categories-by-branch/${selectedBranch}`
+          );
 
-        // Extract correct category fields from response
-        const formattedCategories = response.data.data.map((category) => ({
-          id: category._id, // Correcting to match your backend
-          name: category.categoryName, // Using categoryName field
-        }));
+          const formattedCategories = response.data.data.map((category) => ({
+            id: category._id,
+            name: category.categoryName,
+          }));
 
-        // Add "All" category at the beginning
-        const updatedCategories = [{ id: "all", name: "All" }, ...formattedCategories];
-        setCategories(updatedCategories);
-        setSelectedCategory("all"); // Auto-select "All"
-      } catch (err) {
-        setError("Failed to fetch categories.");
-      }
-    };
+          setCategories([{ id: "all", name: "All" }, ...formattedCategories]);
+          setSelectedCategory("all");
+        } catch (err) {
+          setError("Failed to fetch categories.");
+        }
+      };
 
-    fetchCategories();
-  }
-}, [selectedBranch]);
+      fetchCategories();
+    }
+  }, [selectedBranch]);
 
   // Fetch products when a category is selected
   useEffect(() => {
     if (selectedCategory && selectedBranch) {
       const fetchProducts = async () => {
-        const categoryId = selectedCategory
         try {
           const url =
             selectedCategory === "all"
               ? `http://localhost:8000/api/v1/category/get-all-products/${selectedBranch}`
-              : `http://localhost:8000/api/v1/category/get-category-from-branch-id/${selectedBranch}/${categoryId}`;
+              : `http://localhost:8000/api/v1/category/get-category-from-branch-id/${selectedBranch}/${selectedCategory}`;
 
           const response = await axios.get(url);
-          console.log(response.data.data)
+          console.log(response.data.data);
           setProducts(response.data.data);
         } catch (err) {
           setError("Failed to fetch products.");
         }
       };
+
       fetchProducts();
     }
   }, [selectedCategory, selectedBranch]);
 
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Main Content Area */}
       <div className="flex-grow py-6 px-4 sm:px-10">
-        {/* Branch Selection Form (Popup) */}
+        {/* ✅ Always show branch selection when user visits ProductList */}
         {!selectedBranch && (
           <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 px-4 z-50">
             <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-lg w-11/12 max-w-md text-center relative overflow-auto max-h-[90vh]">
@@ -169,7 +177,6 @@ useEffect(() => {
                 Select Your Branch
               </h2>
 
-              {/* Show loading spinner or error message */}
               {loading ? (
                 <p className="text-gray-500">Loading branches...</p>
               ) : error ? (
@@ -178,7 +185,7 @@ useEffect(() => {
                 <select
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm sm:text-base text-gray-700 bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
                   onChange={handleBranchChange}
-                  value={selectedBranch} // Ensure correct selection
+                  value={selectedBranch}
                 >
                   <option value="">-- Select Branch --</option>
                   {branches.map((branch) => (
@@ -192,7 +199,6 @@ useEffect(() => {
           </div>
         )}
 
-        {/* Only show categories & products if a branch is selected */}
         {selectedBranch && (
           <>
             {/* Heading for Dairy Products */}
@@ -204,7 +210,6 @@ useEffect(() => {
             <div className="flex flex-wrap justify-center gap-2 sm:gap-4 mb-6">
               {categories.length > 0 ? (
                 categories.map((category) => (
-                  
                   <button
                     key={category.id}
                     onClick={() => setSelectedCategory(category.id)}
@@ -224,18 +229,22 @@ useEffect(() => {
 
             {/* Product Grid */}
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 auto-rows-fr">
-         {products.length > 0 ? (
-          products.map((product) => (
-            <div key={product.productName} className="flex-shrink-0 w-full">
-              <ProductCard product={product} selectedBranch={selectedBranch} categoryId={selectedCategory}/>
+              {products.length > 0 ? (
+                products.map((product) => (
+                  <div key={product.productName} className="flex-shrink-0 w-full">
+                    <ProductCard
+                      product={product}
+                      selectedBranch={selectedBranch}
+                      categoryId={selectedCategory}
+                    />
+                  </div>
+                ))
+              ) : (
+                <p className="text-center col-span-full text-gray-500">
+                  {t("products.noProducts")}
+                </p>
+              )}
             </div>
-          ))
-        ) : (
-          <p className="text-center col-span-full text-gray-500">
-            {t("products.noProducts")}
-          </p>
-        )}
-      </div>
           </>
         )}
       </div>
