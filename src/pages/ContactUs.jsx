@@ -361,7 +361,7 @@ export const ContactUs = () => {
           name: formData.name,
         })
         .then((response) => {
-          console.log("Response:", response.data);
+          console.log("R esponse:", response.data);
           setOtpSent(true);
           setOtpInput(""); // Reset OTP input
           startTimer(30); // Start 30-second timer
