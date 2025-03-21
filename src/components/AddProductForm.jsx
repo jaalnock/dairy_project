@@ -10,6 +10,7 @@ export const AddProductForm = ({
   onClose,
   onSave,
 }) => {
+  const [msgOnBtn , setMsgOnBtn] = useState("Save");
   // Initialize form state with expected fields
   const [formData, setFormData] = useState({
     productName: "",
@@ -75,29 +76,42 @@ export const AddProductForm = ({
     Number(formData.fat) >= 0 &&
     formData.categoryId;
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!isFormValid) {
-      toast.error("Please fill in all required fields with valid values!");
-      return;
-    }
-    // Create a FormData object to send both text fields and the file
-    const formDataToSend = new FormData();
-    formDataToSend.append("productName", formData.productName);
-    formDataToSend.append("productPrice", parseFloat(formData.productPrice));
-    formDataToSend.append("quantity", parseInt(formData.quantity, 10));
-    formDataToSend.append("snf", parseFloat(formData.snf));
-    formDataToSend.append("fat", parseFloat(formData.fat));
-    formDataToSend.append("unit", formData.unit || 0);
-
-    // Append the file (if one was selected) using the key "file"
-    if (imageFile) {
-      formDataToSend.append("file", imageFile);
-    }
-
-    // Call the parent's onSave handler with the categoryId and FormData
-    onSave(formData.categoryId, formDataToSend);
-  };
+    const handleSubmit = async (e) => {
+      e.preventDefault();
+      
+      if (!isFormValid) {
+        toast.error("Please fill in all required fields with valid values!");
+        return;
+      }
+    
+      setMsgOnBtn("Saving . . ."); // Show Saving message
+    
+      try {
+        // Create a FormData object to send both text fields and the file
+        const formDataToSend = new FormData();
+        formDataToSend.append("productName", formData.productName);
+        formDataToSend.append("productPrice", parseFloat(formData.productPrice));
+        formDataToSend.append("quantity", parseInt(formData.quantity, 10));
+        formDataToSend.append("snf", parseFloat(formData.snf));
+        formDataToSend.append("fat", parseFloat(formData.fat));
+        formDataToSend.append("unit", formData.unit || 0);
+    
+        // Append the file (if one was selected) using the key "file"
+        if (imageFile) {
+          formDataToSend.append("file", imageFile);
+        }
+    
+        // Await the save operation (assuming onSave is async)
+        await onSave(formData.categoryId, formDataToSend);
+    
+        setMsgOnBtn("Saved ✅"); // Show success message
+        setTimeout(() => setMsgOnBtn("Save"), 2000); // Reset after 2s
+      } catch (error) {
+        toast.error("Error saving product. Please try again!");
+        setMsgOnBtn("Save"); // Reset button if error occurs
+      }
+    };
+    
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-center px-4 z-50">
@@ -269,7 +283,7 @@ export const AddProductForm = ({
                   isFormValid ? "bg-blue-600 hover:bg-blue-700" : "bg-blue-400"
                 } text-white py-2 rounded-lg transition duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400`}
               >
-                Save
+                {msgOnBtn}
               </button>
             </div>
           </form>
