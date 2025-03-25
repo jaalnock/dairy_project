@@ -134,6 +134,7 @@ export const TransactionForm = ({
       time: formData.time,
       items: formData.products.map((item) => ({
         product: item.productId,
+        productName : item.name,
         quantity: item.quantity,
         pamount: item.price * item.quantity,
       })),

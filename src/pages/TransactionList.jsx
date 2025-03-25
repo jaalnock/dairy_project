@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import TransactionForm from "../components/TransactionForm.jsx";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
+import { ErrorDialog } from "../components/ErrorDialog";
 
 // Adjust the base URL as needed for your backend API
 const API_BASE_URL = "http://localhost:8000/api/v1";
@@ -12,6 +13,9 @@ const TransactionList = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState(null);
   const [availableProducts, setAvailableProducts] = useState([]);
+  const [error , setError] = useState([]);
+  const [msg , setMsg] = useState();
+
 
   // Load transactions from API on mount
   useEffect(() => {
@@ -25,11 +29,13 @@ const TransactionList = () => {
         setTransactions(response.data.data);
       } catch (error) {
         console.error("Error fetching transactions:", error);
+        // setError([error.response.data.message])
+        setMsg(error.response.data.message)
       }
     };
     loadTransactions();
   }, []);
-
+  
   // Load available products from API on mount
   useEffect(() => {
     const loadProducts = async () => {
@@ -42,6 +48,7 @@ const TransactionList = () => {
         setAvailableProducts(response.data.data);
       } catch (error) {
         console.error("Error fetching products:", error);
+        setError([error.response.data.message])
       }
     };
     loadProducts();
@@ -66,12 +73,12 @@ const TransactionList = () => {
         );
         setEditingTransaction(null);
       } catch (error) {
+        setError([error.response.data.message])
         console.error("Error updating transaction:", error);
       }
     } else {
       // Create a new transaction
       try {
-        console.log(transactionData);
         const response = await axios.post(
           `${API_BASE_URL}/transaction/save-transaction`,
           transactionData,
@@ -80,6 +87,7 @@ const TransactionList = () => {
         const newTransaction = response.data.data;
         setTransactions([...transactions, newTransaction]);
       } catch (error) {
+        setError([error.response.data.message])
         console.error("Error creating transaction:", error);
       }
     }
@@ -87,6 +95,7 @@ const TransactionList = () => {
   };
 
   const handleEdit = (transaction) => {
+    console.log("transaction: " , transaction)
     setEditingTransaction(transaction);
     setIsFormOpen(true);
   };
@@ -99,12 +108,16 @@ const TransactionList = () => {
       );
       setTransactions(transactions.filter((t) => t._id !== id));
     } catch (error) {
+      setError([error.response.data.message])
       console.error("Error deleting transaction:", error);
     }
   };
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 sm:p-8">
+      {error.length > 0  && (
+          <ErrorDialog errors={error} onClose={() => setError([])} />
+        )}
       <div className="container mx-auto">
         <h2 className="text-3xl sm:text-4xl font-bold mb-6 sm:mb-8 text-center text-[#2c447f]">
           Transactions
@@ -248,7 +261,7 @@ const TransactionList = () => {
                       colSpan="10"
                       className="px-4 py-4 text-center text-gray-500"
                     >
-                      No transactions available.
+                      {msg}
                     </td>
                   </motion.tr>
                 )}

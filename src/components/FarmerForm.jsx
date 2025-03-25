@@ -32,7 +32,8 @@ const FarmerForm = ({
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = (e) => {
+    e.preventDefault();
     // Validate required fields
     const newErrors = validate();
     if (Object.keys(newErrors).length > 0) {

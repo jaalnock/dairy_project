@@ -51,6 +51,7 @@ export const FarmerList = () => {
 
   // Save (add or update) a farmer via API
   const handleSaveFarmer = async (farmer) => {
+    
     try {
       if (editingFarmer) {
         // Update existing farmer (PATCH request)
@@ -68,6 +69,7 @@ export const FarmerList = () => {
         setEditingFarmer(null);
       } else {
         // Add new farmer (POST request)
+        console.log("farmer: " , farmer)
         const response = await axios.post(
           "http://localhost:8000/api/v1/farmer/addFarmer",
           farmer,
@@ -139,7 +141,7 @@ export const FarmerList = () => {
   return (
     <div className="bg-gray-100 min-h-screen p-6 relative">
       <h2 className="text-4xl font-bold text-blue-800 text-center mb-10">
-        {t("branch.title")}
+        {t("Farmer")}
       </h2>
 
       {error && (

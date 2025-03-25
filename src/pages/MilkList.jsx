@@ -75,7 +75,7 @@ const MilkList = () => {
       if (editingEntry) {
         // Update existing milk transaction
         const response = await axios.patch(
-          `http://localhost:8000/api/v1/milk/update-milk/${editingEntry.farmerNumber}/${editingEntry._id}`,
+          `http://localhost:8000/api/v1/milk/update-milk/${editingEntry.farmerId}/${editingEntry._id}`,
           entry,
           { withCredentials: true }
         );
@@ -85,7 +85,7 @@ const MilkList = () => {
         // Update the farmer's transactions in local state:
         setMilkEntries((prevEntries) =>
           prevEntries.map((farmer) => {
-            if (farmer.mobileNumber === editingEntry.farmerNumber) {
+            if (farmer.farmerId === editingEntry.farmerId) {
               return { ...farmer, transaction: updatedFarmer.transaction };
             }
             return farmer;
@@ -99,12 +99,12 @@ const MilkList = () => {
           entry,
           { withCredentials: true }
         );
-        console.log("Add response:", response);
+        console.log("Add response:", response.data.data);
         const updatedFarmer = response.data.data;
         // Update local state: if the farmer exists, update their transactions; otherwise, add the new farmer
         setMilkEntries((prevEntries) => {
           const index = prevEntries.findIndex(
-            (farmer) => farmer.mobileNumber === updatedFarmer.mobileNumber
+            (farmer) => farmer.farmerId === updatedFarmer.farmerId
           );
           if (index !== -1) {
             const newEntries = [...prevEntries];
@@ -139,16 +139,16 @@ const MilkList = () => {
   };
 
   // Delete a milk transaction with optimistic local update (called after confirmation)
-  const handleDeleteConfirmed = async (transactionId, farmerNumber) => {
+  const handleDeleteConfirmed = async (transactionId, farmerId) => {
     try {
       await axios.delete(
-        `http://localhost:8000/api/v1/milk/delete-milk/${farmerNumber}/${transactionId}`,
+        `http://localhost:8000/api/v1/milk/delete-milk/${farmerId}/${transactionId}`,
         { withCredentials: true }
       );
       // Update local state: remove the transaction from the corresponding farmer
       setMilkEntries((prevEntries) =>
         prevEntries.map((farmer) => {
-          if (farmer.mobileNumber === farmerNumber) {
+          if (farmer.farmerId === farmerId) {
             return {
               ...farmer,
               transaction: farmer.transaction.filter(
@@ -171,19 +171,21 @@ const MilkList = () => {
       setEntryToDelete(null);
     }
   };
-
+  {
+    console.log("milkEntries: " , milkEntries);
+  }
   // Flatten the nested milkEntries into individual transaction rows.
   const flatMilkTransactions = milkEntries.flatMap((entry) =>
     entry.transaction.map((txn) => ({
       _id: txn._id,
       farmerName: entry.farmerName,
       farmerNumber: entry.mobileNumber,
-      farmerId: txn.farmerId,
+      farmerId: entry.farmerId,
       transactionDate: txn.transactionDate,
       transactionTime: txn.transactionTime,
       milkType: txn.milkType,
-      fatPercentage: txn.fatPercentage,
-      snfPercentage: txn.snfPercentage,
+      fatPercentage: txn.fat,
+      snfPercentage: txn.snf,
       milkQuantity: txn.milkQuantity,
       pricePerLitre: txn.pricePerLitre,
       transactionAmount: txn.transactionAmount,
@@ -417,7 +419,7 @@ const MilkList = () => {
                     onClick={() =>
                       handleDeleteConfirmed(
                         entryToDelete._id,
-                        entryToDelete.farmerNumber
+                        entryToDelete.farmerId
                       )
                     }
                     className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md transition duration-150"

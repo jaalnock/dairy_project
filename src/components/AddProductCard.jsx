@@ -70,12 +70,6 @@ export const AddProductCard = ({
           <p>
             <span className="font-medium">Quantity:</span> {product.quantity}
           </p>
-          <p>
-            <span className="font-medium">SNF:</span> {product.snf}
-          </p>
-          <p>
-            <span className="font-medium">FAT:</span> {product.fat}
-          </p>
         </div>
 
         {/* Three-Row Layout for Controls */}

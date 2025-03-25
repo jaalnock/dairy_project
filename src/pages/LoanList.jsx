@@ -36,6 +36,7 @@ const LoanList = () => {
                 loansList.push({
                   id: loanI._id, // each loan must have a unique id
                   farmerName: farmer.farmerName,
+                  farmerId: farmer.farmerId,
                   phoneNumber: farmer.mobileNumber,
                   dueAmount: loanI.loanAmount,
                   loanDate: loanI.loanDate,

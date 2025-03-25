@@ -49,9 +49,6 @@ const MilkForm = ({
     }
   }, [formData.farmerId, farmers]);
 
-  
-
-  
   useEffect(() => {
     if (isEditing && editingEntry) {
       const {
