@@ -16,8 +16,6 @@ export const AddProductForm = ({
     productName: "",
     productPrice: "",
     quantity: "",
-    snf: "",
-    fat: "",
     unit: "",
     categoryId: "",
     productImage: "",
@@ -35,8 +33,6 @@ export const AddProductForm = ({
       productName: "",
       productPrice: "",
       quantity: "",
-      snf: "",
-      fat: "",
       unit: "",
       categoryId: "",
       productImage: "",
@@ -67,13 +63,7 @@ export const AddProductForm = ({
     Number(formData.productPrice) > 0 &&
     formData.quantity !== "" &&
     !isNaN(formData.quantity) &&
-    Number(formData.quantity) >= 0 &&
-    formData.snf !== "" &&
-    !isNaN(formData.snf) &&
-    Number(formData.snf) >= 0 &&
-    formData.fat !== "" &&
-    !isNaN(formData.fat) &&
-    Number(formData.fat) >= 0 &&
+    Number(formData.quantity) >= 0  &&
     formData.categoryId;
 
     const handleSubmit = async (e) => {
@@ -85,17 +75,15 @@ export const AddProductForm = ({
       }
     
       setMsgOnBtn("Saving . . ."); // Show Saving message
-    
+      
       try {
         // Create a FormData object to send both text fields and the file
         const formDataToSend = new FormData();
         formDataToSend.append("productName", formData.productName);
         formDataToSend.append("productPrice", parseFloat(formData.productPrice));
         formDataToSend.append("quantity", parseInt(formData.quantity, 10));
-        formDataToSend.append("snf", parseFloat(formData.snf));
-        formDataToSend.append("fat", parseFloat(formData.fat));
         formDataToSend.append("unit", formData.unit || 0);
-    
+        
         // Append the file (if one was selected) using the key "file"
         if (imageFile) {
           formDataToSend.append("file", imageFile);
@@ -194,35 +182,6 @@ export const AddProductForm = ({
                   placeholder="0"
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   min="0"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  SNF
-                </label>
-                <input
-                  type="number"
-                  name="snf"
-                  value={formData.snf}
-                  onChange={handleChange}
-                  placeholder="SNF value"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  FAT
-                </label>
-                <input
-                  type="number"
-                  name="fat"
-                  value={formData.fat}
-                  onChange={handleChange}
-                  placeholder="FAT value"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
             </div>

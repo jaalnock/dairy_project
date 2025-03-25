@@ -8,11 +8,17 @@ const MilkForm = ({
   editingEntry,
   farmers = [],
 }) => {
+
+  const getTransactionTime = () => {
+    const currentHour = new Date().getHours();
+    return currentHour < 15 ? "morning" : "evening"; // Before 3 PM → Morning, After 3 PM → Evening
+  };
+
   const initialFormData = {
     farmerNumber: "",
     farmerId: "",
     transactionDate: new Date().toISOString().split("T")[0],
-    transactionTime: "",
+    transactionTime: getTransactionTime(),
     milkType: "",
     milkQuantity: "",
     fatPercentage: "",
@@ -43,13 +49,15 @@ const MilkForm = ({
     }
   }, [formData.farmerId, farmers]);
 
+  
+
+  
   useEffect(() => {
     if (isEditing && editingEntry) {
       const {
         farmerNumber,
         farmerId,
         transactionDate,
-        transactionTime,
         milkType,
         milkQuantity,
         fatPercentage,
@@ -63,7 +71,7 @@ const MilkForm = ({
         transactionDate: transactionDate
           ? new Date(transactionDate).toISOString().split("T")[0]
           : new Date().toISOString().split("T")[0],
-        transactionTime: transactionTime || "",
+        transactionTime: getTransactionTime() || "",
         milkType: milkType || "",
         milkQuantity: milkQuantity || "",
         fatPercentage: fatPercentage || "",
@@ -294,19 +302,14 @@ const MilkForm = ({
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Transaction Time
               </label>
-              <select
+              <input
+                type="text"
                 name="transactionTime"
                 value={formData.transactionTime}
-                onChange={handleChange}
-                className={`w-full px-4 py-2 border ${
-                  errors.transactionTime ? "border-red-500" : "border-gray-300"
-                } rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
-                required
-              >
-                <option value="">Select time</option>
-                <option value="morning">Morning</option>
-                <option value="evening">Evening</option>
-              </select>
+                readOnly
+                className="w-full px-4 py-2 border border-gray-300 rounded-md bg-gray-100 cursor-not-allowed"
+/>
+
               {errors.transactionTime && (
                 <p className="text-red-500 text-xs mt-1">
                   {errors.transactionTime}
