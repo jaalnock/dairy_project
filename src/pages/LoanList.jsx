@@ -157,10 +157,12 @@ const LoanList = () => {
         Loan Records
       </h2>
 
-      <div className="overflow-x-auto">
-        <table className="min-w-full bg-white shadow-md rounded-lg overflow-hidden">
+      {/* Loans Table */}
+      <div className="overflow-x-auto shadow-lg rounded-lg bg-white">
+        <table className="min-w-full">
           <thead className="bg-blue-500 text-white">
             <tr>
+              <th className="px-4 py-3 text-left">Farmer ID</th>
               <th className="px-4 py-3 text-left">Farmer Name</th>
               <th className="px-4 py-3 text-left">Phone Number</th>
               <th className="px-4 py-3 text-left">Due Amount ($)</th>
@@ -178,6 +180,7 @@ const LoanList = () => {
                     exit={{ opacity: 0, y: -10 }}
                     className={idx % 2 === 0 ? "bg-gray-50" : "bg-white"}
                   >
+                    <td className="px-4 py-3">{loan.farmerId}</td>
                     <td className="px-4 py-3">{loan.farmerName}</td>
                     <td className="px-4 py-3">{loan.phoneNumber}</td>
                     <td className="px-4 py-3">${loan.dueAmount}</td>
@@ -213,7 +216,7 @@ const LoanList = () => {
               ))
             ) : (
               <tr>
-                <td colSpan="5" className="px-4 py-4 text-center text-gray-500">
+                <td colSpan="6" className="px-4 py-4 text-center text-gray-500">
                   No loan records available.
                 </td>
               </tr>

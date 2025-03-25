@@ -10,50 +10,123 @@ const MilkForm = ({
 }) => {
   const initialFormData = {
     farmerNumber: "",
+    farmerId: "",
     transactionDate: new Date().toISOString().split("T")[0],
+    transactionTime: "",
     milkType: "",
     milkQuantity: "",
-    pricePerLitre: "",
+    fatPercentage: "",
+    snfPercentage: "",
+    pricePerLitre: "0", // Will be calculated
+    transactionAmount: "0", // Will be calculated
   };
 
   const [formData, setFormData] = useState(initialFormData);
   const [errors, setErrors] = useState({});
 
+  // Constants for price calculation
+  const PRICE_PER_FAT = 50; // ₹50 per 1% fat
+  const PRICE_PER_SNF = 20; // ₹20 per 1% SNF
+
+  // Auto-populate farmer name when farmer ID changes
+  useEffect(() => {
+    if (formData.farmerId) {
+      const selectedFarmer = farmers.find(
+        (farmer) => farmer.farmerId === parseInt(formData.farmerId)
+      );
+      if (selectedFarmer) {
+        setFormData((prev) => ({
+          ...prev,
+          farmerNumber: selectedFarmer.mobileNumber,
+        }));
+      }
+    }
+  }, [formData.farmerId, farmers]);
+
   useEffect(() => {
     if (isEditing && editingEntry) {
       const {
         farmerNumber,
+        farmerId,
         transactionDate,
+        transactionTime,
         milkType,
         milkQuantity,
+        fatPercentage,
+        snfPercentage,
         pricePerLitre,
+        transactionAmount,
       } = editingEntry;
       setFormData({
         farmerNumber: farmerNumber || "",
+        farmerId: farmerId || "",
         transactionDate: transactionDate
           ? new Date(transactionDate).toISOString().split("T")[0]
           : new Date().toISOString().split("T")[0],
+        transactionTime: transactionTime || "",
         milkType: milkType || "",
         milkQuantity: milkQuantity || "",
-        pricePerLitre: pricePerLitre || "",
+        fatPercentage: fatPercentage || "",
+        snfPercentage: snfPercentage || "",
+        pricePerLitre: pricePerLitre || "0",
+        transactionAmount: transactionAmount || "0",
       });
     }
   }, [isEditing, editingEntry]);
 
+  // Calculate price based on fat and SNF percentages
+  // Backend Note: Price calculation formula - (fat% * PRICE_PER_FAT) + (snf% * PRICE_PER_SNF)
+  const calculatePricePerLitre = (fat, snf, quantity) => {
+    if (!fat || !snf || !quantity) return 0;
+    const fatAmount =
+      (parseFloat(fat) / 100) * parseFloat(quantity) * PRICE_PER_FAT;
+    const snfAmount =
+      (parseFloat(snf) / 100) * parseFloat(quantity) * PRICE_PER_SNF;
+    return (fatAmount + snfAmount) / parseFloat(quantity);
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    const newFormData = { ...formData, [name]: value };
+
+    // Calculate price per litre and transaction amount when relevant fields change
+    if (
+      name === "fatPercentage" ||
+      name === "snfPercentage" ||
+      name === "milkQuantity"
+    ) {
+      const pricePerLitre = calculatePricePerLitre(
+        newFormData.fatPercentage,
+        newFormData.snfPercentage,
+        newFormData.milkQuantity
+      );
+      const transactionAmount =
+        pricePerLitre * parseFloat(newFormData.milkQuantity || 0);
+      newFormData.pricePerLitre = pricePerLitre.toFixed(2);
+      newFormData.transactionAmount = transactionAmount.toFixed(2);
+    }
+
+    setFormData(newFormData);
     // Clear the error for this field as the user types
     setErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
+  // Backend Note: Validation rules for milk entry
   const validate = () => {
     const newErrors = {};
     if (!formData.farmerNumber) {
       newErrors.farmerNumber = "Please select a farmer.";
     }
+    if (!formData.farmerId) {
+      newErrors.farmerId = "Farmer ID is required.";
+    } else if (isNaN(formData.farmerId) || parseInt(formData.farmerId) <= 0) {
+      newErrors.farmerId = "Farmer ID must be a positive number.";
+    }
     if (!formData.transactionDate) {
       newErrors.transactionDate = "Transaction date is required.";
+    }
+    if (!formData.transactionTime) {
+      newErrors.transactionTime = "Please select transaction time.";
     }
     if (!formData.milkType) {
       newErrors.milkType = "Please select a milk type.";
@@ -63,10 +136,21 @@ const MilkForm = ({
     } else if (parseFloat(formData.milkQuantity) <= 0) {
       newErrors.milkQuantity = "Milk quantity must be greater than 0.";
     }
-    if (!formData.pricePerLitre) {
-      newErrors.pricePerLitre = "Price per litre is required.";
-    } else if (parseFloat(formData.pricePerLitre) <= 0) {
-      newErrors.pricePerLitre = "Price per litre must be greater than 0.";
+    if (!formData.fatPercentage) {
+      newErrors.fatPercentage = "Fat percentage is required.";
+    } else if (
+      parseFloat(formData.fatPercentage) <= 0 ||
+      parseFloat(formData.fatPercentage) > 100
+    ) {
+      newErrors.fatPercentage = "Fat percentage must be between 0 and 100.";
+    }
+    if (!formData.snfPercentage) {
+      newErrors.snfPercentage = "SNF percentage is required.";
+    } else if (
+      parseFloat(formData.snfPercentage) <= 0 ||
+      parseFloat(formData.snfPercentage) > 100
+    ) {
+      newErrors.snfPercentage = "SNF percentage must be between 0 and 100.";
     }
     return newErrors;
   };
@@ -78,6 +162,7 @@ const MilkForm = ({
       setErrors(validationErrors);
       return;
     }
+    // Backend Note: All monetary values are sent as strings with 2 decimal places
     handleSaveMilkEntry(formData);
     setIsFormOpen(false);
   };
@@ -125,117 +210,237 @@ const MilkForm = ({
         </h3>
 
         <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
-          {/* Farmer Selector */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Farmer
-            </label>
-            <select
-              name="farmerNumber"
-              value={formData.farmerNumber}
-              onChange={handleChange}
-              className={`w-full px-4 py-2 border ${
-                errors.farmerNumber ? "border-red-500" : "border-gray-300"
-              } rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
-              required
-            >
-              <option value="">Select Farmer</option>
-              {farmers.map((farmer) => (
-                <option key={farmer._id} value={farmer.mobileNumber}>
-                  {farmer.farmerName} ({farmer.mobileNumber})
-                </option>
-              ))}
-            </select>
-            {errors.farmerNumber && (
-              <p className="text-red-500 text-xs mt-1">{errors.farmerNumber}</p>
-            )}
+          {/* Farmer Details Row */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Farmer ID */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Farmer ID
+              </label>
+              <input
+                type="number"
+                name="farmerId"
+                value={formData.farmerId}
+                onChange={handleChange}
+                placeholder="Enter farmer ID"
+                className={`w-full px-4 py-2 border ${
+                  errors.farmerId ? "border-red-500" : "border-gray-300"
+                } rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                required
+              />
+              {errors.farmerId && (
+                <p className="text-red-500 text-xs mt-1">{errors.farmerId}</p>
+              )}
+            </div>
+
+            {/* Farmer Name (Auto-populated) */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Farmer Name
+              </label>
+              <select
+                name="farmerNumber"
+                value={formData.farmerNumber}
+                onChange={handleChange}
+                disabled={!!formData.farmerId}
+                className={`w-full px-4 py-2 border ${
+                  errors.farmerNumber ? "border-red-500" : "border-gray-300"
+                } rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  formData.farmerId ? "bg-gray-50" : ""
+                }`}
+                required
+              >
+                <option value="">Select Farmer</option>
+                {farmers.map((farmer) => (
+                  <option key={farmer._id} value={farmer.mobileNumber}>
+                    {farmer.farmerName} ({farmer.mobileNumber})
+                  </option>
+                ))}
+              </select>
+              {errors.farmerNumber && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.farmerNumber}
+                </p>
+              )}
+            </div>
           </div>
 
-          {/* Transaction Date */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Transaction Date
-            </label>
-            <input
-              type="date"
-              name="transactionDate"
-              value={formData.transactionDate}
-              onChange={handleChange}
-              className={`w-full px-4 py-2 border ${
-                errors.transactionDate ? "border-red-500" : "border-gray-300"
-              } rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
-              required
-            />
-            {errors.transactionDate && (
-              <p className="text-red-500 text-xs mt-1">
-                {errors.transactionDate}
-              </p>
-            )}
+          {/* Transaction Details Row */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Transaction Date */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Transaction Date
+              </label>
+              <input
+                type="date"
+                name="transactionDate"
+                value={formData.transactionDate}
+                onChange={handleChange}
+                className={`w-full px-4 py-2 border ${
+                  errors.transactionDate ? "border-red-500" : "border-gray-300"
+                } rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                required
+              />
+              {errors.transactionDate && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.transactionDate}
+                </p>
+              )}
+            </div>
+
+            {/* Transaction Time */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Transaction Time
+              </label>
+              <select
+                name="transactionTime"
+                value={formData.transactionTime}
+                onChange={handleChange}
+                className={`w-full px-4 py-2 border ${
+                  errors.transactionTime ? "border-red-500" : "border-gray-300"
+                } rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                required
+              >
+                <option value="">Select time</option>
+                <option value="morning">Morning</option>
+                <option value="evening">Evening</option>
+              </select>
+              {errors.transactionTime && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.transactionTime}
+                </p>
+              )}
+            </div>
           </div>
 
-          {/* Milk Type */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Milk Type
-            </label>
-            <select
-              name="milkType"
-              value={formData.milkType}
-              onChange={handleChange}
-              className={`w-full px-4 py-2 border ${
-                errors.milkType ? "border-red-500" : "border-gray-300"
-              } rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
-              required
-            >
-              <option value="">Select type</option>
-              <option value="Cow">Cow</option>
-              <option value="Buffalo">Buffalo</option>
-            </select>
-            {errors.milkType && (
-              <p className="text-red-500 text-xs mt-1">{errors.milkType}</p>
-            )}
+          {/* Milk Details Row */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Milk Type */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Milk Type
+              </label>
+              <select
+                name="milkType"
+                value={formData.milkType}
+                onChange={handleChange}
+                className={`w-full px-4 py-2 border ${
+                  errors.milkType ? "border-red-500" : "border-gray-300"
+                } rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                required
+              >
+                <option value="">Select type</option>
+                <option value="Cow">Cow</option>
+                <option value="Buffalo">Buffalo</option>
+              </select>
+              {errors.milkType && (
+                <p className="text-red-500 text-xs mt-1">{errors.milkType}</p>
+              )}
+            </div>
+
+            {/* Milk Quantity */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Milk Quantity (Liters)
+              </label>
+              <input
+                type="number"
+                name="milkQuantity"
+                value={formData.milkQuantity}
+                onChange={handleChange}
+                className={`w-full px-4 py-2 border ${
+                  errors.milkQuantity ? "border-red-500" : "border-gray-300"
+                } rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                required
+              />
+              {errors.milkQuantity && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.milkQuantity}
+                </p>
+              )}
+            </div>
           </div>
 
-          {/* Milk Quantity */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Milk Quantity (Liters)
-            </label>
-            <input
-              type="number"
-              name="milkQuantity"
-              value={formData.milkQuantity}
-              onChange={handleChange}
-              className={`w-full px-4 py-2 border ${
-                errors.milkQuantity ? "border-red-500" : "border-gray-300"
-              } rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
-              required
-            />
-            {errors.milkQuantity && (
-              <p className="text-red-500 text-xs mt-1">{errors.milkQuantity}</p>
-            )}
+          {/* Quality Details Row */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Fat Percentage */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Fat Percentage (%)
+              </label>
+              <input
+                type="number"
+                name="fatPercentage"
+                value={formData.fatPercentage}
+                onChange={handleChange}
+                placeholder="Enter fat percentage"
+                className={`w-full px-4 py-2 border ${
+                  errors.fatPercentage ? "border-red-500" : "border-gray-300"
+                } rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                required
+              />
+              {errors.fatPercentage && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.fatPercentage}
+                </p>
+              )}
+            </div>
+
+            {/* SNF Percentage */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                SNF Percentage (%)
+              </label>
+              <input
+                type="number"
+                name="snfPercentage"
+                value={formData.snfPercentage}
+                onChange={handleChange}
+                placeholder="Enter SNF percentage"
+                className={`w-full px-4 py-2 border ${
+                  errors.snfPercentage ? "border-red-500" : "border-gray-300"
+                } rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                required
+              />
+              {errors.snfPercentage && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.snfPercentage}
+                </p>
+              )}
+            </div>
           </div>
 
-          {/* Price Per Litre */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Price Per Litre (₹)
-            </label>
-            <input
-              type="number"
-              name="pricePerLitre"
-              value={formData.pricePerLitre}
-              onChange={handleChange}
-              className={`w-full px-4 py-2 border ${
-                errors.pricePerLitre ? "border-red-500" : "border-gray-300"
-              } rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
-              required
-            />
-            {errors.pricePerLitre && (
-              <p className="text-red-500 text-xs mt-1">
-                {errors.pricePerLitre}
-              </p>
-            )}
+          {/* Price Details Row */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Price Per Litre (Calculated) */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Price Per Litre (₹)
+              </label>
+              <input
+                type="number"
+                name="pricePerLitre"
+                value={formData.pricePerLitre}
+                readOnly
+                className="w-full px-4 py-2 border border-gray-300 rounded-md bg-gray-50"
+              />
+            </div>
+
+            {/* Transaction Amount (Calculated) */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Transaction Amount (₹)
+              </label>
+              <input
+                type="number"
+                name="transactionAmount"
+                value={formData.transactionAmount}
+                readOnly
+                className="w-full px-4 py-2 border border-gray-300 rounded-md bg-gray-50"
+              />
+            </div>
           </div>
 
           {/* Action Buttons */}

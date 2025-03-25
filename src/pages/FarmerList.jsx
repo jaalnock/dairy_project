@@ -126,11 +126,15 @@ export const FarmerList = () => {
   };
 
   // Filter farmers based on search query
-  const filteredFarmers = farmers.filter(
-    (farmer) =>
-      farmer.farmerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      farmer.mobileNumber.includes(searchQuery)
-  );
+  const filteredFarmers = farmers.filter((farmer) => {
+    const searchLower = searchQuery.toLowerCase();
+    return (
+      farmer.farmerName.toLowerCase().includes(searchLower) ||
+      farmer.mobileNumber.includes(searchQuery) ||
+      farmer.farmerId.toString().includes(searchQuery) ||
+      farmer.address.toLowerCase().includes(searchLower)
+    );
+  });
 
   return (
     <div className="bg-gray-100 min-h-screen p-6 relative">
@@ -148,77 +152,68 @@ export const FarmerList = () => {
       <div className="max-w-md mx-auto mb-6">
         <input
           type="text"
-          placeholder="Search by name or phone..."
+          placeholder="Search by name, phone, or address..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
         />
       </div>
 
-      {loading ? (
-        <div className="text-center text-gray-600">Loading farmers...</div>
-      ) : (
-        <div className="overflow-x-auto">
-          <table className="min-w-full bg-white shadow-md rounded-lg overflow-hidden">
-            <thead className="bg-blue-500 text-white">
+      {/* Farmers Table */}
+      <div className="overflow-x-auto shadow-lg rounded-lg bg-white">
+        <table className="min-w-full">
+          <thead className="bg-blue-500 text-white">
+            <tr>
+              <th className="px-4 py-3 text-left">Farmer ID</th>
+              <th className="px-4 py-3 text-left">Farmer Name</th>
+              <th className="px-4 py-3 text-left">Mobile Number</th>
+              <th className="px-4 py-3 text-left">Address</th>
+              <th className="px-4 py-3 text-center">Actions</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-200">
+            {loading ? (
               <tr>
-                <th className="px-4 py-3 text-left">Name</th>
-                <th className="px-4 py-3 text-left">Phone Number</th>
-                <th className="px-4 py-3 text-left">Type of Milk</th>
-                <th className="px-4 py-3 text-left">Address</th>
-                <th className="px-4 py-3 text-left">Gender</th>
-                <th className="px-4 py-3 text-left">Joining Date</th>
-                <th className="px-4 py-3 text-center">Actions</th>
+                <td colSpan="5" className="px-4 py-4 text-center text-gray-500">
+                  Loading farmers...
+                </td>
               </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {filteredFarmers.length > 0 ? (
-                filteredFarmers.map((farmer, idx) => (
-                  <motion.tr
-                    key={farmer._id}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    className={idx % 2 === 0 ? "bg-gray-50" : "bg-white"}
-                  >
-                    <td className="px-4 py-3">{farmer.farmerName}</td>
-                    <td className="px-4 py-3">{farmer.mobileNumber}</td>
-                    <td className="px-4 py-3">{farmer.milkType}</td>
-                    <td className="px-4 py-3">{farmer.address}</td>
-                    <td className="px-4 py-3">{farmer.gender}</td>
-                    <td className="px-4 py-3">
-                      {new Date(farmer.joiningDate).toLocaleDateString()}
-                    </td>
-                    <td className="px-4 py-3 text-center">
-                      <button
-                        onClick={() => handleEdit(farmer)}
-                        className="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-1 px-3 rounded mr-2 transition duration-150"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => openDeleteModal(farmer)}
-                        className="bg-red-500 hover:bg-red-600 text-white font-semibold py-1 px-3 rounded transition duration-150"
-                      >
-                        Delete
-                      </button>
-                    </td>
-                  </motion.tr>
-                ))
-              ) : (
-                <tr>
-                  <td
-                    colSpan="7"
-                    className="px-4 py-4 text-center text-gray-500"
-                  >
-                    No farmers found.
+            ) : filteredFarmers.length > 0 ? (
+              filteredFarmers.map((farmer) => (
+                <tr
+                  key={farmer._id}
+                  className="bg-white hover:bg-gray-50 transition-colors duration-200"
+                >
+                  <td className="px-4 py-3">{farmer.farmerId}</td>
+                  <td className="px-4 py-3">{farmer.farmerName}</td>
+                  <td className="px-4 py-3">{farmer.mobileNumber}</td>
+                  <td className="px-4 py-3">{farmer.address}</td>
+                  <td className="px-4 py-3 text-center">
+                    <button
+                      onClick={() => handleEdit(farmer)}
+                      className="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-1 px-3 rounded mr-2 transition duration-150"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => openDeleteModal(farmer)}
+                      className="bg-red-500 hover:bg-red-600 text-white font-semibold py-1 px-3 rounded transition duration-150"
+                    >
+                      Delete
+                    </button>
                   </td>
                 </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      )}
+              ))
+            ) : (
+              <tr>
+                <td colSpan="5" className="px-4 py-4 text-center text-gray-500">
+                  No farmers found.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
 
       {/* Floating Add Farmer Button */}
       <button

@@ -7,14 +7,18 @@ const FarmerForm = ({
   setIsFormOpen,
   editingFarmer,
 }) => {
-  const [formData, setFormData] = useState({
+  const initialFormData = {
     farmerName: "",
+    farmerId: "",
     mobileNumber: "",
-    milkType: "",
     address: "",
     gender: "",
-    joiningDate: new Date().toISOString().split("T")[0], // Default to today's date
-  });
+    milkType: "",
+    joiningDate: new Date().toISOString().split("T")[0],
+  };
+
+  const [formData, setFormData] = useState(initialFormData);
+  const [errors, setErrors] = useState({});
 
   useEffect(() => {
     if (isEditing && editingFarmer) {
@@ -30,22 +34,47 @@ const FarmerForm = ({
 
   const handleSubmit = () => {
     // Validate required fields
-    if (
-      !formData.farmerName ||
-      !formData.mobileNumber ||
-      !formData.milkType ||
-      !formData.address ||
-      !formData.gender
-    ) {
-      alert("Please fill all fields!");
+    const newErrors = validate();
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
       return;
     }
     handleSaveFarmer(formData);
     setIsFormOpen(false);
   };
 
+  const validate = () => {
+    const newErrors = {};
+    if (!formData.farmerName) {
+      newErrors.farmerName = "Farmer name is required.";
+    }
+    if (!formData.farmerId) {
+      newErrors.farmerId = "Farmer ID is required.";
+    } else if (isNaN(formData.farmerId) || parseInt(formData.farmerId) <= 0) {
+      newErrors.farmerId = "Farmer ID must be a positive number.";
+    }
+    if (!formData.mobileNumber) {
+      newErrors.mobileNumber = "Mobile number is required.";
+    } else if (!/^\d{10}$/.test(formData.mobileNumber)) {
+      newErrors.mobileNumber = "Mobile number must be 10 digits.";
+    }
+    if (!formData.address) {
+      newErrors.address = "Address is required.";
+    }
+    if (!formData.gender) {
+      newErrors.gender = "Gender is required.";
+    }
+    if (!formData.milkType) {
+      newErrors.milkType = "Milk type is required.";
+    }
+    if (!formData.joiningDate) {
+      newErrors.joiningDate = "Joining date is required.";
+    }
+    return newErrors;
+  };
+
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center px-4 z-50">
+    <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex justify-center items-center px-4 z-50">
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: -20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -80,135 +109,192 @@ const FarmerForm = ({
         </div>
 
         {/* Modal Content */}
-        <form className="px-6 py-4 space-y-5">
-          <div>
-            <label
-              htmlFor="farmerName"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Farmer Name
-            </label>
-            <input
-              type="text"
-              id="farmerName"
-              name="farmerName"
-              value={formData.farmerName}
-              onChange={handleChange}
-              placeholder="Enter farmer name"
-              className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
+        <div className="px-6 py-4">
+          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
+            {/* Basic Details Row */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Farmer ID */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Farmer ID
+                </label>
+                <input
+                  type="number"
+                  name="farmerId"
+                  value={formData.farmerId}
+                  onChange={handleChange}
+                  placeholder="Enter farmer ID"
+                  className={`w-full px-4 py-2 border ${
+                    errors.farmerId ? "border-red-500" : "border-gray-300"
+                  } rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                  required
+                />
+                {errors.farmerId && (
+                  <p className="text-red-500 text-xs mt-1">{errors.farmerId}</p>
+                )}
+              </div>
 
-          <div>
-            <label
-              htmlFor="mobileNumber"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Mobile Number
-            </label>
-            <input
-              type="tel"
-              id="mobileNumber"
-              name="mobileNumber"
-              value={formData.mobileNumber}
-              onChange={handleChange}
-              placeholder="Enter mobile number"
-              className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
+              {/* Farmer Name */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Farmer Name
+                </label>
+                <input
+                  type="text"
+                  name="farmerName"
+                  value={formData.farmerName}
+                  onChange={handleChange}
+                  placeholder="Enter farmer name"
+                  className={`w-full px-4 py-2 border ${
+                    errors.farmerName ? "border-red-500" : "border-gray-300"
+                  } rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                  required
+                />
+                {errors.farmerName && (
+                  <p className="text-red-500 text-xs mt-1">
+                    {errors.farmerName}
+                  </p>
+                )}
+              </div>
+            </div>
 
-          <div>
-            <label
-              htmlFor="milkType"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Type of Milk
-            </label>
-            <select
-              id="milkType"
-              name="milkType"
-              value={formData.milkType}
-              onChange={handleChange}
-              className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">Select Type</option>
-              <option value="Cow">Cow</option>
-              <option value="Buffalo">Buffalo</option>
-            </select>
-          </div>
+            {/* Contact Details Row */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Mobile Number */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Mobile Number
+                </label>
+                <input
+                  type="tel"
+                  name="mobileNumber"
+                  value={formData.mobileNumber}
+                  onChange={handleChange}
+                  placeholder="Enter 10-digit mobile number"
+                  className={`w-full px-4 py-2 border ${
+                    errors.mobileNumber ? "border-red-500" : "border-gray-300"
+                  } rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                  required
+                />
+                {errors.mobileNumber && (
+                  <p className="text-red-500 text-xs mt-1">
+                    {errors.mobileNumber}
+                  </p>
+                )}
+              </div>
 
-          <div>
-            <label
-              htmlFor="address"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Address
-            </label>
-            <input
-              type="text"
-              id="address"
-              name="address"
-              value={formData.address}
-              onChange={handleChange}
-              placeholder="Enter address"
-              className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
+              {/* Gender */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Gender
+                </label>
+                <select
+                  name="gender"
+                  value={formData.gender}
+                  onChange={handleChange}
+                  className={`w-full px-4 py-2 border ${
+                    errors.gender ? "border-red-500" : "border-gray-300"
+                  } rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                  required
+                >
+                  <option value="">Select gender</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Other">Other</option>
+                </select>
+                {errors.gender && (
+                  <p className="text-red-500 text-xs mt-1">{errors.gender}</p>
+                )}
+              </div>
+            </div>
 
-          <div>
-            <label
-              htmlFor="gender"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Gender
-            </label>
-            <select
-              id="gender"
-              name="gender"
-              value={formData.gender}
-              onChange={handleChange}
-              className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">Select Gender</option>
-              <option value="Male">Male</option>
-              <option value="Female">Female</option>
-            </select>
-          </div>
+            {/* Address and Milk Type Row */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Address */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Address
+                </label>
+                <textarea
+                  name="address"
+                  value={formData.address}
+                  onChange={handleChange}
+                  placeholder="Enter address"
+                  rows="2"
+                  className={`w-full px-4 py-2 border ${
+                    errors.address ? "border-red-500" : "border-gray-300"
+                  } rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                  required
+                />
+                {errors.address && (
+                  <p className="text-red-500 text-xs mt-1">{errors.address}</p>
+                )}
+              </div>
 
-          <div>
-            <label
-              htmlFor="joiningDate"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Joining Date
-            </label>
-            <input
-              type="date"
-              id="joiningDate"
-              name="joiningDate"
-              value={formData.joiningDate}
-              onChange={handleChange}
-              className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-        </form>
+              {/* Milk Type */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Type of Milk
+                </label>
+                <select
+                  name="milkType"
+                  value={formData.milkType}
+                  onChange={handleChange}
+                  className={`w-full px-4 py-2 border ${
+                    errors.milkType ? "border-red-500" : "border-gray-300"
+                  } rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                  required
+                >
+                  <option value="">Select milk type</option>
+                  <option value="Cow">Cow</option>
+                  <option value="Buffalo">Buffalo</option>
+                  <option value="Both">Both</option>
+                </select>
+                {errors.milkType && (
+                  <p className="text-red-500 text-xs mt-1">{errors.milkType}</p>
+                )}
+              </div>
+            </div>
 
-        {/* Modal Actions */}
-        <div className="flex justify-end gap-4 px-6 py-4 border-t border-gray-200">
-          <button
-            type="button"
-            onClick={() => setIsFormOpen(false)}
-            className="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 font-medium rounded-md transition duration-200"
-          >
-            Cancel
-          </button>
-          <button
-            type="button"
-            onClick={handleSubmit}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md transition duration-200"
-          >
-            {isEditing ? "Update" : "Save"} Farmer
-          </button>
+            {/* Joining Date */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Joining Date
+              </label>
+              <input
+                type="date"
+                name="joiningDate"
+                value={formData.joiningDate}
+                onChange={handleChange}
+                className={`w-full px-4 py-2 border ${
+                  errors.joiningDate ? "border-red-500" : "border-gray-300"
+                } rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                required
+              />
+              {errors.joiningDate && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.joiningDate}
+                </p>
+              )}
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex justify-between mt-6 sm:mt-8 space-x-2 sm:space-x-4">
+              <button
+                type="button"
+                onClick={() => setIsFormOpen(false)}
+                className="flex-1 bg-gray-400 hover:bg-gray-500 text-white px-3 sm:px-4 py-2 rounded-lg transition duration-200 focus:outline-none"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="flex-1 bg-[#2c447f] hover:bg-[#1b2d5b] text-white px-3 sm:px-4 py-2 rounded-lg transition duration-200 focus:outline-none"
+              >
+                {isEditing ? "Update" : "Add"} Farmer
+              </button>
+            </div>
+          </form>
         </div>
       </motion.div>
     </div>

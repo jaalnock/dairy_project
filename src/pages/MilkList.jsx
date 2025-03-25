@@ -173,15 +173,19 @@ const MilkList = () => {
   };
 
   // Flatten the nested milkEntries into individual transaction rows.
-  // Each farmer document is expected to have: { farmerName, mobileNumber, transaction: [...] }
   const flatMilkTransactions = milkEntries.flatMap((entry) =>
     entry.transaction.map((txn) => ({
       _id: txn._id,
       farmerName: entry.farmerName,
-      farmerNumber: entry.mobileNumber, // For update/delete endpoints
+      farmerNumber: entry.mobileNumber,
+      farmerId: txn.farmerId,
       transactionDate: txn.transactionDate,
+      transactionTime: txn.transactionTime,
       milkType: txn.milkType,
+      fatPercentage: txn.fatPercentage,
+      snfPercentage: txn.snfPercentage,
       milkQuantity: txn.milkQuantity,
+      pricePerLitre: txn.pricePerLitre,
       transactionAmount: txn.transactionAmount,
     }))
   );
@@ -264,10 +268,15 @@ const MilkList = () => {
           <table className="min-w-full">
             <thead className="bg-blue-500 text-white">
               <tr>
+                <th className="px-4 py-3 text-left">Farmer ID</th>
                 <th className="px-4 py-3 text-left">Farmer Name</th>
                 <th className="px-4 py-3 text-left">Transaction Date</th>
+                <th className="px-4 py-3 text-left">Time</th>
                 <th className="px-4 py-3 text-left">Milk Type</th>
+                <th className="px-4 py-3 text-left">Fat %</th>
+                <th className="px-4 py-3 text-left">SNF %</th>
                 <th className="px-4 py-3 text-left">Milk Quantity (Liters)</th>
+                <th className="px-4 py-3 text-left">Price/Litre (₹)</th>
                 <th className="px-4 py-3 text-left">Transaction Amount (₹)</th>
                 <th className="px-4 py-3 text-center">Actions</th>
               </tr>
@@ -276,7 +285,7 @@ const MilkList = () => {
               {loadingMilk ? (
                 <tr>
                   <td
-                    colSpan="6"
+                    colSpan="11"
                     className="px-4 py-4 text-center text-gray-500"
                   >
                     Loading milk entries...
@@ -292,12 +301,19 @@ const MilkList = () => {
                         : "bg-white hover:bg-gray-50"
                     }`}
                   >
+                    <td className="px-4 py-3">{flatEntry.farmerId}</td>
                     <td className="px-4 py-3">{flatEntry.farmerName}</td>
                     <td className="px-4 py-3">
                       {new Date(flatEntry.transactionDate).toLocaleDateString()}
                     </td>
+                    <td className="px-4 py-3 capitalize">
+                      {flatEntry.transactionTime}
+                    </td>
                     <td className="px-4 py-3">{flatEntry.milkType}</td>
+                    <td className="px-4 py-3">{flatEntry.fatPercentage}%</td>
+                    <td className="px-4 py-3">{flatEntry.snfPercentage}%</td>
                     <td className="px-4 py-3">{flatEntry.milkQuantity}</td>
+                    <td className="px-4 py-3">₹{flatEntry.pricePerLitre}</td>
                     <td className="px-4 py-3">
                       ₹{flatEntry.transactionAmount}
                     </td>
@@ -320,7 +336,7 @@ const MilkList = () => {
               ) : (
                 <tr>
                   <td
-                    colSpan="6"
+                    colSpan="11"
                     className="px-4 py-4 text-center text-gray-500"
                   >
                     No milk collections available.
