@@ -1,69 +1,3 @@
-// import React, { useState } from "react";
-// import { ProductCard } from "../components/index.js";
-// import { products } from "../config";
-// import { useTranslation } from "react-i18next";
-
-// // Categorized Products
-// const categories = [
-//   { category: "all", productIds: [] }, // 'All' shows all products
-//   { category: "milk", productIds: [1, 2, 3, 8] },
-// ];
-
-// export const ProductList = () => {
-//   const { t } = useTranslation();
-//   const [selectedCategory, setSelectedCategory] = useState("all");
-
-//   // Get products based on selected category
-//   const filteredProducts =
-//     selectedCategory === "all"
-//       ? products // Show all products for "All"
-//       : products.filter((product) =>
-//           categories
-//             .find((cat) => cat.category === selectedCategory)
-//             ?.productIds.includes(product.id)
-//         );
-
-//   return (
-//     <div className="py-6 px-4 sm:px-10">
-//       {/* Heading for Dairy Products */}
-//       <h2 className="text-2xl sm:text-3xl font-semibold text-gray-800 mb-6 text-center">
-//         {t("products.title")}
-//       </h2>
-
-//       {/* Category Buttons */}
-//       <div className="flex flex-wrap justify-center gap-2 sm:gap-4 mb-6">
-//         {categories.map((category) => (
-//           <button
-//             key={category.category}
-//             onClick={() => setSelectedCategory(category.category)}
-//             className={`px-3 py-2 rounded-lg text-sm font-medium ${
-//               selectedCategory === category.category
-//                 ? "bg-blue-600 text-white"
-//                 : "bg-gray-200 text-gray-700"
-//             } hover:bg-blue-500 hover:text-white transition`}
-//           >
-//             {t(`products.categories.${category.category}`)}
-//           </button>
-//         ))}
-//       </div>
-
-//       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 auto-rows-fr">
-//         {filteredProducts.length > 0 ? (
-//           filteredProducts.map((product) => (
-//             <div key={product.id} className="flex-shrink-0 w-full">
-//               <ProductCard product={product} />
-//             </div>
-//           ))
-//         ) : (
-//           <p className="text-center col-span-full text-gray-500">
-//             {t("products.noProducts")}
-//           </p>
-//         )}
-//       </div>
-//     </div>
-//   );
-// };
-
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { ProductCard } from "../components/index.js";
@@ -75,8 +9,10 @@ export const ProductList = () => {
   const [selectedBranch, setSelectedBranch] = useState("");
   const [branches, setBranches] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [products, setProducts] = useState([]);
+  const [subAdmins, setSubAdmins] = useState([]);
   const [loading, setLoading] = useState(true);
+  // Fetch branches from the backend on component mount.
+  const [products, setProducts] = useState([]);
   const [error, setError] = useState("");
 
   // ✅ Always reset selectedBranch when user visits ProductList
@@ -88,18 +24,20 @@ export const ProductList = () => {
   const handleBranchChange = (e) => {
     const branchId = e.target.value;
     const branchName = e.target.options[e.target.selectedIndex].text;
-    
+
     console.log("Selected Branch:", branchId, branchName);
 
     setSelectedBranch(branchId);
-    
+
     // ✅ Store both values correctly in localStorage
-    localStorage.setItem("selectedBranch", JSON.stringify({ branchId, branchName }));
+    localStorage.setItem(
+      "selectedBranch",
+      JSON.stringify({ branchId, branchName })
+    );
 
     setCategories([]); // Clear categories
     setProducts([]); // Clear products
-};
-
+  };
 
   // Fetch branches
   useEffect(() => {
@@ -223,7 +161,9 @@ export const ProductList = () => {
                   </button>
                 ))
               ) : (
-                <p className="text-center text-gray-500">No categories available</p>
+                <p className="text-center text-gray-500">
+                  No categories available
+                </p>
               )}
             </div>
 
@@ -231,7 +171,10 @@ export const ProductList = () => {
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 auto-rows-fr">
               {products.length > 0 ? (
                 products.map((product) => (
-                  <div key={product.productName} className="flex-shrink-0 w-full">
+                  <div
+                    key={product.productName}
+                    className="flex-shrink-0 w-full"
+                  >
                     <ProductCard
                       product={product}
                       selectedBranch={selectedBranch}
