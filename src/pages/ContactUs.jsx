@@ -392,6 +392,9 @@ export const ContactUs = () => {
       .then((response) => {
         console.log("Response:", response.data);
         setOtpVerified(true);
+
+        
+
         setConfirmationMessage(
           t("contactUs.confirmation") || "Your inquiry has been received. We will contact you soon."
         );
