@@ -324,6 +324,7 @@ export const ContactUs = () => {
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [timer, setTimer] = useState(0);
+  const [branches , setAllBranches] = useState([]);
 
   // Handle input change
   const handleInputChange = (e) => {
@@ -349,6 +350,26 @@ export const ContactUs = () => {
       });
     }, 1000);
   };
+
+  const getAllBranches = async () => {
+    try
+    {
+      const response = await axios.get(
+        "http://localhost:8000/api/v1/branch//get-branches-for-customer",
+        { withCredentials: true }
+      );
+      console.log("Branches fetched:", response.data.data);
+
+      setAllBranches(response.data.data);
+      
+    }catch(err){
+      console.log("error: " , err)
+    }
+  }
+
+  useEffect(() => {
+    getAllBranches();
+  }, [])
 
   // Send OTP and start the timer
   const sendOtp = () => {
@@ -540,22 +561,19 @@ export const ContactUs = () => {
         transition={{ duration: 0.5 }}
       >
         <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-6">
+
           <div className="w-full sm:max-w-xl">
             <h3 className="text-xl font-semibold text-blue-700 mb-4">
               {t("contactUs.info.title")}
             </h3>
-            <p className="mb-4">
-              <strong>{t("contactUs.info.mainBranchLabel")}</strong>
-              <span className="block">{t("contactUs.info.mainBranch")}</span>
-            </p>
-            <p className="mb-4">
-              <strong>{t("contactUs.info.secondBranchLabel")}</strong>
-              <span className="block">{t("contactUs.info.secondBranch")}</span>
-            </p>
-            <p className="mb-4">
-              <strong>{t("contactUs.info.thirdBranchLabel")}</strong>
-              <span className="block">{t("contactUs.info.thirdBranch")}</span>
-            </p>
+            {
+              branches?.map((branch) => {
+                return <p className="mb-4">
+                  <strong>{"Branch: " + branch?.branchId}</strong>
+                  <span className="block">{branch?.branchAddress + " " + branch?.location}</span>
+                </p>
+              })
+            }
             <p className="mb-4">
               <strong>{t("contactUs.info.contactNoLabel")}</strong>
               <span className="block">{t("contactUs.info.contactNo")}</span>
