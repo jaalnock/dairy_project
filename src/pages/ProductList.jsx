@@ -2,7 +2,9 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { ProductCard } from "../components/index.js";
 import { useTranslation } from "react-i18next";
+import { io } from "socket.io-client";
 
+const socket = io("http://localhost:8000");
 export const ProductList = () => {
   const { t } = useTranslation();
   const [selectedCategory, setSelectedCategory] = useState("all");
@@ -11,7 +13,7 @@ export const ProductList = () => {
   const [categories, setCategories] = useState([]);
   const [subAdmins, setSubAdmins] = useState([]);
   const [loading, setLoading] = useState(true);
-  // Fetch branches from the backend on component mount.
+  
   const [products, setProducts] = useState([]);
   const [error, setError] = useState("");
 
@@ -103,6 +105,23 @@ export const ProductList = () => {
       fetchProducts();
     }
   }, [selectedCategory, selectedBranch]);
+
+  useEffect(() => {
+    socket.on("categoryUpdated", () => {
+      if (selectedBranch) {
+        axios.get(`http://localhost:8000/api/v1/category/get-categories-by-branch/${selectedBranch}`)
+          .then((response) => {
+            setCategories([{ id: "all", name: "All" }, ...response.data.data.map((c) => ({ id: c._id, name: c.categoryName }))]);
+          });
+        
+        axios.get(`http://localhost:8000/api/v1/category/get-all-products/${selectedBranch}`)
+          .then((response) => {
+            setProducts(response.data.data);
+          });
+      }
+    });
+    return () => socket.off("categoryUpdated");
+  }, [selectedBranch]);
 
   return (
     <div className="min-h-screen flex flex-col">
