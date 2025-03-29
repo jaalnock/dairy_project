@@ -413,12 +413,45 @@ export const ContactUs = () => {
       .then((response) => {
         console.log("Response:", response.data);
         setOtpVerified(true);
-
-        
-
-        setConfirmationMessage(
-          t("contactUs.confirmation") || "Your inquiry has been received. We will contact you soon."
-        );
+  
+        const cartItems = JSON.parse(localStorage.getItem("cartItems")) || [];
+  
+        if (cartItems?.length === 0) {
+          setErrorMessage("Your cart is empty. Please add items before placing an order.");
+          return;
+        }
+  
+        const formattedCartItems = cartItems.map((item) => ({
+          productName: item.productName,
+          productPrice: item.productPrice,
+          productImage: item.productImage,
+          quantity: item.quantity,
+        }));
+  
+        const orderData = {
+          name: formData.name,
+          mobile: formData.mobile,
+          address: formData.address,
+          branch : cartItems[0].branchId,
+          cartItems: formattedCartItems,
+        };
+  
+        // Place order
+        axios
+          .post("http://localhost:8000/api/v1/online-order/create-order", {orderData}, { withCredentials: true })
+          .then((orderResponse) => {
+            console.log("Order Created:", orderResponse.data);
+            setConfirmationMessage(
+              t("contactUs.confirmation") || "Your order has been placed successfully!"
+            );
+  
+            // Clear cart after successful order
+            localStorage.removeItem("cartItems");
+          })
+          .catch((orderError) => {
+            console.error("Order Creation Error:", orderError);
+            setErrorMessage("Failed to place order. Please try again later.");
+          });
       })
       .catch((error) => {
         console.error("Error:", error);
@@ -426,9 +459,10 @@ export const ContactUs = () => {
           t("contactUs.alert.invalidOtp") || "The OTP you entered is invalid. Please try again."
         );
       });
-
+  
     setErrorMessage("");
   };
+  
 
   return (
     <motion.div
@@ -568,7 +602,7 @@ export const ContactUs = () => {
             </h3>
             {
               branches?.map((branch) => {
-                return <p className="mb-4">
+                return <p key={branch?.branchId} className="mb-4">
                   <strong>{"Branch: " + branch?.branchId}</strong>
                   <span className="block">{branch?.branchAddress + " " + branch?.location}</span>
                 </p>
