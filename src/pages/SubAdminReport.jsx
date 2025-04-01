@@ -11,7 +11,9 @@ export const SubAdminReport = () => {
 
   const downloadReport = async (url, filename) => {
     try {
+      // /api/v1/transaction/subAdmin/customer-reports/:type
       setLoading(true);
+      console.log("url: " , url);
       const response = await axios.get(`${BASE_URL}${url}`, {
         responseType: "blob",
         withCredentials:true
@@ -28,7 +30,7 @@ export const SubAdminReport = () => {
       
     } catch (error) {
       console.error("Error downloading report:", error);
-      alert("Failed to download the report.");
+      alert("Report for selected datetype may not be exist or internal server error");
     } finally {
       setLoading(false);
     }
@@ -236,7 +238,7 @@ export const SubAdminReport = () => {
           <button
             onClick={() =>
               downloadReport(
-                `/transaction/subAdmin/customer-reports/report?reportType=${reportType}`,
+                `/transaction/subAdmin/customer-reports-by-type/report?reportType=${reportType}`,
                 `${reportType}_Product_Transaction_Report.xlsx`
               )
             }
