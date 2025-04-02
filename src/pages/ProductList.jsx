@@ -3,6 +3,7 @@ import axios from "axios";
 import { ProductCard } from "../components/index.js";
 import { useTranslation } from "react-i18next";
 import { io } from "socket.io-client";
+import { ErrorDialog } from "../components/ErrorDialog.jsx";
 
 const socket = io("http://localhost:8000");
 export const ProductList = () => {
@@ -13,13 +14,14 @@ export const ProductList = () => {
   const [categories, setCategories] = useState([]);
   const [subAdmins, setSubAdmins] = useState([]);
   const [loading, setLoading] = useState(true);
-  
+  const [errors , setErrors] = useState([]) ;
   const [products, setProducts] = useState([]);
   const [error, setError] = useState("");
 
   // ✅ Always reset selectedBranch when user visits ProductList
   useEffect(() => {
     setSelectedBranch(""); // Clear the selection every time user visits
+    
   }, []);
 
   // ✅ Store selected branch in localStorage when changed
@@ -198,6 +200,7 @@ export const ProductList = () => {
                       product={product}
                       selectedBranch={selectedBranch}
                       categoryId={selectedCategory}
+                      setGlobalErrors={setErrors}
                     />
                   </div>
                 ))
@@ -209,6 +212,9 @@ export const ProductList = () => {
             </div>
           </>
         )}
+      {errors.length > 0 && (
+        <ErrorDialog errors={errors} onClose={() => setErrors([])} />
+      )}
       </div>
     </div>
   );

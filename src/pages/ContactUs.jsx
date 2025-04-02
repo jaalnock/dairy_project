@@ -303,11 +303,13 @@
 // };
 
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { motion } from "framer-motion";
 import inquiryImage from "../assets/Inquiry_image.png";
 import axios from "axios";
 import { useTranslation } from "react-i18next";
+import { CartContext } from "../context/CartContext";
+
 
 export const ContactUs = () => {
   const { t } = useTranslation();
@@ -317,6 +319,8 @@ export const ContactUs = () => {
     mobile: "",
     address: "",
   });
+  const { cartItems, removeFromCart, increaseQuantity, decreaseQuantity } =
+    useContext(CartContext);
   const [otpSent, setOtpSent] = useState(false);
   const [otpInput, setOtpInput] = useState("");
   const [otpVerified, setOtpVerified] = useState(false);
@@ -325,6 +329,7 @@ export const ContactUs = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const [timer, setTimer] = useState(0);
   const [branches , setAllBranches] = useState([]);
+  
 
   // Handle input change
   const handleInputChange = (e) => {
@@ -441,12 +446,19 @@ export const ContactUs = () => {
           .post("http://localhost:8000/api/v1/online-order/create-order", {orderData}, { withCredentials: true })
           .then((orderResponse) => {
             console.log("Order Created:", orderResponse.data);
+            
             setConfirmationMessage(
               t("contactUs.confirmation") || "Your order has been placed successfully!"
             );
   
             // Clear cart after successful order
             localStorage.removeItem("cartItems");
+
+            
+
+            setTimeout(() => {
+              window.location.reload();
+            }, 3000);
           })
           .catch((orderError) => {
             console.error("Order Creation Error:", orderError);
