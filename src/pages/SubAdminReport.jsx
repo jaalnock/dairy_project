@@ -11,9 +11,10 @@ export const SubAdminReport = () => {
 
   const downloadReport = async (url, filename) => {
     try {
-      // /api/v1/transaction/subAdmin/customer-reports/:type
+      
       setLoading(true);
-      console.log("url: " , url);
+      console.log("filename: " , filename);
+      console.log("BASE_URL/url: " , `${BASE_URL}${url}`)
       const response = await axios.get(`${BASE_URL}${url}`, {
         responseType: "blob",
         withCredentials:true
@@ -43,6 +44,28 @@ export const SubAdminReport = () => {
       </h2>
 
       <div className="flex space-x-4 mb-6">
+        <button
+          className={`py-2 px-4 rounded-lg ${
+            activeTab === "farmerCombinedReport"
+              ? "bg-blue-600 text-white"
+              : "bg-gray-200 text-gray-800"
+          }`}
+          onClick={() => setActiveTab("farmerCombinedReport")}
+        >
+          Farmers' Combined Report
+        </button>
+
+        <button
+          className={`py-2 px-4 rounded-lg ${
+            activeTab === "allfarmersCombinedReport"
+              ? "bg-blue-600 text-white"
+              : "bg-gray-200 text-gray-800"
+          }`}
+          onClick={() => setActiveTab("allfarmersCombinedReport")}
+        >
+          All Farmers' Combined Report
+        </button>
+
         <button
           className={`py-2 px-4 rounded-lg ${
             activeTab === "farmersLoan"
@@ -94,6 +117,70 @@ export const SubAdminReport = () => {
           Product Transaction Report
         </button>
       </div>
+
+      {activeTab === "allfarmersCombinedReport" && (
+        <div className="p-4 bg-gray-100 rounded-lg">
+          <h3 className="text-xl font-semibold text-gray-800 mb-2">
+            All Farmers' Combined Report
+          </h3>
+
+          <button
+            onClick={() =>
+              downloadReport(
+                `/farmer/combined-report-for-all-farmers`,
+                `$all_Farmers_Combined_Report.pdf`
+              )
+            }
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition duration-300 shadow-md"
+            disabled={loading}
+          >
+            {loading ? "Downloading..." : "Download All Farmers' Combined Report"}
+          </button>
+        </div>
+      )}
+      
+      {activeTab === "farmerCombinedReport" && (
+        <div className="p-4 bg-gray-100 rounded-lg">
+          <h3 className="text-xl font-semibold text-gray-800 mb-2">
+            Farmers' Combined Report
+          </h3>
+          {/* <div className="mb-4">
+            <label className="block text-gray-700 font-medium mb-2">
+              Select Report Type:
+            </label>
+            <select
+              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={reportType}
+              onChange={(e) => setReportType(e.target.value)}
+            >
+              <option value="daily">Daily Report</option>
+              <option value="weekly">Weekly Report</option>
+              <option value="monthly">Monthly Report</option>
+            </select>
+          </div> */}
+
+            <input
+            type="text"
+            placeholder="Enter Mobile Number"
+            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 mb-2"
+            value={mobileNumber}
+            onChange={(e) => setMobileNumber(e.target.value)}
+            />
+
+          <button
+            onClick={() =>
+              downloadReport(
+                `/farmer/combined-report-by-mobileNumber/${mobileNumber}`,
+                `${mobileNumber}_Farmer_Combined_Report.pdf`
+              )
+            }
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition duration-300 shadow-md"
+            disabled={loading}
+          >
+            {loading ? "Downloading..." : "Download Farmers' Combined Report"}
+          </button>
+        </div>
+      )}
 
       {activeTab === "farmersLoan" && (
         <div className="p-4 bg-gray-100 rounded-lg">
@@ -252,3 +339,5 @@ export const SubAdminReport = () => {
     </div>
   );
 };
+
+
